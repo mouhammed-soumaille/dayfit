@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# datasets, embeddings and checkpoints are generated, never committed
+data/raw/
+data/fake_raw/
+data/queries/
+data/*.csv
+results/*.csv
+models/*.pt
+*.npy
+kaggle.json
