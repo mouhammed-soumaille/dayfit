@@ -24,18 +24,24 @@ from evaluation.random_retriever import RandomRetriever
 from retrieval.color_hist import ColorHistRetriever
 
 
-def make_clip():
-    # imported here so random / color_hist still run without torch installed
-    from retrieval.clip_retriever import OpenClipRetriever
-    # the original OpenAI CLIP ViT-B/32 (the OpenAI weights need the "quickgelu" variant)
-    return OpenClipRetriever("clip", "ViT-B-32-quickgelu", pretrained="openai")
+def open_clip_model(name, model_name, pretrained=None):
+    """Returns a function that builds an OpenClipRetriever when called.
+    (torch is imported only then, so random / color_hist run without it.)"""
+    def make():
+        from retrieval.clip_retriever import OpenClipRetriever
+        return OpenClipRetriever(name, model_name, pretrained=pretrained)
+    return make
 
 
 # Add new methods here as you write them (name -> function that creates the retriever)
 RETRIEVERS = {
     "random": RandomRetriever,
     "color_hist": ColorHistRetriever,
-    "clip": make_clip,
+    # the original OpenAI CLIP ViT-B/32 (the OpenAI weights need the "quickgelu" variant)
+    "clip": open_clip_model("clip", "ViT-B-32-quickgelu", pretrained="openai"),
+    # CLIP-style models fine-tuned on fashion product images by Marqo (downloaded from Hugging Face)
+    "fashion_siglip": open_clip_model("fashion_siglip", "hf-hub:Marqo/marqo-fashionSigLIP"),
+    "fashion_clip": open_clip_model("fashion_clip", "hf-hub:Marqo/marqo-fashionCLIP"),
 }
 
 
