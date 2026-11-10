@@ -26,3 +26,11 @@ models/index*/
 !results/lookbench_summary.csv
 !results/comparisons.csv
 LLM_HANDOFF.md
+report/*.aux
+report/*.log
+report/*.toc
+report/*.out
+report/*.fls
+report/*.fdb_latexmk
+report/tmp*.tmp
+PROJECT_STATUS.md
