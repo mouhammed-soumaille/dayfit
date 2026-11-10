@@ -22,3 +22,7 @@ data/lookbench/
 data/real_photos/
 results/**/*.csv
 models/index*/
+!results/summary.csv
+!results/lookbench_summary.csv
+!results/comparisons.csv
+LLM_HANDOFF.md

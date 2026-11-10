@@ -25,8 +25,12 @@ class EnsembleRetriever(Retriever):
         self.item_ids = self.parts[0].item_ids
         self.features = np.hstack([p.features for p in self.parts]) / np.sqrt(len(self.parts))
 
+    def embed_query(self, image):
+        """Joined, length-1 embedding of one query photo."""
+        return np.concatenate([p.embed_query(image) for p in self.parts]) / np.sqrt(len(self.parts))
+
     def search(self, image, k=5):
-        query = np.concatenate([p.embed_query(image) for p in self.parts]) / np.sqrt(len(self.parts))
+        query = self.embed_query(image)
         scores = self.features @ query
         best = np.argsort(-scores)[:k]
         return [(self.item_ids[i], float(scores[i])) for i in best]

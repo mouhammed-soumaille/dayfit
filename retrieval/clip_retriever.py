@@ -51,7 +51,12 @@ class OpenClipRetriever(Retriever):
 
         self.model, _, self.preprocess = open_clip.create_model_and_transforms(
             model_name, pretrained=pretrained)
+        # which weights made the saved embeddings: retraining changes the
+        # checkpoint's modification time, so old embeddings are not reused
+        self.weights_tag = f"weights: {model_name} {pretrained}"
+        self.checkpoint_path = checkpoint_path
         if checkpoint_path:
+            self.weights_tag += f" {checkpoint_path} {os.path.getmtime(checkpoint_path):.0f}"
             state = torch.load(checkpoint_path, map_location="cpu")
             self.model.load_state_dict(state.get("state_dict", state))
             print(f"[{self.name}] loaded fine-tuned weights from {checkpoint_path}")
@@ -95,11 +100,14 @@ class OpenClipRetriever(Retriever):
         # catalog to high-res images keeps the ids but changes every image.
         paths_path = os.path.join(self.index_dir, f"{self.index_name}_paths.txt")
         image_paths = list(catalog_df["image_path"])
+        key = [self.weights_tag] + image_paths  # first line = weights, then one path per line
 
         if os.path.exists(emb_path) and os.path.exists(paths_path):
             with open(paths_path) as f:
                 saved_paths = f.read().split("\n")
-            if saved_paths == image_paths:
+            # (files saved before the weights line existed are fine for pretrained models)
+            old_format_ok = not self.checkpoint_path and saved_paths == image_paths
+            if saved_paths == key or old_format_ok:
                 self.features = np.load(emb_path)
                 print(f"[{self.name}] loaded saved catalog embeddings {self.features.shape}")
                 return
@@ -112,7 +120,7 @@ class OpenClipRetriever(Retriever):
         os.makedirs(self.index_dir, exist_ok=True)
         np.save(emb_path, self.features)
         with open(paths_path, "w") as f:
-            f.write("\n".join(image_paths))
+            f.write("\n".join(key))
         print(f"\n[{self.name}] saved {emb_path}")
 
     def embed_query(self, image):

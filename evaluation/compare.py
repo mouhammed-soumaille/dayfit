@@ -29,6 +29,8 @@ def main():
     parser.add_argument("--metric", default="hit1", choices=list(NAMES))
     parser.add_argument("--conditions", default="phone_mild,phone_medium,phone_strong")
     parser.add_argument("--folder", default="results/perquery")
+    parser.add_argument("--out", default="results/comparisons.csv",
+                        help="every comparison is also saved here (re-running one replaces it)")
     args = parser.parse_args()
 
     rows = []
@@ -48,8 +50,21 @@ def main():
                              p_value=round(p, 4),
                              significant="yes" if p < 0.05 else "no"))
 
+    table = pd.DataFrame(rows)
     print(f"\nPaired bootstrap on {NAMES[args.metric]} (95% CI of the difference):\n")
-    print(pd.DataFrame(rows).to_string(index=False))
+    print(table.to_string(index=False))
+
+    # save for the report: keep earlier comparisons, replace any that were re-run
+    if len(table):
+        table.insert(0, "metric", NAMES[args.metric])
+        if os.path.exists(args.out):
+            old = pd.read_csv(args.out)
+            key = ["metric", "condition", "change"]
+            old = old[~old.set_index(key).index.isin(table.set_index(key).index)]
+            table = pd.concat([old, table], ignore_index=True)
+        os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
+        table.to_csv(args.out, index=False)
+        print(f"\nsaved to {args.out}")
 
 
 if __name__ == "__main__":
