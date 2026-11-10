@@ -12,3 +12,13 @@ results/*.csv
 models/*.pt
 *.npy
 kaggle.json
+
+# large or generated data (added Nov 10)
+data/raw_full/
+data/images_hires/
+data/crop_cache/
+data/crop_examples/
+data/lookbench/
+data/real_photos/
+results/**/*.csv
+models/index*/

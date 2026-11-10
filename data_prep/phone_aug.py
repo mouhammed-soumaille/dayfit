@@ -66,7 +66,10 @@ def make_phone_version(img, rng, severity="medium"):
 
     img = ImageEnhance.Brightness(img).enhance(rng.uniform(*s["bright"]))
     img = ImageEnhance.Contrast(img).enhance(rng.uniform(*s["bright"]))
-    img = img.filter(ImageFilter.GaussianBlur(rng.uniform(0, s["blur"])))
+    # blur is defined in pixels at the models' 224-pixel input size, so the
+    # amount of blur the model sees is the same whatever the photo's resolution
+    blur_px = rng.uniform(0, s["blur"]) * max(w, h) / 224
+    img = img.filter(ImageFilter.GaussianBlur(blur_px))
 
     buffer = io.BytesIO()
     img.save(buffer, format="JPEG", quality=s["jpeg"])

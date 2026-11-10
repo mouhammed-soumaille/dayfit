@@ -25,7 +25,9 @@ def color_histogram(image):
 
 
 class ColorHistRetriever(Retriever):
-    name = "color_hist"
+    def __init__(self, crop_queries=False):
+        self.crop_queries = crop_queries
+        self.name = "color_hist_crop" if crop_queries else "color_hist"
 
     def build_index(self, catalog_df):
         self.item_ids = list(catalog_df["item_id"])
@@ -34,6 +36,9 @@ class ColorHistRetriever(Retriever):
         ])  # shape: (number of catalog images, 128)
 
     def search(self, image, k=5):
+        if self.crop_queries:
+            from retrieval.preprocess import crop_garment
+            image = crop_garment(image)
         query = color_histogram(image)
         scores = self.features @ query          # cosine similarity with every catalog image
         best = np.argsort(-scores)[:k]          # indices of the k highest scores
