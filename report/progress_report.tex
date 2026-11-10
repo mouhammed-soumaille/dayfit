@@ -12,7 +12,7 @@
 \newcommand{\pending}[1]{\textcolor{orange!80!black}{\textbf{[Pending:} #1\textbf{]}}}
 
 \title{DAYFIT: Visual Clothing Search from Phone Photos\\[4pt]
-\large Progress report (internal) --- EECE 490 course project}
+\large Progress report (internal, updated) --- EECE 490 course project}
 \author{Mouhammed Soumaille}
 \date{November 11, 2026}
 
@@ -39,19 +39,29 @@ Precision@5; and (iv) on real street photos (LookBench) the fine-tuning gain shr
 %=====================================================================
 \section{Problem and goal}
 
-\paragraph{Task.} Given a photo of a garment taken with a phone, return the $k=5$ catalogue items that
-are most likely to be that exact item (or, failing that, the same kind of garment).
+\paragraph{User and problem (approved proposal).} Online shoppers and people browsing clothing catalogues
+often see a garment in a picture and want something similar, but find it hard to describe its colour, cut or
+style in a search bar. DAYFIT lets them search with the image instead: upload a photo, get the five most
+similar catalogue items.
 
-\paragraph{Proposed stakeholder (to be confirmed against the approved proposal).}
-Small clothing shops that sell through Instagram or WhatsApp. Customers send a photo asking
-``do you have this?'', and staff search the catalogue by hand, which costs time and loses sales.
-The system would rank the catalogue, and a staff member would confirm the answer from a short list
-(human oversight). \pending{check the stakeholder and real-world constraint in the approved proposal.}
+\paragraph{How it is done today.} Typing words into a search bar, or filtering by category and colour. A
+category + colour filter baseline that mimics this is planned (it uses the catalogue labels).
+\pending{implement and evaluate.}
 
-\paragraph{Why ML and not a simpler method.} The non-ML baseline (colour histogram) finds the exact item
-for only 1\% of medium-difficulty phone photos (Section~\ref{sec:ladder}); a learned image embedding
-finds it for 79--97\%. A second non-ML baseline that mimics how staff search today (filter by
-category + colour using the catalogue labels) is planned.
+\paragraph{Question (approved).} Can image features from a pretrained model find more relevant matches than
+a simple colour-based search, especially when the uploaded image is not a clean product photo?
+
+\paragraph{Metrics.} The proposal's main metric is \textbf{Precision@5}: are the five results the same kind
+of garment? We added a harder, second question: does the system find the \emph{exact} item
+(Recall@1/@5)? The two can disagree (Section~\ref{sec:ft}), so both are always reported.
+
+\paragraph{Real-world constraint (approved).} Robustness to imperfect user photos, while monitoring
+response time. Our evidence: the mild/medium/strong severity curve, real street photos (LookBench), the
+conformal shift experiment, and per-method latency (CPU latency in Docker pending).
+
+\paragraph{Why ML and not a simpler method.} The colour histogram finds the exact item for only 1\% of
+medium phone photos and its Precision@5 is at chance level (0.08); a learned image embedding reaches
+79--97\% and 0.80--0.89 (Section~\ref{sec:ladder}).
 
 %=====================================================================
 \section{Data}
@@ -476,7 +486,8 @@ model; add a coverage / set-size figure.}
 
 \section{Remaining work}
 \begin{enumerate}
-  \item Problem framing: confirm stakeholder and real-world constraint from the approved proposal.
+  \item Fix the fine-tuning trade-off: evaluate \texttt{ensemble\_ft\_mv}; random-batch ablation
+        (\texttt{--hard\_batches 0}); decide which model to recommend for ``similar'' vs ``exact''.
   \item ``How it's done today'' baseline: filter by category + colour using catalogue labels.
   \item Evaluate \texttt{finetuned\_mv} and \texttt{ensemble\_ft\_mv} (synthetic and LookBench).
   \item Conformal retrieval on real models, with figure; fine-tuning curve figure.

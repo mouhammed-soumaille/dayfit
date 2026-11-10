@@ -85,3 +85,39 @@ Precision@5 (same article type), phone_medium: histogram 0.08, CLIP 0.58, Fashio
 - [ ] Look at crop failures (python -m retrieval.preprocess)
 - [ ] Per-category breakdown, failure gallery, manual check of ~30 queries
 - [ ] FastAPI + Streamlit app, Docker
+
+## Update Nov 11: proposal alignment
+
+Approved proposal: user = online shoppers; main metric = Precision@5 (same type); constraint = robustness to
+imperfect user photos + response time. We keep that framing; exact-item Recall is our added, harder question.
+
+## Finding 4: fine-tuning (row 7)
+
+Training: 5 epochs, last 4/12 blocks, same-type hard batches, lr 1e-5, temperature 0.05, batch 64.
+Validation Recall@1: 0.807 (pretrained) -> 0.957 -> 0.973 -> 0.977 (best, epoch 3) -> 0.977 -> 0.977.
+
+| | mild | medium | strong |
+|---|---|---|---|
+| Recall@1 FashionSigLIP | 94.9 | 79.3 | 51.0 |
+| Recall@1 fine-tuned | 99.0 | 96.9 [95, 99] | 84.7 [80, 89] |
+| paired difference | +4.1* | +17.7* | +33.7* (all p<0.0005) |
+| P@5 FashionSigLIP | 0.897 | 0.886 | 0.773 |
+| P@5 fine-tuned | 0.795 | 0.798 | 0.744 |
+| paired difference | -10.3* | -8.8* | -2.9* (p=0.047, borderline) |
+
+Fine-tuning wins exact-item Recall but loses the proposal's main metric. Hypothesis: same-type hard batches
+push each item away from its same-type neighbours. Test: --hard_batches 0 ablation; also try ensemble_ft_mv.
+
+## Finding 5: real photos (LookBench real_streetlook, 981 queries, 3,278 gallery, query = LookBench crop)
+
+| | Recall@1 | Recall@5 | category P@5 |
+|---|---|---|---|
+| FashionSigLIP | 42.8 [39.8, 45.8] | 64.1 | 0.714 |
+| fine-tuned | 45.5 [42.6, 48.4] | 67.3 | 0.691 |
+| paired | +2.7 [+0.5, +4.8] p=0.014 | | -2.3 p<0.0005 |
+
+- Synthetic fine-tuning gain (+17.7) mostly does not transfer to real photos (+2.7): it largely learned our augmentation.
+- Synthetic photos are easier than real ones (79% vs 43%).
+- Paper (arXiv 2601.14706) reports FashionSigLIP fine R@1 55.2%, coarse R@1 73.4% on a 61,553-image corpus with a
+  different correctness rule (category + all attributes). Not comparable to our item_ID metric; our category P@5
+  (71.4%) is roughly consistent with their coarse 73.4%.
