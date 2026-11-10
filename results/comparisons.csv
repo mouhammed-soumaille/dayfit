@@ -23,3 +23,9 @@ Recall@1,phone_medium,fashion_siglip -> ensemble,0.793,0.84,"+0.048 [+0.014,+0.0
 Recall@1,phone_medium,ensemble -> ensemble_mv,0.84,0.854,"+0.014 [+0.000,+0.031]",0.109,no
 Recall@1,phone_strong,fashion_siglip -> ensemble,0.51,0.558,"+0.048 [+0.014,+0.082]",0.011,yes
 Recall@1,phone_strong,ensemble -> ensemble_mv,0.558,0.582,"+0.024 [+0.003,+0.048]",0.035,yes
+Recall@1,phone_mild,fashion_siglip -> finetuned,0.949,0.99,"+0.041 [+0.020,+0.065]",0.0,yes
+Recall@1,phone_medium,fashion_siglip -> finetuned,0.793,0.969,"+0.177 [+0.133,+0.221]",0.0,yes
+Recall@1,phone_strong,fashion_siglip -> finetuned,0.51,0.847,"+0.337 [+0.279,+0.395]",0.0,yes
+Precision@5,phone_mild,fashion_siglip -> finetuned,0.897,0.795,"-0.103 [-0.127,-0.080]",0.0,yes
+Precision@5,phone_medium,fashion_siglip -> finetuned,0.886,0.798,"-0.088 [-0.112,-0.065]",0.0,yes
+Precision@5,phone_strong,fashion_siglip -> finetuned,0.773,0.744,"-0.029 [-0.059,-0.001]",0.047,yes
