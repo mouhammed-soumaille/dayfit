@@ -107,6 +107,14 @@ def main():
         cat5.append(np.mean([category_of[i] == q.category for i in top]))  # same category
         print(f"  {n}/{len(queries)}", end="\r")
 
+    # save each query's result so compare.py can run a paired test
+    # (p5 here is category Precision@5; same column name as run_eval so compare.py can read it)
+    condition = f"lookbench_{args.subset}_{args.query_image}"
+    perquery = pd.DataFrame(dict(query_id=queries["query_id"].values,
+                                 hit1=hit1, hit5=hit5, p5=cat5))
+    os.makedirs("results/perquery", exist_ok=True)
+    perquery.to_csv(f"results/perquery/{args.method}_{condition}.csv", index=False)
+
     row = dict(subset=args.subset, method=args.method, query_image=args.query_image,
                n_queries=len(queries))
     for name, values in [("Recall@1", hit1), ("Recall@5", hit5), ("CategoryP@5", cat5)]:
