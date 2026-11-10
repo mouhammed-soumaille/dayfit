@@ -28,8 +28,8 @@ by 40--54 points of Recall@1 and a colour histogram by far more; (ii) cheap tric
 embeddings, a two-model ensemble) add 2--5 significant points, while garment cropping with rembg
 significantly hurts; (iii) contrastive fine-tuning raises Recall@1 on our synthetic phone photos from
 79.3\% to 96.9\% (medium) and from 51.0\% to 84.7\% (strong), but costs about 9 points of same-type
-Precision@5; and (iv) on real street photos (LookBench) the fine-tuning gain shrinks to about
-+2.7 points, showing that most of the synthetic gain came from learning our own augmentation.
+Precision@5; and (iv) on real street photos (LookBench) the fine-tuning gain shrinks to +2.7 points
+(significant, $p=0.014$), showing that most of the synthetic gain came from learning our own augmentation.
 \end{abstract}
 
 \setcounter{tocdepth}{1}
@@ -380,10 +380,11 @@ method & Recall@1 (\%) & Recall@5 (\%) & Category P@5 \\
 FashionSigLIP & 42.8 [39.8, 45.8] & 64.1 [61.3, 67.0] & 0.714 [0.692, 0.736] \\
 fine-tuned    & 45.5 [42.6, 48.4] & 67.3 [64.4, 70.2] & 0.691 [0.670, 0.712] \\
 \midrule
-difference    & +2.7 & +3.2 & $-$0.023 \\
+paired difference & +2.7 [+0.5, +4.8]* & +3.2 & $-$0.023 [$-$0.034, $-$0.012]* \\
 \bottomrule
 \end{tabular}
-\caption{LookBench \texttt{real\_streetlook}, 981 queries, 95\% bootstrap CIs.}
+\caption{LookBench \texttt{real\_streetlook}, 981 queries, 95\% bootstrap CIs.
+* = significant in a paired bootstrap ($p=0.014$ for Recall@1, $p<0.0005$ for category P@5).}
 \end{table}
 
 \paragraph{Interpretation.}
@@ -391,17 +392,26 @@ difference    & +2.7 & +3.2 & $-$0.023 \\
   \item \textbf{The fine-tuning gain shrinks from +17.7 points (synthetic medium) to about +2.7
         points (real).} Most of the synthetic gain was the model learning our augmentation, not getting
         better at real phone photos. This confirms the caveat with evidence.
-  \item The direction is still positive (Recall@1 and Recall@5 both up), so fine-tuning did not hurt
-        exact matching on real photos. \pending{paired test: \texttt{run\_lookbench.py} does not yet save
-        per-query results, so we cannot yet say whether +2.7 is significant.}
-  \item The category trade-off appears on real data too ($-$2.3 points P@5), so it is not only a
-        property of the synthetic photos.
+  \item The small gain is real: the paired bootstrap gives +2.7 points [+0.5, +4.8], $p=0.014$.
+        Note that the two separate CIs overlap, yet the paired test is significant: because both models
+        answer the same 981 queries, query difficulty cancels out in the differences.
+  \item The category trade-off appears on real data too ($-$2.3 points category P@5, $p<0.0005$),
+        so it is not only a property of the synthetic photos.
   \item Absolute numbers are much lower on real photos (43\% vs 79\% Recall@1 for FashionSigLIP),
         so our synthetic phone photos are \emph{easier} than reality. This is a limitation of the
         synthetic test set and must be stated.
 \end{itemize}
-\pending{compare our FashionSigLIP numbers with those in the LookBench paper, to confirm the scoring
-matches theirs.}
+\paragraph{Comparison with the LookBench paper.} Our numbers are \emph{not} directly comparable with
+the paper's. The paper's headline metric is \emph{fine Recall@1}: the top result must have the query's
+category and all of its annotated attributes, searched against a 61,553-image corpus (positives plus
+Fashion200K distractors). We use the public release (3,278 gallery images, no distractors) and count a
+result as correct only if it has the same \texttt{item\_ID}. The paper reports, for FashionSigLIP on
+RealStreetLook, fine Recall@1 55.2\%, coarse (category-only) Recall@1 73.4\% and nDCG@5 42.4. The closest
+comparable quantity we have is category Precision@5 = 71.4\%, which is consistent with their 73.4\%
+(not the same metric: ours averages over the top 5). The gap between our 42.8\% and their 55.2\% is
+therefore a difference in definition (smaller gallery vs.\ a different notion of ``correct''), not
+evidence of a scoring bug. \pending{optional: also record category Recall@1, which is exactly the
+paper's coarse Recall@1, for a direct check.}
 
 %=====================================================================
 \section{Conformal retrieval}\label{sec:conformal}
@@ -446,8 +456,9 @@ model; add a coverage / set-size figure.}
   \item Domain-specific pretraining is the largest gain; the two fashion models are tied.
   \item Multi-view (+2--3, free) and the ensemble (+5, 2$\times$ latency) give significant extra gains.
   \item rembg garment cropping significantly hurts on synthetic photos and is 12$\times$ slower.
-  \item Fine-tuning gives a large synthetic gain (+18 to +34 points) but only about +3 on real photos,
-        and costs about 9 points of same-type Precision@5.
+  \item Fine-tuning gives a large synthetic gain (+18 to +34 points) but only +2.7 on real photos
+        (still significant, $p=0.014$), and costs same-type Precision@5 (about $-$9 points synthetic,
+        $-$2.3 real).
   \item Synthetic phone photos are easier than real street photos (79\% vs 43\%).
 \end{enumerate}
 
@@ -459,14 +470,15 @@ model; add a coverage / set-size figure.}
         hard to establish.
   \item Fine-tuning trains on the same augmentation family it is tested on (shown by LookBench).
   \item Latency so far is measured on a laptop GPU, not on the CPU a deployed service would use.
-  \item LookBench scoring follows its example script; not yet cross-checked with the paper's numbers.
+  \item Our LookBench metric (same \texttt{item\_ID}, small gallery) differs from the paper's fine
+        Recall@1, so our real-photo numbers cannot be placed on the paper's leaderboard.
 \end{itemize}
 
 \section{Remaining work}
 \begin{enumerate}
   \item Problem framing: confirm stakeholder and real-world constraint from the approved proposal.
   \item ``How it's done today'' baseline: filter by category + colour using catalogue labels.
-  \item Paired test on LookBench; evaluate \texttt{finetuned\_mv} and \texttt{ensemble\_ft\_mv}.
+  \item Evaluate \texttt{finetuned\_mv} and \texttt{ensemble\_ft\_mv} (synthetic and LookBench).
   \item Conformal retrieval on real models, with figure; fine-tuning curve figure.
   \item About 30 own photos (Precision@5).
   \item Production: FastAPI \texttt{/search} (uploads kept in memory only), Streamlit UI, Docker,

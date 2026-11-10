@@ -29,3 +29,5 @@ Recall@1,phone_strong,fashion_siglip -> finetuned,0.51,0.847,"+0.337 [+0.279,+0.
 Precision@5,phone_mild,fashion_siglip -> finetuned,0.897,0.795,"-0.103 [-0.127,-0.080]",0.0,yes
 Precision@5,phone_medium,fashion_siglip -> finetuned,0.886,0.798,"-0.088 [-0.112,-0.065]",0.0,yes
 Precision@5,phone_strong,fashion_siglip -> finetuned,0.773,0.744,"-0.029 [-0.059,-0.001]",0.047,yes
+Recall@1,lookbench_real_streetlook_image,fashion_siglip -> finetuned,0.428,0.455,"+0.027 [+0.005,+0.048]",0.014,yes
+Precision@5,lookbench_real_streetlook_image,fashion_siglip -> finetuned,0.714,0.691,"-0.023 [-0.034,-0.012]",0.0,yes
