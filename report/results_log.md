@@ -160,3 +160,14 @@ nn_same_type = share of each item's 5 nearest catalog neighbours with the same t
 Hard batches cut type separation by 29%; random batches keep it. Same ordering as synthetic P@5.
 Fine-tuning lowers all similarities (embeddings spread out), so raw gaps are not comparable; use gap_std.
 Caveat: catalog includes training items; descriptive, no CIs.
+
+## Finding 9: conformal on real models (B1, synthetic photos, alpha = 0.1, 200 splits)
+
+In-distribution coverage >= 0.90 for all models and severities (guarantee holds).
+Relative variant, mean set size (all severities / strong): SigLIP 8.6 / 102, ensemble_mv 3.9 / 54,
+finetuned_random 1.0 / 1.8 (72% of strong queries get a single answer, 95% correct). Synthetic favours fine-tuning.
+Threshold variant: exact coverage (0.901-0.907, inside the T6 bound 0.907) but huge sets on strong photos (912 items).
+Relative variant over-covers (0.95-0.98): most calibration scores are tied at 0 (top-1 correct), so the
+no-ties assumption of the upper bound fails; coverage = R@1. Fix: randomized tie-breaking.
+Shift mild -> strong: coverage collapses (relative 0.51 / 0.58 / 0.81; threshold 0.17 / 0.10 / 0.61);
+threshold sets often empty. Guarantee needs calibration data like deployment data -> T1.
