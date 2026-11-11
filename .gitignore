@@ -28,6 +28,8 @@ models/index*/
 !results/conformal.csv
 !results/conformal_shift.csv
 !results/conformal_tv.csv
+!results/conformal_mondrian.csv
+!results/conformal_risk.csv
 LLM_HANDOFF.md
 report/*.aux
 report/*.log
@@ -36,4 +38,8 @@ report/*.out
 report/*.fls
 report/*.fdb_latexmk
 report/tmp*.tmp
+report/progress_report.tex
+report/progress_report.pdf
+report/*.synctex.gz
+report/appendix_tables.tex
 PROJECT_STATUS.md
