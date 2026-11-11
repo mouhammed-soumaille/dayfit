@@ -61,10 +61,14 @@ def main():
 
     if os.path.exists("results/lookbench_summary.csv"):
         d = pd.read_csv("results/lookbench_summary.csv")
-        t = pd.DataFrame({"method": d["method"], "query": d["query_image"], "n": d["n_queries"],
+        if "protocol" not in d.columns:
+            d["protocol"] = "official"
+        t = pd.DataFrame({"method": d["method"], "query": d["query_image"], "protocol": d["protocol"],
+                          "n": d["n_queries"],
                           "Recall@1": with_ci(d, "Recall@1"), "Recall@5": with_ci(d, "Recall@5"),
                           "category P@5": with_ci(d, "CategoryP@5")})
-        parts.append(table(t, "LookBench real\\_streetlook, every method run."))
+        parts.append(table(t, "LookBench real\\_streetlook, every method run (official = LookBench's protocol; "
+                              "dedup = duplicate gallery pictures merged, Finding 15)."))
 
     if os.path.exists("results/comparisons.csv"):
         d = pd.read_csv("results/comparisons.csv")

@@ -249,6 +249,8 @@ def fig_recall_vs_p5(summary, lookbench_path="results/lookbench_summary.csv"):
     if os.path.exists(lookbench_path):
         lb = pd.read_csv(lookbench_path)
         lb = lb[(lb["subset"] == "real_streetlook") & (lb["query_image"] == "image")]
+        if "protocol" in lb.columns:        # duplicate-aware numbers (Finding 15)
+            lb = lb[lb["protocol"] == "dedup"]
 
         def lb_row(m):
             r = lb[lb["method"] == m]
