@@ -171,3 +171,14 @@ Relative variant over-covers (0.95-0.98): most calibration scores are tied at 0 
 no-ties assumption of the upper bound fails; coverage = R@1. Fix: randomized tie-breaking.
 Shift mild -> strong: coverage collapses (relative 0.51 / 0.58 / 0.81; threshold 0.17 / 0.10 / 0.61);
 threshold sets often empty. Guarantee needs calibration data like deployment data -> T1.
+
+## Finding 10: conformal under real-photo shift (T1), LookBench, alpha = 0.1, 200 paired splits
+
+Synthetic -> real coverage (threshold / relative): SigLIP 0.84 / 0.67, ensemble_mv 0.84 / 0.64,
+finetuned_random 0.73 / 0.52 (relative mean set 1.2: confident single answers, right half the time).
+Real -> real restores coverage 0.899-0.903; relative median set size SigLIP 164, ensemble_mv 143,
+finetuned_random 59 (of 3,278); means 310 / 288 / 151 (skewed). Threshold sets 2-4x larger.
+T1 bound coverage >= 0.9 - TV(synthetic scores, real scores): holds in 15/18 (model x variant x bins).
+Misses are small and at coarse bins: binning underestimates TV (data processing), so the plug-in bound is
+optimistic. TV largest for the fine-tuned model (0.31-0.37 vs 0.23-0.29): consistent with "learned our augmentation".
+Implication: calibrate on real photos; on real photos a 90% guarantee needs large sets -> app should flag "unsure".
