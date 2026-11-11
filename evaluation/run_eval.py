@@ -88,6 +88,8 @@ RETRIEVERS = {
     "finetuned": open_clip_model("finetuned", SIGLIP, checkpoint_path="models/finetuned.pt"),
     "finetuned_mv": open_clip_model("finetuned_mv", SIGLIP, multiview=True,
                                     checkpoint_path="models/finetuned.pt"),
+    "finetuned_random": open_clip_model("finetuned_random", SIGLIP, checkpoint_path="models/finetuned_random.pt"),
+
     # best pipeline: fine-tuned SigLIP + pretrained FashionCLIP, both multi-view
     "ensemble_ft_mv": ensemble("ensemble_ft_mv",
                                open_clip_model("finetuned_mv", SIGLIP, multiview=True,
