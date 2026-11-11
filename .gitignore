@@ -25,6 +25,7 @@ models/index*/
 !results/summary.csv
 !results/lookbench_summary.csv
 !results/comparisons.csv
+!results/conformal.csv
 LLM_HANDOFF.md
 report/*.aux
 report/*.log
