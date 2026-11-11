@@ -30,6 +30,8 @@ models/index*/
 !results/conformal_tv.csv
 !results/conformal_mondrian.csv
 !results/conformal_risk.csv
+!results/filter_baseline.csv
+!results/filter_rerank.csv
 LLM_HANDOFF.md
 report/*.aux
 report/*.log
