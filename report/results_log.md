@@ -194,3 +194,19 @@ T4 (answer only if top similarity >= lambda; loss = wrong-category share of show
 measured loss <= alpha at every level (0.198-0.200 / 0.096-0.097 / 0.049). Answer rate at alpha 0.2:
 SigLIP 80%, ensemble 81%, finetuned_random 85%; at 0.1: 41 / 46 / 46%. P@5 when answered only 0.73 -> ~0.79:
 the guarantee is met mostly by abstaining; top similarity is a weak confidence signal.
+
+## Finding 12: grouped Mondrian conformal (T3 follow-up, evaluation/conformal_extra.py, "group" variant)
+Setup: 7 category groups fixed BEFORE seeing any grouped result (tops 296, outerwear 216, bottoms 229,
+dresses 40, footwear 55, bags 49, accessories 96 queries; sock -> accessories, cardigan -> tops).
+Calibrate the relative threshold within each group; real -> real, alpha = 0.1, 200 random 50/50 splits.
+Standard (one shared threshold) under-covers the same three groups for all three models:
+outerwear 0.86-0.88, bottoms 0.85-0.87, dresses 0.83-0.86. Grouped calibration brings every group to
+0.90-0.93 for every model (bottoms 0.899-0.902) and reduces over-coverage of easy groups (bags 1.00 -> 0.92).
+Set sizes (finetuned_random): small categories no longer get the whole gallery (per-category Mondrian 3278 ->
+grouped: belt 177, tie 3, glasses 2, clutch bag 4, sneaker 3).
+Cost: the guarantee is per group, not per category, so hard categories inside an easier group are hidden
+again (finetuned_random: sock 0.80, cardigan 0.77, jumpsuit 0.74, denim skirt 0.70); some large
+categories in a hard group get larger sets than standard (coat 84 -> 221).
+Standard and per-category numbers and T4 are unchanged (same seed and splits; checked: max difference 0.0).
+Implication: grouping is the practical middle ground: a guarantee for every group with usable sets.
+Per-category guarantees need >= 9 calibration queries per category, which the smallest categories lack.
