@@ -210,3 +210,18 @@ categories in a hard group get larger sets than standard (coat 84 -> 221).
 Standard and per-category numbers and T4 are unchanged (same seed and splits; checked: max difference 0.0).
 Implication: grouping is the practical middle ground: a guarantee for every group with usable sets.
 Per-category guarantees need >= 9 calibration queries per category, which the smallest categories lack.
+
+## Finding 13: menu-filter baseline, "how shoppers search today" (C1, evaluation/filter_baseline.py)
+Shopper filters by garment type (and colour on synthetic data; LookBench has no colour labels); the shop
+shows matches in an order unrelated to the photo (modelled as uniformly random). Exact formulas, no
+simulation: with r pictures of the item among m shown, P(hit in top k) = 1 - C(m-r,k)/C(m,k), expected
+position of the first picture = (m+1)/(r+1). Precision@5 (same type) = 1 by construction, so we compare on
+exact-item recall and scroll depth.
+Synthetic (294 test items, 6,197 catalogue): type filter shows median 490 items, R@1 0.002, R@5 0.012,
+median scroll 246; type + colour shows median 56, R@1 0.045, R@5 0.183, median scroll 28.5.
+LookBench real (981 queries, 3,278 gallery): type filter shows median 154, R@1 0.026, R@5 0.113, median
+scroll 48; 49 queries (5%) are filtered out because their gallery pictures carry a different category label
+(counted as misses; also caps any model's category P@5 on LookBench).
+Comparison: finetuned_random R@1 0.949 (synthetic medium) and 0.456 (real) vs 0.045 / 0.026 for the best
+menu filter: about 20x / 17x. Optimistic for menus: assumes the shopper can name type and colour,
+which the user story says they cannot.
