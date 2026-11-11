@@ -225,3 +225,35 @@ scroll 48; 49 queries (5%) are filtered out because their gallery pictures carry
 Comparison: finetuned_random R@1 0.949 (synthetic medium) and 0.456 (real) vs 0.045 / 0.026 for the best
 menu filter: about 20x / 17x. Optimistic for menus: assumes the shopper can name type and colour,
 which the user story says they cannot.
+
+## Finding 14: menu filter + visual re-ranking (C2, evaluation/filter_rerank.py, finetuned_random)
+Filter by type (and colour, synthetic only), then sort the survivors by model similarity.
+Filter "none" reproduces run_eval (synthetic medium R@1 0.949) and the dedup LookBench protocol (0.520).
+Synthetic R@1 none / type / type+colour: medium 0.949 / 0.949 / 0.963, strong 0.813 / 0.823 / 0.874,
+clean 1.0 everywhere: the model almost never confuses garment types, so a type filter adds nothing;
+colour helps on the hardest photos.
+LookBench real R@1 none 0.520 -> type 0.554, R@5 0.677 -> 0.704, mean rank of the item 85.7 -> 16.9
+(filtering removes the catastrophic misses), but 49 items (5%) are lost to inconsistent category labels.
+Theory: if the item survives the filter, its rank can only improve (filtering only removes competitors).
+Implication: an optional type filter is a useful app feature for real photos; the model, not the menu,
+does the work of finding the exact item.
+
+## Finding 15: LookBench gallery duplicates; dedup protocol (correction, evaluation/run_lookbench.py)
+real_streetlook gallery: 3,278 entries but only 2,537 distinct image files; 633 files (outfit photos)
+are listed 2-5 times under different item_IDs (94 of them under different categories); 515 of 981
+queries have an item with a shared picture. The official protocol keeps whichever copy the sort puts
+first, so retrieving the right picture can count as a miss. New "dedup" protocol: merge copies (md5)
+before the top 5; a picture is correct if any copy has the query's item_ID / category. Both are saved;
+official numbers reproduce exactly.
+Dedup raises R@1 by +5.8 to +7.0 points for every model (finetuned_random 0.456 -> 0.520,
+fashion_siglip 0.428 -> 0.486, ensemble_mv 0.440 -> 0.505, ensemble_ft_mv 0.471 -> 0.539), R@5 by ~2,
+category P@5 essentially unchanged. Ranking unchanged; all Finding 7 conclusions hold (paired, dedup):
+finetuned -> finetuned_random P@5 +0.036 (p<0.0005), R@1 -0.005 (p=0.31); fashion_siglip -> finetuned_random
+R@1 +0.034 (p<0.0005), P@5 +0.011 (p=0.009); ensemble_mv -> finetuned_random n.s. (R@1 p=0.09, P@5 p=0.40).
+C1 LookBench re-counted in distinct pictures (supersedes the Finding 13 LookBench line): type filter
+shows median 119 pictures (was 154 entries), R@1 0.031 (was 0.026), R@5 0.131 (was 0.113), median scroll
+36.7 (was 48); 49 queries still filtered out. Conclusion unchanged (model R@1 0.520 dedup, ~17x).
+C2 LookBench: R@1 counts ties in the item's favour, so it equals the dedup protocol; R@5 and ranks still
+count duplicate entries of OTHER pictures (slightly pessimistic).
+Not re-run: conformal set sizes and risk control count gallery entries, not pictures (set sizes inflated
+at most 3278/2537 = 1.29x; coverage unaffected) -> stated as a limitation.
