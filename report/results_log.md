@@ -121,3 +121,20 @@ push each item away from its same-type neighbours. Test: --hard_batches 0 ablati
 - Paper (arXiv 2601.14706) reports FashionSigLIP fine R@1 55.2%, coarse R@1 73.4% on a 61,553-image corpus with a
   different correctness rule (category + all attributes). Not comparable to our item_ID metric; our category P@5
   (71.4%) is roughly consistent with their coarse 73.4%.
+
+
+## Finding 6: does adding the pretrained model fix the fine-tuning trade-off? (A1)
+
+| | synth R@1 med | synth P@5 med | real R@1 | real cat P@5 | ms |
+|---|---|---|---|---|---|
+| ensemble_mv (pretrained) | 85.4 | 0.882 | 44.0 [40.9, 47.1] | 0.720 | ~28 |
+| finetuned | 96.9 | 0.798 | 45.5 | 0.691 | ~14 |
+| finetuned_mv | 96.9 | 0.808 | 45.6 [42.6, 48.7] | 0.700 | ~14 |
+| ensemble_ft_mv | 97.6 | 0.850 | 47.1 [44.1, 50.2] | 0.706 | ~28 |
+
+Paired tests, ensemble_ft_mv vs finetuned: R@1 not different anywhere (real +1.6, p=0.146); P@5 better everywhere
+(synthetic +3.8 to +6.5, real +1.5, p=0.001). So ensemble_ft_mv dominates finetuned.
+ensemble_ft_mv vs ensemble_mv: R@1 better (synthetic +3 to +25, real +3.1, p=0.002); P@5 worse (synthetic -3.1/-3.5,
+strong tie; real -1.4, p=0.003). Trade-off persists but is small on real photos.
+Decision rule: find-similar (P@5) -> ensemble_mv (no training); find-exact-item -> ensemble_ft_mv; both ~28 ms.
+All significant real-photo results p <= 0.003, so they survive a Holm correction.
