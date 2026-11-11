@@ -12,7 +12,8 @@ Figures:
   fig2_robustness.png  Recall@1 vs phone-photo severity (mild -> strong) for the main methods
   fig3_tradeoff.png    accuracy vs search time per query
   fig4_resolution.png  same models on 60x80 vs high-res images
-  fig5_finetune.png    validation Recall@1 per fine-tuning epoch (once finetune_log.csv exists)
+  fig5_finetune.png    validation Recall@1 per fine-tuning epoch (+ random-batch ablation if run)
+  fig6_recall_vs_p5.png exact-item Recall@1 vs same-type P@5, synthetic and LookBench
 """
 import os
 
@@ -198,15 +199,23 @@ def fig_resolution(summary, lowres_path="results/lowres/summary.csv"):
     save(fig, "fig4_resolution.png")
 
 
-def fig_finetune(log_path="models/finetune_log.csv"):
+def fig_finetune(log_path="models/finetune_log.csv",
+                 random_log_path="models/finetune_random_log.csv"):
+    """Validation Recall@1 per epoch; also draws the random-batch ablation if it exists."""
     if not os.path.exists(log_path):
         return
     log = pd.read_csv(log_path)
     fig, ax = plt.subplots(figsize=(6, 3.8))
-    ax.plot(log["epoch"], log["val_recall@1"], color=BLUE, linewidth=2, marker="o", markersize=6)
+    ax.plot(log["epoch"], log["val_recall@1"], color=BLUE, linewidth=2, marker="o", markersize=6,
+            label="same-type hard batches")
+    if os.path.exists(random_log_path):
+        rand = pd.read_csv(random_log_path)
+        ax.plot(rand["epoch"], rand["val_recall@1"], color=ORANGE, linewidth=2, marker="s",
+                markersize=5, label="random batches (ablation)")
+        ax.legend(frameon=False, fontsize=8, loc="center right")
     ax.axhline(log["val_recall@1"].iloc[0], color=INK2, linewidth=1, linestyle="--")
-    ax.text(log["epoch"].max(), log["val_recall@1"].iloc[0], "  pretrained", va="bottom",
-            ha="right", fontsize=8, color=INK2)
+    ax.text(0.15, log["val_recall@1"].iloc[0], "pretrained", va="bottom",
+            ha="left", fontsize=8, color=INK2)
     ax.set_xticks(log["epoch"])
     ax.set_xlabel("Epoch (0 = before training)", color=INK2, fontsize=9)
     ax.set_ylabel("Validation Recall@1 (medium)", color=INK2, fontsize=9)
@@ -214,6 +223,56 @@ def fig_finetune(log_path="models/finetune_log.csv"):
     ax.set_title("Fine-tuning: validation accuracy per epoch", loc="left", fontsize=11, color=INK)
     style(ax)
     save(fig, "fig5_finetune.png")
+
+
+# models in the exact-item vs same-type figure: (method, label, colour)
+TRADE = [
+    ("fashion_siglip", "FashionSigLIP", BLUE),
+    ("ensemble_mv", "Ensemble (pretrained)", AQUA),
+    ("finetuned", "Fine-tuned", ORANGE),
+    ("finetuned_mv", "Fine-tuned, multi-view", YELLOW),
+    # ("finetuned_random", "Fine-tuned, random batches", MAGENTA),  # add back after the ablation step
+    ("ensemble_ft_mv", "Fine-tuned ensemble", VIOLET),
+]
+
+
+def fig_recall_vs_p5(summary, lookbench_path="results/lookbench_summary.csv"):
+    """Exact-item Recall@1 (x) vs same-type Precision@5 (y), synthetic medium and real photos.
+
+    Each dot is one model with 95% CIs on both axes. Up-and-right is better;
+    a model that moves right but down has traded 'similar items' for 'exact item'."""
+    panels = [("Synthetic phone photos (medium)", summary, "Recall@1", "Precision@5",
+               lambda m: row(summary, m, "phone_medium"))]
+    if os.path.exists(lookbench_path):
+        lb = pd.read_csv(lookbench_path)
+        lb = lb[(lb["subset"] == "real_streetlook") & (lb["query_image"] == "image")]
+
+        def lb_row(m):
+            r = lb[lb["method"] == m]
+            return None if r.empty else r.iloc[-1]
+        panels.append(("Real photos (LookBench street)", lb, "Recall@1", "CategoryP@5", lb_row))
+
+    fig, axes = plt.subplots(1, len(panels), figsize=(5.2 * len(panels), 4.2), squeeze=False)
+    for ax, (title, _, xcol, ycol, get) in zip(axes[0], panels):
+        for method, label, colour in TRADE:
+            r = get(method)
+            if r is None:
+                continue
+            x, y = r[xcol], r[ycol]
+            ax.errorbar(x, y, xerr=[[x - r[xcol + "_lo"]], [r[xcol + "_hi"] - x]],
+                        yerr=[[y - r[ycol + "_lo"]], [r[ycol + "_hi"] - y]],
+                        fmt="o", color=colour, markersize=7, markeredgecolor="white",
+                        elinewidth=1, capsize=0, label=label)
+        ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
+        ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
+        ax.set_xlabel("Exact-item Recall@1", color=INK2, fontsize=9)
+        ax.set_ylabel("Same-type Precision@5", color=INK2, fontsize=9)
+        ax.set_title(title, loc="left", fontsize=10, color=INK)
+        style(ax)
+    axes[0][-1].legend(frameon=False, fontsize=7.5, loc="lower left")
+    fig.suptitle("Exact item vs similar items (up and right is better)", x=0.01, ha="left",
+                 fontsize=11, color=INK)
+    save(fig, "fig6_recall_vs_p5.png")
 
 
 def save(fig, name):
@@ -231,6 +290,7 @@ def main():
     fig_tradeoff(summary)
     fig_resolution(summary)
     fig_finetune()
+    fig_recall_vs_p5(summary)
 
 
 if __name__ == "__main__":
