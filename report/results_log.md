@@ -138,3 +138,13 @@ ensemble_ft_mv vs ensemble_mv: R@1 better (synthetic +3 to +25, real +3.1, p=0.0
 strong tie; real -1.4, p=0.003). Trade-off persists but is small on real photos.
 Decision rule: find-similar (P@5) -> ensemble_mv (no training); find-exact-item -> ensemble_ft_mv; both ~28 ms.
 All significant real-photo results p <= 0.003, so they survive a Holm correction.
+
+## Finding 7: the cause of the P@5 drop is same-type hard batches (ablation)
+
+Random-batch fine-tuning (same seed, split, 5 epochs; only the batching changed), val R@1 best 0.963 vs 0.977.
+vs hard-batch finetuned: real R@1 +0.1 (p=0.95), real cat P@5 +3.5 (p<0.0005); synthetic P@5 +7.0/+6.9/+7.8,
+synthetic R@1 -1.4/-2.0/-3.4 (all significant). Hard batches only buy synthetic Recall.
+vs FashionSigLIP (same architecture, 14 ms): real R@1 +2.8 (p=0.01), real cat P@5 +1.2 (p=0.003): better on both.
+vs ensemble_mv (28 ms): real R@1 +1.5 (p=0.16), real P@5 +0.6 (p=0.26): no significant difference at half latency.
+Synthetic P@5 vs pretrained: -2 to -3 on mild/medium (medium p=0.042, borderline), +5 on strong.
+New decision rule: finetuned_random (14 ms) for both find-similar and find-exact; ensemble_mv as training-free option.
