@@ -9,11 +9,13 @@ shopper's item, everything can be computed exactly (no simulation):
 Precision@5 (same type) is 1 by construction for a type filter, so we compare on exact-item
 Recall@1 / Recall@5 and on how far the shopper has to scroll.
 Optimistic for menus: it assumes the shopper can name the type and colour, which our user
-story says they cannot. LookBench has no colour labels, so only the type filter runs there.
+story says they cannot. LookBench has no colour labels, so only the type filter runs there,
+counted in distinct pictures (duplicate gallery entries merged, Finding 15).
 
 Run from the repo root:
     python -m evaluation.filter_baseline
 """
+import hashlib
 from math import comb
 
 import numpy as np
@@ -64,15 +66,21 @@ def synthetic_rows():
 
 
 def lookbench_rows():
-    """LookBench real street photos: filter the gallery by the query's category."""
+    """LookBench real street photos: filter the gallery by the query's category.
+
+    Counted in distinct PICTURES (md5 of the file), not gallery entries: 633 outfit photos are
+    listed once per item they show (Finding 15), so counting entries would show duplicates twice.
+    """
     from evaluation.run_lookbench import prepare
     gallery, queries = prepare("real_streetlook")
     queries = queries[queries["label"].isin(gallery["label"])]
+    gallery = gallery.assign(picture=[hashlib.md5(open(p, "rb").read()).hexdigest()
+                                      for p in gallery["image_path"]])
 
-    cat_count = gallery["category"].value_counts()
-    pictures = gallery.groupby(["label", "category"]).size()   # pictures of an item inside a category
-    shown = [cat_count.get(c, 0) for c in queries["category"]]
-    relevant = [pictures.get((lab, c), 0) for lab, c in zip(queries["label"], queries["category"])]
+    pictures_in_cat = gallery.groupby("category")["picture"].nunique()
+    pictures_of_item = gallery.groupby(["label", "category"])["picture"].nunique()
+    shown = [pictures_in_cat.get(c, 0) for c in queries["category"]]
+    relevant = [pictures_of_item.get((lab, c), 0) for lab, c in zip(queries["label"], queries["category"])]
     return [summarize("lookbench_real", "type", shown, relevant)]
 
 
