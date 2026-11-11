@@ -47,3 +47,11 @@ Recall@1,lookbench_real_streetlook_image,ensemble_ft_mv -> finetuned,0.471,0.455
 Precision@5,lookbench_real_streetlook_image,ensemble_ft_mv -> finetuned,0.706,0.691,"-0.015 [-0.026,-0.005]",0.001,yes
 Recall@1,lookbench_real_streetlook_image,ensemble_ft_mv -> ensemble_mv,0.471,0.44,"-0.031 [-0.050,-0.011]",0.002,yes
 Precision@5,lookbench_real_streetlook_image,ensemble_ft_mv -> ensemble_mv,0.706,0.72,"+0.014 [+0.005,+0.023]",0.003,yes
+Recall@1,phone_mild,finetuned -> finetuned_random,0.99,0.976,"-0.014 [-0.027,-0.003]",0.035,yes
+Recall@1,phone_medium,finetuned -> finetuned_random,0.969,0.949,"-0.020 [-0.037,-0.007]",0.004,yes
+Recall@1,phone_strong,finetuned -> finetuned_random,0.847,0.813,"-0.034 [-0.061,-0.010]",0.006,yes
+Precision@5,phone_mild,finetuned -> finetuned_random,0.795,0.865,"+0.070 [+0.052,+0.088]",0.0,yes
+Precision@5,phone_medium,finetuned -> finetuned_random,0.798,0.867,"+0.069 [+0.050,+0.087]",0.0,yes
+Precision@5,phone_strong,finetuned -> finetuned_random,0.744,0.822,"+0.078 [+0.059,+0.097]",0.0,yes
+Recall@1,lookbench_real_streetlook_image,finetuned -> finetuned_random,0.455,0.456,"+0.001 [-0.017,+0.019]",0.954,no
+Precision@5,lookbench_real_streetlook_image,finetuned -> finetuned_random,0.691,0.726,"+0.035 [+0.028,+0.042]",0.0,yes
