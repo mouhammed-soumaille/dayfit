@@ -1,0 +1,15 @@
+model,data,condition,filter,n_queries,filtered_out,recall1,recall5,median_rank,mean_rank
+finetuned_random,synthetic,clean,none,294,0,1.0,1.0,1.0,1.0
+finetuned_random,synthetic,clean,type,294,0,1.0,1.0,1.0,1.0
+finetuned_random,synthetic,clean,type + colour,294,0,1.0,1.0,1.0,1.0
+finetuned_random,synthetic,phone_medium,none,294,0,0.9489795918367347,0.9931972789115646,1.0,1.098639455782313
+finetuned_random,synthetic,phone_medium,type,294,0,0.9489795918367347,0.9931972789115646,1.0,1.098639455782313
+finetuned_random,synthetic,phone_medium,type + colour,294,0,0.9625850340136054,0.9931972789115646,1.0,1.0748299319727892
+finetuned_random,synthetic,phone_mild,none,294,0,0.9761904761904762,1.0,1.0,1.0238095238095237
+finetuned_random,synthetic,phone_mild,type,294,0,0.9761904761904762,1.0,1.0,1.0238095238095237
+finetuned_random,synthetic,phone_mild,type + colour,294,0,0.9863945578231292,1.0,1.0,1.0136054421768708
+finetuned_random,synthetic,phone_strong,none,294,0,0.8129251700680272,0.9455782312925171,1.0,2.510204081632653
+finetuned_random,synthetic,phone_strong,type,294,0,0.8231292517006803,0.9523809523809523,1.0,2.251700680272109
+finetuned_random,synthetic,phone_strong,type + colour,294,0,0.8741496598639455,0.9761904761904762,1.0,1.6802721088435375
+finetuned_random,lookbench_real,real_streetlook,none,981,0,0.5198776758409785,0.6768603465851172,1.0,85.74108053007136
+finetuned_random,lookbench_real,real_streetlook,type,981,49,0.5535168195718655,0.7043832823649337,1.0,16.895922746781117
