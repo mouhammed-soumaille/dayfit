@@ -6,6 +6,9 @@ T3, per-category (Mondrian) conformal:
   each category separately (only on calibration queries of the same category), which
   gives the 90% guarantee inside EVERY category. Cost: fewer calibration queries per
   category, so larger sets. Relative variant, alpha = 0.1.
+  Group variant: calibrate within 7 fixed category groups (GROUPS below, fixed before
+  seeing any grouped results). Guarantees 90% averaged inside each GROUP (not each
+  category), with more calibration queries per group, so smaller sets.
 
 T4, conformal risk control on Precision@5 (Angelopoulos et al., 2022):
   The app shows the top 5 only when it is confident (top similarity >= lambda), and
@@ -29,9 +32,32 @@ import pandas as pd
 from evaluation.conformal import relative_q
 from evaluation.conformal_shift import lookbench_scores, save
 
+# Category groups for grouped Mondrian conformal. Fixed BEFORE seeing any grouped results.
+GROUPS = {
+    "tops": ["blouse", "shirt", "t-shirt", "sweater", "sweatshirt", "cardigan", "vest"],
+    "outerwear": ["coat", "jacket", "cape"],
+    "bottoms": ["pants", "shorts", "black linen shorts", "skirt", "denim skirt",
+                "pleated skirt", "silk skirt"],
+    "dresses": ["dress", "jumpsuit"],
+    "footwear": ["shoe", "sneaker", "lace-up sandals"],
+    "bags": ["bag", "handbag", "clutch bag"],
+    "accessories": ["belt", "glasses", "glove", "hat", "headband", "scarf", "tie",
+                    "umbrella", "sock"],
+}
+GROUP_OF = {cat: g for g, cats in GROUPS.items() for cat in cats}
 
-def mondrian(scores, true, categories, trials, alpha, rng):
-    """Coverage and set size per category: one shared calibration vs per-category calibration."""
+
+def to_group(categories):
+    """Map each category name to its group; stop loudly if a name is not in GROUPS."""
+    missing = sorted({c for c in categories if c.lower() not in GROUP_OF})
+    if missing:
+        raise ValueError(f"categories without a group: {missing}")
+    return np.array([GROUP_OF[c.lower()] for c in categories])
+
+
+def mondrian(scores, true, categories, groups, trials, alpha, rng):
+    """Coverage and set size per category under three calibrations:
+    standard (all queries), mondrian (same category only), group (same group only)."""
     top = scores.max(axis=1)
     gaps = top - true                       # relative score: how far below the top result
     n = len(scores)
@@ -45,7 +71,9 @@ def mondrian(scores, true, categories, trials, alpha, rng):
             if len(t) == 0:
                 continue
             q_cat = relative_q(gaps[cal[categories[cal] == cat]], alpha)  # inf if too few queries
-            for variant, q in [("standard", q_all), ("mondrian", q_cat)]:
+            g = groups[t[0]]                                             # a category has one group
+            q_grp = relative_q(gaps[cal[groups[cal] == g]], alpha)
+            for variant, q in [("standard", q_all), ("mondrian", q_cat), ("group", q_grp)]:
                 cutoff = top[t] - q
                 covered, sizes = found.setdefault((cat, variant), ([], []))
                 covered.extend(true[t] >= cutoff)
@@ -53,8 +81,9 @@ def mondrian(scores, true, categories, trials, alpha, rng):
 
     rows = []
     for cat in np.unique(categories):
-        row = dict(category=cat, n_queries=int((categories == cat).sum()))
-        for variant in ["standard", "mondrian"]:
+        row = dict(category=cat, group=groups[categories == cat][0],
+                   n_queries=int((categories == cat).sum()))
+        for variant in ["standard", "mondrian", "group"]:
             covered, sizes = found[(cat, variant)]
             row[f"coverage_{variant}"] = np.mean(covered)
             row[f"median_size_{variant}"] = np.median(sizes)
@@ -113,7 +142,7 @@ def main():
     gallery_cat = gallery["category"].to_numpy()
 
     rng = np.random.default_rng(0)
-    mond = mondrian(scores, true, query_cat, args.trials, 0.1, rng)
+    mond = mondrian(scores, true, query_cat, to_group(query_cat), args.trials, 0.1, rng)
     risk = risk_control(scores, query_cat, gallery_cat, args.trials, [0.2, 0.1, 0.05], rng)
     mond.insert(0, "model", args.method)
     risk.insert(0, "model", args.method)
@@ -123,6 +152,16 @@ def main():
     pd.set_option("display.width", 160)
     print("\n\nT3: per-category coverage, target 90% (relative variant, real -> real):\n")
     print(mond.drop(columns="model").round(3).to_string(index=False))
+    print("\nT3 group check: coverage per group (categories weighted by #queries):\n")
+    variants = ["standard", "mondrian", "group"]
+    covered = pd.DataFrame({v: mond[f"coverage_{v}"] * mond["n_queries"] for v in variants})
+    covered["group_name"] = mond["group"]
+    covered["n_queries"] = mond["n_queries"]
+    by_group = covered.groupby("group_name").sum()
+    for v in variants:
+        by_group[v] = by_group[v] / by_group["n_queries"]
+    by_group = by_group[["n_queries"] + variants]
+    print(by_group.round(3).to_string())
     print("\nT4: risk control on wrong-category share among shown results (real -> real):\n")
     print(risk.drop(columns="model").round(3).to_string(index=False))
 
