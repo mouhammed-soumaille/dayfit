@@ -148,3 +148,15 @@ vs FashionSigLIP (same architecture, 14 ms): real R@1 +2.8 (p=0.01), real cat P@
 vs ensemble_mv (28 ms): real R@1 +1.5 (p=0.16), real P@5 +0.6 (p=0.26): no significant difference at half latency.
 Synthetic P@5 vs pretrained: -2 to -3 on mild/medium (medium p=0.042, borderline), +5 on strong.
 New decision rule: finetuned_random (14 ms) for both find-similar and find-exact; ensemble_mv as training-free option.
+
+## Finding 8: mechanism (T2) - hard batches push same-type items apart
+
+Catalog embeddings (6,197 items), cosine similarity. gap_std = (within-type - between-type mean) / std of all pairs.
+nn_same_type = share of each item's 5 nearest catalog neighbours with the same type.
+| model | within | between | gap_std | nn_same_type |
+| FashionSigLIP | 0.690 | 0.531 | 1.68 | 0.905 |
+| hard batches | 0.250 | 0.127 | 1.20 | 0.836 |
+| random batches | 0.373 | 0.179 | 1.78 | 0.893 |
+Hard batches cut type separation by 29%; random batches keep it. Same ordering as synthetic P@5.
+Fine-tuning lowers all similarities (embeddings spread out), so raw gaps are not comparable; use gap_std.
+Caveat: catalog includes training items; descriptive, no CIs.
