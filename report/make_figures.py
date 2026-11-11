@@ -14,6 +14,9 @@ Figures:
   fig4_resolution.png  same models on 60x80 vs high-res images
   fig5_finetune.png    validation Recall@1 per fine-tuning epoch (+ random-batch ablation if run)
   fig6_recall_vs_p5.png exact-item Recall@1 vs same-type P@5, synthetic and LookBench
+  fig7_conformal_shift.png  conformal coverage on real photos: synthetic vs real calibration, T1 bound
+  fig8_mondrian.png    per-category coverage and set size, standard vs Mondrian
+  fig9_risk.png        risk control: answer rate vs guaranteed wrong-type share
 """
 import os
 
@@ -231,7 +234,7 @@ TRADE = [
     ("ensemble_mv", "Ensemble (pretrained)", AQUA),
     ("finetuned", "Fine-tuned", ORANGE),
     ("finetuned_mv", "Fine-tuned, multi-view", YELLOW),
-    # ("finetuned_random", "Fine-tuned, random batches", MAGENTA),  # add back after the ablation step
+    ("finetuned_random", "Fine-tuned, random batches", MAGENTA),
     ("ensemble_ft_mv", "Fine-tuned ensemble", VIOLET),
 ]
 
@@ -274,6 +277,109 @@ def fig_recall_vs_p5(summary, lookbench_path="results/lookbench_summary.csv"):
                  fontsize=11, color=INK)
     save(fig, "fig6_recall_vs_p5.png")
 
+# models in the conformal figures: (method, label, colour), same colours as above
+CONF = [("fashion_siglip", "FashionSigLIP", BLUE),
+        ("ensemble_mv", "Ensemble (pretrained)", AQUA),
+        ("finetuned_random", "Fine-tuned, random batches", MAGENTA)]
+
+
+def fig_conformal_shift(path="results/conformal_shift.csv", tv_path="results/conformal_tv.csv"):
+    """Coverage on real photos when calibrating on synthetic vs real photos, and the T1 bound."""
+    if not (os.path.exists(path) and os.path.exists(tv_path)):
+        return
+    table = pd.read_csv(path)
+    table = table[(table["alpha"] == 0.1) & (table["method"] == "relative")]
+    tv = pd.read_csv(tv_path)
+    tv = tv[(tv["method"] == "relative") & (tv["bins"] == 50)]
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+    for i, (method, label, colour) in enumerate(CONF):
+        syn = table[(table["model"] == method) & (table["setting"] == "synthetic_to_real")]
+        real = table[(table["model"] == method) & (table["setting"] == "real_to_real")]
+        bound = tv[tv["model"] == method]
+        if syn.empty or real.empty:
+            continue
+        ax1.bar(i - 0.2, syn["coverage"].iloc[0], width=0.38, color=colour, alpha=0.45)
+        ax1.bar(i + 0.2, real["coverage"].iloc[0], width=0.38, color=colour)
+        if not bound.empty:
+            ax1.plot([i - 0.38, i - 0.02], [bound["bound_at_90"].iloc[0]] * 2, color=INK, linewidth=2)
+        ax2.bar(i, real["median_size"].iloc[0], width=0.6, color=colour)
+        ax2.text(i, real["median_size"].iloc[0], f"{real['median_size'].iloc[0]:.0f}",
+                 ha="center", va="bottom", fontsize=8, color=INK2)
+    ax1.axhline(0.9, color=INK2, linestyle="--", linewidth=1)
+    ax1.text(2.45, 0.905, "target 90%", fontsize=8, color=INK2, ha="right", va="bottom")
+    names = [label.replace(" (", "\n(").replace(", ", ",\n") for _, label, _ in CONF]
+    for ax in (ax1, ax2):
+        ax.set_xticks(range(len(CONF)))
+        ax.set_xticklabels(names, fontsize=8)
+        style(ax)
+    ax1.set_ylim(0, 1)
+    ax1.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
+    ax1.set_ylabel("Coverage on real photos", color=INK2, fontsize=9)
+    ax1.set_title("Light: calibrated on synthetic. Dark: on real.\nBlack line: T1 bound 0.9 - TV",
+                  loc="left", fontsize=9.5, color=INK)
+    ax2.set_ylabel("Median set size (of 3,278)", color=INK2, fontsize=9)
+    ax2.set_title("Honest set size on real photos\n(calibrated on real)", loc="left",
+                  fontsize=9.5, color=INK)
+    save(fig, "fig7_conformal_shift.png")
+
+
+def fig_mondrian(path="results/conformal_mondrian.csv", model="finetuned_random", min_queries=18):
+    """Per-category coverage, standard vs per-category (Mondrian) calibration."""
+    if not os.path.exists(path):
+        return
+    table = pd.read_csv(path)
+    table = table[(table["model"] == model) & (table["n_queries"] >= min_queries)]
+    table = table.sort_values("coverage_standard")
+    y = range(len(table))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
+    ax1.plot(table["coverage_standard"], y, "o", color=INK2, label="standard (one calibration)")
+    ax1.plot(table["coverage_mondrian"], y, "o", color=VIOLET, label="per category (Mondrian)")
+    ax1.axvline(0.9, color=INK2, linestyle="--", linewidth=1)
+    ax1.set_yticks(list(y))
+    ax1.set_yticklabels([f"{c} ({n})" for c, n in zip(table["category"], table["n_queries"])], fontsize=8)
+    ax1.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
+    ax1.set_xlabel("Coverage (target 90%)", color=INK2, fontsize=9)
+    ax1.legend(frameon=False, fontsize=8, loc="upper left")
+    ax1.set_title("Coverage per category", loc="left", fontsize=10, color=INK)
+    ax2.plot(table["median_size_standard"], y, "o", color=INK2)
+    ax2.plot(table["median_size_mondrian"], y, "o", color=VIOLET)
+    ax2.set_xscale("log")
+    ax2.set_xlabel("Median set size (log scale)", color=INK2, fontsize=9)
+    ax2.set_title("Set size per category", loc="left", fontsize=10, color=INK)
+    for ax in (ax1, ax2):
+        style(ax)
+    save(fig, "fig8_mondrian.png")
+
+
+def fig_risk(path="results/conformal_risk.csv"):
+    """T4: how often the app still answers, for each guaranteed level of wrong-type results."""
+    if not os.path.exists(path):
+        return
+    table = pd.read_csv(path)
+    fig, ax = plt.subplots(figsize=(6.5, 4))
+    for method, label, colour in CONF:
+        t = table[table["model"] == method]
+        if t.empty:
+            continue
+        guaranteed = t[t["alpha"] != "no abstention"].copy()
+        guaranteed["alpha"] = guaranteed["alpha"].astype(float)
+        guaranteed = guaranteed.sort_values("alpha")
+        free = t[t["alpha"] == "no abstention"]
+        xs = list(guaranteed["alpha"]) + list(free["loss"])
+        ys = list(guaranteed["answer_rate"]) + list(free["answer_rate"])
+        ax.plot(xs, ys, "-o", color=colour, label=label, markersize=6)
+    ax.set_xlabel("Average share of wrong-type results (guaranteed bound; last point = no abstention)",
+                  color=INK2, fontsize=8.5)
+    ax.set_ylabel("Share of photos the app answers", color=INK2, fontsize=9)
+    ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
+    ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
+    ax.set_ylim(0, 1.05)
+    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    ax.set_title("Risk control on real photos: stricter guarantee = answer less often",
+                 loc="left", fontsize=10, color=INK)
+    style(ax)
+    save(fig, "fig9_risk.png")
+
 
 def save(fig, name):
     os.makedirs(OUT, exist_ok=True)
@@ -291,6 +397,9 @@ def main():
     fig_resolution(summary)
     fig_finetune()
     fig_recall_vs_p5(summary)
+    fig_conformal_shift()
+    fig_mondrian()
+    fig_risk()
 
 
 if __name__ == "__main__":
