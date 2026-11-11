@@ -182,3 +182,15 @@ T1 bound coverage >= 0.9 - TV(synthetic scores, real scores): holds in 15/18 (mo
 Misses are small and at coarse bins: binning underestimates TV (data processing), so the plug-in bound is
 optimistic. TV largest for the fine-tuned model (0.31-0.37 vs 0.23-0.29): consistent with "learned our augmentation".
 Implication: calibrate on real photos; on real photos a 90% guarantee needs large sets -> app should flag "unsure".
+
+## Finding 11: per-category conformal (T3) and risk control (T4), LookBench real -> real
+
+T3 (alpha 0.1, relative): standard conformal hides categories at 0.52-0.82 (jumpsuit, denim skirt, cape,
+pleated skirt, cardigan, coat) while easy ones are at 1.00. Mondrian: every category >= 0.90.
+Cost = redistribution: easy categories get smaller sets (finetuned_random: shirt 65 -> 10, bag 63 -> 10),
+hard ones bigger (coat 84 -> 588). Categories with < ~18 queries (< 9 calibration) get the whole gallery
+(3,278): need ceil((n+1)(1-alpha)) <= n, i.e. n >= 9. Fix: merge rare categories into coarser groups.
+T4 (answer only if top similarity >= lambda; loss = wrong-category share of shown top 5, 0 if abstain):
+measured loss <= alpha at every level (0.198-0.200 / 0.096-0.097 / 0.049). Answer rate at alpha 0.2:
+SigLIP 80%, ensemble 81%, finetuned_random 85%; at 0.1: 41 / 46 / 46%. P@5 when answered only 0.73 -> ~0.79:
+the guarantee is met mostly by abstaining; top similarity is a weak confidence signal.
