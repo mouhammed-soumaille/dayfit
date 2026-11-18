@@ -57,3 +57,8 @@ results/manual_check/
 !serving/type_text.npy
 !serving/outside_text.npy
 data/hm/
+data/app_images/
+!serving/type_text_app.npy
+!serving/outside_text_app.npy
+!results/learned_confidence.csv
+!results/confidence_features.csv
