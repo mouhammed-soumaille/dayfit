@@ -64,3 +64,5 @@ data/app_images/
 !results/confidence_features.csv
 my_photos/
 !results/type_rerank.csv
+report/progress_report_*.tex
+report/progress_report_*.pdf
