@@ -68,7 +68,7 @@ def main():
                           "Recall@1": with_ci(d, "Recall@1"), "Recall@5": with_ci(d, "Recall@5"),
                           "category P@5": with_ci(d, "CategoryP@5")})
         parts.append(table(t, "LookBench real\\_streetlook, every method run (official = LookBench's protocol; "
-                              "dedup = duplicate gallery pictures merged, Finding 15)."))
+                              "dedup = duplicate gallery pictures merged, Section~\\ref{sec:dups})."))
 
     if os.path.exists("results/comparisons.csv"):
         d = pd.read_csv("results/comparisons.csv")
