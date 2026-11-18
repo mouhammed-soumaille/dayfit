@@ -45,3 +45,4 @@ report/progress_report.pdf
 report/*.synctex.gz
 report/appendix_tables.tex
 PROJECT_STATUS.md
+!results/per_category.csv
