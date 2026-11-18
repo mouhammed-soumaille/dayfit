@@ -1,0 +1,47 @@
+{
+  "method": "finetuned_random",
+  "source": "LookBench real_streetlook (all photos)",
+  "n_calibration": 981,
+  "shortlist": {
+    "alpha": 0.1,
+    "q": 0.2283805012702942,
+    "lookbench_coverage": 0.9014460285132384,
+    "lookbench_median_size": 59.0
+  },
+  "not_sure": {
+    "alpha": 0.1,
+    "loss": "share of top 5 in the wrong category group",
+    "lambda": 0.6713838577270508,
+    "lambda_exact_names": 0.8231509327888489,
+    "lookbench_answer_rate": 0.9114765784114053,
+    "lookbench_loss": 0.09820570264765785,
+    "lookbench_group_p5_when_answered": 0.892636145667757
+  },
+  "limitation": "Calibrated on LookBench photos and gallery; the app searches a different catalogue, so the guarantees do not formally hold in the app.",
+  "lookbench_risk_table": [
+    {
+      "alpha": "no abstention",
+      "loss": 0.12966360856269116,
+      "answer_rate": 1.0,
+      "p5_when_answered": 0.8703363914373088
+    },
+    {
+      "alpha": "0.2",
+      "loss": 0.12831364562118125,
+      "answer_rate": 0.9986761710794296,
+      "p5_when_answered": 0.8715183517589484
+    },
+    {
+      "alpha": "0.1",
+      "loss": 0.09820570264765785,
+      "answer_rate": 0.9114765784114053,
+      "p5_when_answered": 0.892636145667757
+    },
+    {
+      "alpha": "0.05",
+      "loss": 0.04721792260692464,
+      "answer_rate": 0.5828920570264766,
+      "p5_when_answered": 0.9198361505141744
+    }
+  ]
+}
