@@ -277,3 +277,24 @@ Caveats: descriptive only (no correction across 7 groups / 14 types; n=21 gives 
 Category P@5 depends on how common the category is in the gallery -> state as a metric limitation.
 Implication: the "unreliable match" warning matters most for rare categories (dresses, bags) and for
 exact-item claims on outerwear; feeds D10b (failure gallery) and F (per-category fairness).
+
+## Finding 17: failure gallery (D10b, evaluation/failure_gallery.py, fig10_failures_*.png)
+run_lookbench now also saves each query's top-5 distinct pictures (results/rankings/); re-run of
+finetuned_random reproduced every saved number exactly, and hit@1 / hit@5 / P@5 recomputed from the
+rankings match the per-query files for all 981 queries.
+Correction found by the gallery's sanity check: our synthetic P@5 removes the exact item (top-6 minus
+source; "are the alternatives sensible?") while LookBench category P@5 (LookBench's code) counts it.
+Model-vs-model comparisons within a dataset are unaffected; synthetic and real P@5 must not be compared
+directly (now stated in the report's metrics and LookBench sections).
+Gallery = 6 random rows (seed 0) per case, qualitative only:
+- Real dresses with P@5 <= 0.4 (31 queries): in 3/6 rows the "dress" crop shows a top and/or shorts
+  (label/crop mismatch); the model returns visually matching tops/shorts with high scores (up to 0.86).
+  In the other 3 the exact item is rank 1 and neighbours share colour/fabric (black skirts, satin).
+- Real outerwear, top-1 not exact (134): all results are near-identical coats/jackets (fine-grained),
+  scores 0.74-0.89; one row shows apparent near-duplicate gallery pictures not merged by md5; a cape row
+  marks wrap coats as "wrong" (exact-category P@5).
+- Synthetic Trousers, strong photos (11): all results right type, exact pair often rank 2-3; some black
+  trousers are labelled Track Pants/Jeans in the catalogue (label ambiguity).
+Implications: (1) misses are mostly fine-grained or label ambiguity, supporting a top-5 shortlist over a
+single answer; (2) confident misses (high top similarity) explain why risk control on top similarity only
+lifts answered P@5 0.73 -> 0.79 (F11); (3) D8 should quantify dress-label noise and near-duplicates.
