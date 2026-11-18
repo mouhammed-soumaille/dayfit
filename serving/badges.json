@@ -1,0 +1,124 @@
+{
+  "type_prompts": {
+    "Tshirts": "a t-shirt",
+    "Shirts": "a shirt",
+    "Tops": "a top",
+    "Kurtas": "a kurta",
+    "Sweatshirts": "a sweatshirt",
+    "Jackets": "a jacket",
+    "Dresses": "a dress",
+    "Jeans": "jeans",
+    "Trousers": "trousers",
+    "Track Pants": "track pants",
+    "Shorts": "shorts",
+    "Casual Shoes": "casual shoes",
+    "Sports Shoes": "sports shoes",
+    "Heels": "heels"
+  },
+  "type_groups": {
+    "Tshirts": "tops",
+    "Shirts": "tops",
+    "Tops": "tops",
+    "Kurtas": "tops",
+    "Sweatshirts": "tops",
+    "Jackets": "outerwear",
+    "Dresses": "dresses",
+    "Jeans": "bottoms",
+    "Trousers": "bottoms",
+    "Track Pants": "bottoms",
+    "Shorts": "bottoms",
+    "Casual Shoes": "footwear",
+    "Sports Shoes": "footwear",
+    "Heels": "footwear"
+  },
+  "type_badge": {
+    "level": "group",
+    "min_confidence": 0.9
+  },
+  "colour_bands": {
+    "very_close_max": 16.452174280022327,
+    "different_min": 37.002504357036685,
+    "n_same_label_pairs": 3060
+  },
+  "evaluation": {
+    "clean": {
+      "n": 294,
+      "type_accuracy": 0.8401360544217688,
+      "same_type_badge_agrees": 0.845578231292517,
+      "group_badge": {
+        "conf>=0.0": {
+          "shown": 1.0,
+          "accuracy_when_shown": 0.9693877551020408
+        },
+        "conf>=0.5": {
+          "shown": 1.0,
+          "accuracy_when_shown": 0.9693877551020408
+        },
+        "conf>=0.7": {
+          "shown": 0.9931972789115646,
+          "accuracy_when_shown": 0.976027397260274
+        },
+        "conf>=0.9": {
+          "shown": 0.9387755102040817,
+          "accuracy_when_shown": 0.9782608695652174
+        }
+      }
+    },
+    "phone_medium": {
+      "n": 294,
+      "type_accuracy": 0.8299319727891157,
+      "same_type_badge_agrees": 0.8353741496598639,
+      "group_badge": {
+        "conf>=0.0": {
+          "shown": 1.0,
+          "accuracy_when_shown": 0.9727891156462585
+        },
+        "conf>=0.5": {
+          "shown": 1.0,
+          "accuracy_when_shown": 0.9727891156462585
+        },
+        "conf>=0.7": {
+          "shown": 0.9761904761904762,
+          "accuracy_when_shown": 0.975609756097561
+        },
+        "conf>=0.9": {
+          "shown": 0.891156462585034,
+          "accuracy_when_shown": 0.9923664122137404
+        }
+      },
+      "true_match_colour_bands": {
+        "very close": 0.6598639455782312,
+        "slightly different": 0.30272108843537415,
+        "different": 0.03741496598639456
+      }
+    },
+    "phone_strong": {
+      "n": 294,
+      "type_accuracy": 0.7687074829931972,
+      "same_type_badge_agrees": 0.7843537414965986,
+      "group_badge": {
+        "conf>=0.0": {
+          "shown": 1.0,
+          "accuracy_when_shown": 0.9421768707482994
+        },
+        "conf>=0.5": {
+          "shown": 0.9931972789115646,
+          "accuracy_when_shown": 0.9452054794520548
+        },
+        "conf>=0.7": {
+          "shown": 0.9523809523809523,
+          "accuracy_when_shown": 0.9642857142857143
+        },
+        "conf>=0.9": {
+          "shown": 0.8231292517006803,
+          "accuracy_when_shown": 0.9834710743801653
+        }
+      },
+      "true_match_colour_bands": {
+        "very close": 0.5340136054421769,
+        "slightly different": 0.3945578231292517,
+        "different": 0.07142857142857142
+      }
+    }
+  }
+}
