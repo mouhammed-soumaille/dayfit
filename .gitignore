@@ -52,3 +52,4 @@ results/manual_check/
 !results/group_p5.csv
 !results/group_p5_tests.csv
 !results/manual_check.csv
+!results/cluster_bootstrap.csv
