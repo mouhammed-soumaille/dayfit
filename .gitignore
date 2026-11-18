@@ -49,3 +49,5 @@ PROJECT_STATUS.md
 !results/near_dedup_summary.csv
 !results/near_dedup_tests.csv
 results/manual_check/
+!results/group_p5.csv
+!results/group_p5_tests.csv
