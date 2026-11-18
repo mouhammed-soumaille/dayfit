@@ -122,9 +122,11 @@ def main():
     k_search = 5 * max_copies               # enough results to always find 5 distinct pictures
 
     found = {p: dict(hit1=[], hit5=[], p5=[]) for p in ["official", "dedup"]}
+    ranking_rows = []                       # top-5 distinct pictures per query (dedup), for D8/D10/T5
     for n, q in enumerate(queries.itertuples(), start=1):
         image = Image.open(getattr(q, args.query_image)).convert("RGB")
-        ranked = [item_id for item_id, _ in retriever.search(image, k=k_search)]
+        results = retriever.search(image, k=k_search)
+        ranked = [item_id for item_id, _ in results]
 
         top = ranked[:5]                    # official: gallery entries as they come
         labels = [label_of[i] for i in top]
@@ -137,6 +139,13 @@ def main():
             if picture[i] not in pictures:
                 pictures.append(picture[i])
         pictures = pictures[:5]
+        first_copy = {}                     # each picture's highest-ranked gallery entry and its score
+        for item_id, score in results:
+            first_copy.setdefault(picture[item_id], (item_id, float(score)))
+        for rank, p in enumerate(pictures, start=1):
+            item_id, score = first_copy[p]
+            ranking_rows.append(dict(query_id=q.query_id, rank=rank, item_id=item_id,
+                                     picture=p, score=score))
         found["dedup"]["hit1"].append(float(q.label in pic_labels[pictures[0]]))
         found["dedup"]["hit5"].append(float(any(q.label in pic_labels[p] for p in pictures)))
         found["dedup"]["p5"].append(np.mean([q.category in pic_cats[p] for p in pictures]))
@@ -159,6 +168,12 @@ def main():
             row[name] = float(np.mean(values[column]))
             row[f"{name}_lo"], row[f"{name}_hi"] = bootstrap_ci(values[column])
         rows.append(row)
+
+    # save the top-5 distinct pictures of every query (used by D8 manual check, D10 gallery, T5 hubness)
+    os.makedirs("results/rankings", exist_ok=True)
+    pd.DataFrame(ranking_rows).to_csv(
+        f"results/rankings/{args.method}_lookbench_{args.subset}_{args.query_image}_dedup.csv",
+        index=False)
 
     new = pd.DataFrame(rows)
     if os.path.exists(args.out):
