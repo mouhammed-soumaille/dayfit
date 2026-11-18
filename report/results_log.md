@@ -319,3 +319,25 @@ n.s. everywhere (smallest p 0.058).
 Conclusion: dedup stays the main protocol; near-dedup is a sensitivity check in the report. All conclusions
 hold, but "better P@5 than the pretrained base" is small (+0.01) and not significant at the loosest
 threshold; state it as such. Many tests, no correction: p ~ 0.01 results are suggestive, not strong.
+
+## Finding 19: LookBench category names are too strict; group P@5 (evaluation/group_p5.py) (correction)
+Manual check (D8b) showed "wrong category" results that are the same kind of garment. Cause: category P@5
+compares category STRINGS and LookBench's names overlap (bag/handbag/clutch bag, skirt/pleated/denim/silk
+skirt, shirt/t-shirt, shoe/sneaker); the gallery also has 38 names on 109 of 3,278 entries that never occur
+as a query category (boots, jeans, sneaker variants, "trench coat", "tights" ...), which always count as wrong.
+Group P@5 = result in the query's category group (7 groups fixed for F12 before any grouped result + explicit
+mapping of the 38 gallery-only names, written before computing; "product label" never counts). With exact
+names the script reproduces every saved category P@5.
+Exact -> group P@5: FashionSigLIP 0.714 -> 0.869, ensemble_mv 0.721 -> 0.864, finetuned 0.688 -> 0.843,
+finetuned_random 0.725 -> 0.869 [0.853, 0.885].
+Paired (group P@5): finetuned -> finetuned_random +0.026 [+0.020, +0.032] p<0.0005 (hard-batch drop survives);
+fashion_siglip -> finetuned_random -0.001 [-0.008, +0.006] p=0.85 (the +0.011 exact-name gain VANISHES);
+ensemble_mv -> finetuned_random +0.004 p=0.27 (tie holds).
+By group (finetuned_random, exact -> group): bags 0.52 -> 0.85, footwear 0.73 -> 0.90, tops 0.72 -> 0.89,
+outerwear 0.80 -> 0.93, bottoms 0.80 -> 0.95, accessories 0.66 -> 0.72, dresses 0.32 -> 0.32.
+Corrections: (1) F7/F15 claim "finetuned_random beats its pretrained base on both real metrics" -> "better
+real R@1 (+3.4, p<0.0005), tied on garment type"; the P@5 gain was in arbitrary name distinctions
+(it was also fragile in F18). (2) F16: low bag P@5 was mostly naming (bag vs handbag), not base rate;
+low dress P@5 is real (neighbours are tops/skirts, another group; plus label noise, F17).
+Report: new section "Category names and group P@5", row in the ablation table, bullets and summary rewritten.
+Limitation: groups are lenient (cardigan counts for blouse); exact and group P@5 bracket the truth.
