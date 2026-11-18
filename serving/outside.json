@@ -1,0 +1,60 @@
+{
+  "tau": 0.4,
+  "rule": "smallest tau with false alarm <= 0.05 on both in-catalogue sets",
+  "table": [
+    {
+      "tau": 0.3,
+      "detected": 0.9282868525896414,
+      "detected_skirts": 0.9591836734693877,
+      "detected_bags": 1.0,
+      "detected_other": 0.8653846153846154,
+      "false_alarm_lookbench": 0.054455445544554455,
+      "false_alarm_synthetic": 0.013605442176870748
+    },
+    {
+      "tau": 0.4,
+      "detected": 0.9163346613545816,
+      "detected_skirts": 0.9387755102040817,
+      "detected_bags": 1.0,
+      "detected_other": 0.8557692307692307,
+      "false_alarm_lookbench": 0.037953795379537955,
+      "false_alarm_synthetic": 0.008503401360544218
+    },
+    {
+      "tau": 0.5,
+      "detected": 0.8884462151394422,
+      "detected_skirts": 0.9387755102040817,
+      "detected_bags": 1.0,
+      "detected_other": 0.7884615384615384,
+      "false_alarm_lookbench": 0.033003300330033,
+      "false_alarm_synthetic": 0.003401360544217687
+    },
+    {
+      "tau": 0.6,
+      "detected": 0.8725099601593626,
+      "detected_skirts": 0.9387755102040817,
+      "detected_bags": 0.9795918367346939,
+      "detected_other": 0.7596153846153846,
+      "false_alarm_lookbench": 0.0297029702970297,
+      "false_alarm_synthetic": 0.003401360544217687
+    },
+    {
+      "tau": 0.7,
+      "detected": 0.8366533864541833,
+      "detected_skirts": 0.8979591836734694,
+      "detected_bags": 0.9795918367346939,
+      "detected_other": 0.7115384615384616,
+      "false_alarm_lookbench": 0.024752475247524754,
+      "false_alarm_synthetic": 0.003401360544217687
+    },
+    {
+      "tau": 0.8,
+      "detected": 0.8047808764940239,
+      "detected_skirts": 0.8775510204081632,
+      "detected_bags": 0.9795918367346939,
+      "detected_other": 0.6538461538461539,
+      "false_alarm_lookbench": 0.0165016501650165,
+      "false_alarm_synthetic": 0.003401360544217687
+    }
+  ]
+}

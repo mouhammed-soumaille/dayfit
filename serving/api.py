@@ -47,6 +47,8 @@ with open("serving/calibration.json") as f:
     calibration = json.load(f)
 with open("serving/badges.json") as f:
     badges = json.load(f)
+with open("serving/outside.json") as f:
+    outside = json.load(f)                     # out-of-catalogue warning threshold (serving/outside_check.py)
 
 
 async def read_photo(request):
@@ -73,7 +75,9 @@ def search_photo(image):
     order = np.argsort(-scores)[:K]
     best = float(scores[order[0]])
 
-    group, group_prob = types.predict_group(image)
+    seen = types.analyse(image)                         # group badge + out-of-catalogue check, one embedding
+    group, group_prob = seen["group"], seen["group_prob"]
+    not_sold = seen["outside_prob"] >= outside["tau"]
     show_group = group_prob >= badges["type_badge"]["min_confidence"]
     query_colour = garment_colour(image)
 
@@ -95,7 +99,9 @@ def search_photo(image):
     return dict(
         results=results,
         query=dict(predicted_group=group if show_group else None, group_confidence=round(group_prob, 3),
-                   colour_hex=lab_to_hex(query_colour)),
+                   colour_hex=lab_to_hex(query_colour),
+                   not_in_catalogue=seen["outside_type"] if not_sold else None,
+                   not_in_catalogue_prob=round(seen["outside_prob"], 3)),
         not_sure=best < lam,
         best_similarity=best,
         shortlist_size=int((scores >= best - q).sum()),

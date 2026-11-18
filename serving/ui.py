@@ -23,6 +23,9 @@ import requests
 import streamlit as st
 
 API = os.environ.get("DAYFIT_API", "http://localhost:8000")
+PLURAL = {"skirt": "skirts", "jumpsuit": "jumpsuits", "handbag": "handbags", "hat": "hats",
+          "scarf": "scarves", "belt": "belts", "socks": "socks", "sunglasses": "sunglasses",
+          "swimsuit": "swimsuits"}
 
 
 def swatch(hex_code):
@@ -49,6 +52,10 @@ if photo is not None:
         st.stop()
     answer = response.json()
 
+    not_sold = answer["query"]["not_in_catalogue"]
+    if not_sold:
+        right.info(f"This looks like a {not_sold}. Our catalogue has no {PLURAL[not_sold]}, so the results "
+                   "below can only be loose suggestions of other garments.")
     if answer["not_sure"]:
         right.warning("Not sure: none of these looks like a strong match. Treat them as loose "
                       "suggestions, or try a clearer photo of the garment alone.")

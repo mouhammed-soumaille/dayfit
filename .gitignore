@@ -55,3 +55,4 @@ results/manual_check/
 !results/cluster_bootstrap.csv
 !results/hubness.csv
 !serving/type_text.npy
+!serving/outside_text.npy

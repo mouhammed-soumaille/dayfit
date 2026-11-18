@@ -58,6 +58,11 @@ CONFIDENCE = [0.0, 0.5, 0.7, 0.9]     # show the group badge only if its probabi
 BADGE_MIN_CONFIDENCE = 0.9     # chosen Nov 18 after seeing the table above (UI decision; D9 checks it)
 OUT = "serving/badges.json"
 TEXT_EMB = "serving/type_text.npy"      # the 14 prompt embeddings, computed once (needs transformers)
+# garment kinds the catalogue does NOT sell; used only to warn the shopper (separate from the type badge)
+OUTSIDE_WORDS = {"skirt": "a skirt", "jumpsuit": "a jumpsuit", "handbag": "a handbag", "hat": "a hat",
+                 "scarf": "a scarf", "belt": "a belt", "socks": "socks", "sunglasses": "sunglasses",
+                 "swimsuit": "a swimsuit"}
+OUTSIDE_EMB = "serving/outside_text.npy"
 
 
 class TypePredictor:
@@ -77,6 +82,16 @@ class TypePredictor:
             np.save(TEXT_EMB, t.float().cpu().numpy())
             print(f"  saved the {len(self.types)} prompt embeddings to {TEXT_EMB}")
         self.text = torch.from_numpy(np.load(TEXT_EMB)).to(self.device)
+        self.outside_types = list(OUTSIDE_WORDS)
+        if not os.path.exists(OUTSIDE_EMB):     # first run only, like TEXT_EMB
+            tokenizer = open_clip.get_tokenizer(SIGLIP)
+            with torch.no_grad():
+                text = tokenizer([f"a photo of {OUTSIDE_WORDS[t]}" for t in self.outside_types]).to(self.device)
+                t = self.model.encode_text(text)
+                t = t / t.norm(dim=-1, keepdim=True)
+            np.save(OUTSIDE_EMB, t.float().cpu().numpy())
+            print(f"  saved the {len(self.outside_types)} out-of-catalogue prompt embeddings to {OUTSIDE_EMB}")
+        self.outside = torch.from_numpy(np.load(OUTSIDE_EMB)).to(self.device)
 
     @torch.no_grad()
     def predict(self, image):
@@ -88,6 +103,27 @@ class TypePredictor:
         probs = (scale * v @ self.text.T).softmax(dim=-1)[0].float().cpu().numpy()
         best = int(probs.argmax())
         return self.types[best], float(probs[best])
+
+    def analyse(self, image):
+        """One image embedding -> group badge AND out-of-catalogue warning.
+        group, group_prob : softmax over the 14 catalogue types only (exactly as predict_group)
+        outside_prob      : softmax over the 14 catalogue + 9 outside types; total probability of
+                            the outside types; outside_type = the most likely of them"""
+        x = self.preprocess(image.convert("RGB")).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            v = self.model.encode_image(x)
+            v = v / v.norm(dim=-1, keepdim=True)
+            scale = self.model.logit_scale.exp()
+            inside = (scale * v @ self.text.T)[0]
+            both = torch.cat([inside, (scale * v @ self.outside.T)[0]]).softmax(dim=-1).float().cpu().numpy()
+            inside = inside.softmax(dim=-1).float().cpu().numpy()
+        by_group = {}
+        for t, p in zip(self.types, inside):
+            by_group[GROUP_OF_TYPE[t]] = by_group.get(GROUP_OF_TYPE[t], 0.0) + float(p)
+        group = max(by_group, key=by_group.get)
+        out = both[len(self.types):]
+        return dict(group=group, group_prob=by_group[group],
+                    outside_type=self.outside_types[int(out.argmax())], outside_prob=float(out.sum()))
 
     def predict_group(self, image):
         """PIL image -> (predicted group, probability) = sum of the type probabilities in each group."""
