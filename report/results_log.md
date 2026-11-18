@@ -512,7 +512,13 @@ them came in with the evaluation catalogue) and skips a result whose cosine with
 >= 0.97 (same product photographed again; the same girls' jeans had appeared 3x in one top 5). "Not sure" and
 the shortlist size use only visible items. Checks: 33,141 rows, no missing gender, index vectors have unit
 length (so the dot product is a cosine), evaluation catalogue unaffected (nothing hidden, no skipping), 6 tests pass.
-Own jeans flat lay afterwards: looks right to me (TODO Mouhammed: paste the top 5 here).
+Own jeans flat lay afterwards: looks right (jeans first; checked by Mouhammed in the app).
+Wide-leg jeans photo (worn, white background; after the group-level bonus, Nov 19): badge "bottoms", top 5 all
+Jeans (Blue, Grey, Blue, Blue, Blue), colour "very close" for all 5, similarity 0.67 / 0.67 / 0.66 / 0.62 / 0.59,
+shortlist 66. Right kind and wash, wrong CUT: all 5 are men's straight/bootcut. Cause = catalogue coverage, not
+the model: none of the 609 Jeans names in Fashion Product Images (2011-12) contain wide, baggy, flare, loose,
+relaxed or palazzo (names are sparse, so not a proof); slim 29, skinny 15. Similarity can only rank what the
+shop sells. Re-check this photo after the H&M catalogue (2018-20, mostly women's) is merged.
 
 ## Pre-registration (Nov 19, 00:00, BEFORE any of the experiments below)
 Accuracy target (agreed definition): group P@5 on LookBench real photos (dedup protocol), goal 0.90.
