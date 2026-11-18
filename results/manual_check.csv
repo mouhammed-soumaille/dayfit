@@ -1,0 +1,62 @@
+row,query_id,set,category,hit1,p5,label_check,metric_fair,note,annotator,reviewed_by,reviewer_agrees
+1,q261,dress_failure,dress,False,0.0,wrong,no,crop shows trench coat and jeans; trench coats returned,claude,mouhammed,yes
+2,q264,dress_failure,dress,False,0.0,wrong,no,crop shows one-shoulder top; matching tops returned,claude,mouhammed,yes
+3,q266,dress_failure,dress,True,0.2,correct,yes,,claude,mouhammed,yes
+4,q267,dress_failure,dress,True,0.2,correct,yes,neighbours floral skirts,claude,mouhammed,yes
+5,q269,dress_failure,dress,True,0.4,correct,yes,,claude,mouhammed,yes
+6,q271,dress_failure,dress,True,0.4,correct,yes,,claude,mouhammed,yes
+7,q272,dress_failure,dress,True,0.2,correct,yes,neighbours black skirts,claude,mouhammed,yes
+8,q273,dress_failure,dress,True,0.4,correct,yes,neighbours black skirts,claude,mouhammed,yes
+9,q274,dress_failure,dress,True,0.2,ambiguous,yes,crop mostly blazer and bag; pleated dress,claude,mouhammed,yes
+10,q276,dress_failure,dress,False,0.2,wrong,no,crop shows lace top and black shorts,claude,mouhammed,yes
+11,q277,dress_failure,dress,True,0.2,wrong,no,crop shows leather mini skirt; leather skirts scored wrong,claude,mouhammed,yes
+12,q278,dress_failure,dress,False,0.4,correct,no,black dresses scored wrong,claude,mouhammed,yes
+13,q279,dress_failure,dress,True,0.4,correct,no,black dress scored wrong,claude,mouhammed,yes
+14,q281,dress_failure,dress,True,0.4,correct,no,knit dresses scored wrong,claude,mouhammed,yes
+15,q282,dress_failure,dress,False,0.0,wrong,no,crop shows white top and yellow shorts; shorts returned,claude,mouhammed,yes
+16,q283,dress_failure,dress,False,0.0,wrong,no,same photo as row 15 (duplicate query),claude,mouhammed,yes
+17,q284,dress_failure,dress,False,0.0,ambiguous,no,blazer over satin skirt or dress; satin skirts returned,claude,mouhammed,yes
+18,q285,dress_failure,dress,True,0.4,ambiguous,yes,satin slip top or dress,claude,mouhammed,yes
+19,q286,dress_failure,dress,True,0.4,correct,yes,neighbours skirts,claude,mouhammed,yes
+20,q287,dress_failure,dress,True,0.4,correct,yes,neighbours black skirts,claude,mouhammed,yes
+21,q288,dress_failure,dress,True,0.2,correct,yes,,claude,mouhammed,yes
+22,q289,dress_failure,dress,False,0.0,wrong,no,crop shows white t-shirt; t-shirts returned,claude,mouhammed,yes
+23,q414,dress_failure,jumpsuit,True,0.2,correct,yes,neighbours trousers and skirts,claude,mouhammed,yes
+24,q415,dress_failure,jumpsuit,False,0.0,correct,yes,neighbours jeans and denim skirt,claude,mouhammed,yes
+25,q416,dress_failure,jumpsuit,False,0.0,correct,no,near-duplicate crops of one denim jumpsuit photo scored wrong,claude,mouhammed,yes
+26,q417,dress_failure,jumpsuit,False,0.0,correct,no,same near-duplicate jumpsuit crops scored wrong,claude,mouhammed,yes
+27,q418,dress_failure,jumpsuit,False,0.0,correct,no,jumpsuit crops scored wrong,claude,mouhammed,yes
+28,q419,dress_failure,jumpsuit,False,0.2,correct,yes,,claude,mouhammed,yes
+29,q420,dress_failure,jumpsuit,False,0.2,correct,yes,neighbours navy trousers,claude,mouhammed,yes
+30,q421,dress_failure,jumpsuit,True,0.2,correct,yes,neighbours black trousers,claude,mouhammed,yes
+31,q889,dress_failure,dress,True,0.2,correct,no,knit dresses scored wrong,claude,mouhammed,yes
+32,q120,random,cardigan,True,0.8,correct,yes,,claude,mouhammed,yes
+33,q127,random,cardigan,False,1.0,correct,yes,,claude,mouhammed,yes
+34,q170,random,coat,False,0.6,correct,no,beige trench and peacoat scored wrong,claude,mouhammed,yes
+35,q203,random,coat,True,0.6,correct,no,grey coat close-up scored wrong,claude,mouhammed,yes
+36,q218,random,coat,False,1.0,correct,yes,,claude,mouhammed,yes
+37,q326,random,jacket,True,1.0,correct,yes,,claude,mouhammed,yes
+38,q334,random,jacket,True,1.0,correct,yes,,claude,mouhammed,yes
+39,q347,random,jacket,False,0.8,correct,no,camo jacket scored wrong,claude,mouhammed,yes
+40,q378,random,jacket,False,1.0,correct,yes,,claude,mouhammed,yes
+41,q38,random,bag,True,0.6,correct,no,handbags scored wrong (bag vs handbag),claude,mouhammed,yes
+42,q399,random,jacket,False,1.0,correct,yes,,claude,mouhammed,yes
+43,q470,random,pants,True,0.4,correct,yes,red skirts and shoes fairly wrong,claude,mouhammed,yes
+44,q480,random,pants,True,1.0,correct,yes,,claude,mouhammed,yes
+45,q510,random,pants,False,0.6,ambiguous,yes,crop shows trousers and coat hem,claude,mouhammed,yes
+46,q517,random,scarf,True,1.0,correct,yes,,claude,mouhammed,yes
+47,q55,random,blouse,True,0.6,ambiguous,yes,puff-sleeve top or dress,claude,mouhammed,yes
+48,q583,random,shirt,True,0.2,ambiguous,no,t-shirts labelled shirt; white tees scored wrong,claude,mouhammed,yes
+49,q59,random,blouse,True,0.8,correct,yes,,claude,mouhammed,yes
+50,q669,random,shorts,True,1.0,correct,yes,,claude,mouhammed,yes
+51,q753,random,skirt,True,1.0,correct,yes,,claude,mouhammed,yes
+52,q764,random,skirt,True,1.0,correct,yes,,claude,mouhammed,yes
+53,q799,random,sock,False,1.0,correct,yes,,claude,mouhammed,yes
+54,q811,random,sweater,True,0.6,correct,no,cream knit close-up scored wrong,claude,mouhammed,yes
+55,q820,random,sweater,False,0.0,ambiguous,no,long grey cardigan labelled sweater; cardigans scored wrong,claude,mouhammed,yes
+56,q821,random,sweater,False,0.0,ambiguous,no,same photo as row 55 (duplicate query),claude,mouhammed,yes
+57,q837,random,sweatshirt,True,0.2,wrong,no,crop shows black t-shirt; tees scored wrong,claude,mouhammed,yes
+58,q854,random,t-shirt,False,1.0,correct,yes,,claude,mouhammed,yes
+59,q859,random,t-shirt,False,1.0,correct,yes,,claude,mouhammed,yes
+60,q917,random,vest,False,1.0,correct,yes,,claude,mouhammed,yes
+61,q919,random,vest,True,0.8,correct,yes,,claude,mouhammed,yes
