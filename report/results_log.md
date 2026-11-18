@@ -451,3 +451,36 @@ differ, so upload/JSON overhead is negligible). Top 5 equal to the evaluated res
 About half of the time is the second model (type badge); making it optional would roughly halve latency.
 Caution recorded: a first measurement (36 ms) accidentally hit a local MPS server on the same port;
 checked with lsof and the container log, then re-measured.
+## Finding 27: learned "not sure" score (evaluation/learned_confidence.py -> results/learned_confidence.csv)
+Question: can a learned confidence score answer more photos than the top similarity at the same risk level?
+Seven signals per LookBench photo (top similarity, gaps to 2nd and 5th result, shortlist size, type and
+out-of-catalogue probabilities, colour difference to the top 5); target "the top 5 are all in the right group".
+Plan fixed before running: 50 random splits by crop (40% train, 30% calibrate lambda at alpha 0.1, 30% test);
+logistic regression and gradient-boosted trees (HistGradientBoostingClassifier, fixed settings, no tuning).
+Means over 50 splits (top similarity / logistic / trees):
+  AUROC 0.651 / 0.758 / 0.719; answer rate at alpha 0.1: 90.2% / 89.9% / 87.7%;
+  test loss 0.096 / 0.097 / 0.097 (all <= 0.1, guarantee holds); answer rate above top similarity in
+  24 / 50 splits (logistic) and 15 / 50 (trees).
+Negative result: the learned scores rank photos better overall but not on the worst ~10% that must be
+skipped at alpha 0.1. The app keeps the top similarity (simpler, as good where it matters).
+
+## Finding 28: bigger app catalogue (data_prep/app_catalog.py, serving/engine.py, serving/app_badges_check.py)
+App only; every evaluation number stays on the 6,197-item catalogue. Selection rules fixed before building:
+full Fashion Product Images zip, adult items, 72 wearable types (clothes, shoes, bags, worn accessories;
+no watches, wallets, jewellery, underwear, nightwear, swimwear, personal care), all evaluation items kept,
+near-duplicates removed with the build_catalog rule. Result: 33,141 items of 68 types (501 near-duplicates
+removed, 5 without image); e.g. heels 1,316, sandals 845, flip flops 885, handbags 1,756, sunglasses 1,042,
+skirts 98. Embedded with finetuned_random (separate index, finetuned_random_app.npy).
+Checks: evaluation catalogue unchanged (same top 5, score difference 0); in the app index the 6,197
+evaluation items have exactly the saved embeddings (difference 0) and no best score went down.
+Search time on MPS 18 ms (was 15 ms).
+Badges with the app vocabulary (72 prompts, 7 groups: + bags, accessories; groups fixed before measuring);
+the evaluation badge still reproduces Finding 24 (shown 0.891, correct 0.992 on phone_medium).
+Group badge at confidence >= 0.9: LookBench real shown 64.5%, correct 95.4% (accessories 86.4%, bags 100%,
+bottoms incl. skirts 96.1%, dresses 91.3%, footwear 100%, outerwear 93.5%, tops 97.0%);
+synthetic shown 70.2%, correct 99.3%. More groups -> badge shown less often, accuracy about the same.
+Out-of-catalogue warning (still not sold: swimsuit, watch, necklace, earrings, wallet, umbrella): same rule
+as Finding 25 -> tau = 0.3; false alarms 0.1% LookBench (976 crops of sold kinds), 0.2% synthetic.
+Detection only testable on 5 umbrella crops (5/5) -> unmeasured in practice.
+Open: "not sure" lambda was calibrated against a smaller gallery; with 33k items best scores can only rise,
+so it may fire less often. To be checked on real photos (D9).
