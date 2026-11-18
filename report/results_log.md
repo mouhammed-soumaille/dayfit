@@ -446,7 +446,7 @@ read-only (cannot write files). Build note: copying the checkpoint into the imag
 time, so the index cache rebuilt the index on CPU once (25 min); fixed by restoring the recorded time
 (index built on the Mac reused; build then reports "loaded saved catalog embeddings").
 Latency, 100 synthetic medium photos after 5 warm-up (median / p95): Mac GPU (MPS) 36 / 37 ms;
-Docker CPU (4 vCPU) 266 / 278 ms server time; round trip the same within ~1 ms (clocks of VM and host
+Docker CPU (4 vCPU) 266 / 282 ms server time (final image; previous image 266 / 278); round trip the same within ~1 ms (clocks of VM and host
 differ, so upload/JSON overhead is negligible). Top 5 equal to the evaluated results for 105/105 photos.
 About half of the time is the second model (type badge); making it optional would roughly halve latency.
 Caution recorded: a first measurement (36 ms) accidentally hit a local MPS server on the same port;
