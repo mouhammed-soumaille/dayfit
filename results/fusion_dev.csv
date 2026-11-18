@@ -1,0 +1,14 @@
+part,value,r1,group_p5
+b_dinov2,0.0,0.528,0.866
+b_dinov2,0.1,0.538,0.876
+b_dinov2,0.2,0.51,0.878
+b_dinov2,0.3,0.5,0.873
+b_dinov2,0.4,0.476,0.863
+b_dinov2,0.5,0.448,0.86
+b_dinov2,0.7,0.4,0.828
+b_dinov2,1.0,0.306,0.791
+a_group_bonus,0.0,0.528,0.866
+a_group_bonus,0.02,0.536,0.883
+a_group_bonus,0.05,0.528,0.903
+a_group_bonus,0.1,0.52,0.913
+a_group_bonus,0.2,0.512,0.916
