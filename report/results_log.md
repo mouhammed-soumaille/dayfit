@@ -582,3 +582,9 @@ DINOv2 is much weaker than our model on its own (dev R@1 0.306 vs 0.528) and add
 fusion; colour re-ranking costs a little group P@5 and gains no significant R@1. The hope that a
 higher-resolution self-supervised model keeps design detail is NOT supported. Exact-item R@1 (~0.51) stays
 the open problem (Finding 31: design-level misses); only real street-to-shop training is left as a lever.
+App change after F32: serving/api.py now uses the GROUP-level bonus, score = similarity + 0.05 * P(item's group |
+photo) (sum of the zero-shot type probabilities in the item's group), i.e. exactly the version tested on real
+photos. Same w as before; serving/rerank.json records level "group" and the evidence. Not re-measured on
+synthetic photos (the type-level numbers of F29 no longer describe the app exactly; to check with D9).
+Decision (Nov 19): DeepFashion2 real-pair training skipped for now (only lever left for exact-item R@1, but
+costly: access form, large download, hours of training); revisit only if > 1 week remains after G.
