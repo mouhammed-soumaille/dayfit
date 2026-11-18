@@ -39,7 +39,7 @@ import open_clip
 import pandas as pd
 import torch
 from PIL import Image
-from skimage.color import deltaE_ciede2000, rgb2lab
+from skimage.color import deltaE_ciede2000, lab2rgb, rgb2lab
 
 from retrieval.clip_retriever import pick_device
 
@@ -115,6 +115,12 @@ def garment_colour(image):
     return np.median(lab[keep], axis=0)
 
 
+def lab_to_hex(lab):
+    """CIELAB colour -> '#rrggbb' (for showing the estimated garment colour as a swatch)."""
+    rgb = np.clip(lab2rgb(np.asarray(lab, dtype=float)[None, None, :])[0, 0], 0, 1)
+    return "#" + "".join(f"{int(round(c * 255)):02x}" for c in rgb)
+
+
 def colour_band(lab_a, lab_b, bands):
     """'very close' / 'slightly different' / 'different' from the CIEDE2000 difference."""
     d = float(deltaE_ciede2000(lab_a[None], lab_b[None])[0])
@@ -128,6 +134,8 @@ def colour_band(lab_a, lab_b, bands):
 def main():
     white = rgb2lab(np.ones((1, 1, 3)))[0, 0]
     print(f"  check: CIELAB of pure white = ({white[0]:.1f}, {white[1]:.1f}, {white[2]:.1f}), expect (100, 0, 0)")
+    red = rgb2lab(np.array([[[1.0, 0.0, 0.0]]]))[0, 0]
+    print(f"  check: pure red -> CIELAB -> hex = {lab_to_hex(red)}, expect #ff0000")
 
     catalog = pd.read_csv("data/catalog.csv", dtype={"item_id": str})
     rng = np.random.default_rng(0)

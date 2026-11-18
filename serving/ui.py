@@ -24,6 +24,12 @@ import streamlit as st
 
 API = os.environ.get("DAYFIT_API", "http://localhost:8000")
 
+
+def swatch(hex_code):
+    """A small coloured square followed by its hex code (estimated from the photo)."""
+    return (f'<span style="display:inline-block;width:14px;height:14px;background:{hex_code};'
+            f'border:1px solid #888;vertical-align:middle"></span> <code>{hex_code}</code>')
+
 st.set_page_config(page_title="DAYFIT", layout="wide")
 st.title("DAYFIT: find a garment from a photo")
 st.caption("Your photo is only used for this search. It is kept in memory and never stored.")
@@ -48,6 +54,8 @@ if photo is not None:
                       "suggestions, or try a clearer photo of the garment alone.")
     group = answer["query"]["predicted_group"]
     right.write(f"Looks like: **{group}**" if group else "Garment type: not sure")
+    right.markdown(f"Estimated colour of your garment: {swatch(answer['query']['colour_hex'])} "
+                   "(from the photo; lighting can shift it)", unsafe_allow_html=True)
     right.write(f"About **{answer['shortlist_size']}** catalogue items are about as similar as the "
                 f"best match (90% shortlist, calibrated on other photos; see note below).")
 
@@ -66,6 +74,7 @@ if photo is not None:
             col.caption(("✅ " if r["type_badge"] == "same type" else "⚠️ ") + r["type_badge"])
         col.caption({"very close": "🎨 colour very close", "slightly different": "🎨 colour slightly different",
                      "different": "🎨 colour different"}[r["colour_badge"]])
+        col.markdown(swatch(r["colour_hex"]), unsafe_allow_html=True)
         col.caption(f"similarity {r['score']:.2f}")
     if hidden:
         right.caption(f"{hidden} result(s) hidden by your filters (the ranking itself is unchanged).")

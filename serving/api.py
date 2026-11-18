@@ -28,7 +28,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from serving.badges import GROUP_OF_TYPE, TypePredictor, colour_band, garment_colour
+from serving.badges import GROUP_OF_TYPE, TypePredictor, colour_band, garment_colour, lab_to_hex
 from serving.engine import SearchEngine
 
 try:  # lets PIL open iPhone .heic photos
@@ -81,20 +81,21 @@ def search_photo(image):
     for rank, i in enumerate(order, start=1):
         item_id = retriever.item_ids[i]
         row = engine.item.loc[item_id]
-        band, delta_e = colour_band(query_colour, garment_colour(Image.open(row["image_path"])),
-                                    badges["colour_bands"])
+        item_colour = garment_colour(Image.open(row["image_path"]))
+        band, delta_e = colour_band(query_colour, item_colour, badges["colour_bands"])
         item_group = GROUP_OF_TYPE[row["article_type"]]
         results.append(dict(
             rank=rank, item_id=item_id, score=float(scores[i]),
             article_type=row["article_type"], color=row["color"], image_url=f"/catalog/{item_id}",
             type_badge=("same type" if item_group == group else "different type") if show_group else None,
-            colour_badge=band, colour_delta_e=round(delta_e, 1)))
+            colour_badge=band, colour_delta_e=round(delta_e, 1), colour_hex=lab_to_hex(item_colour)))
 
     q = calibration["shortlist"]["q"]
     lam = calibration["not_sure"]["lambda"]
     return dict(
         results=results,
-        query=dict(predicted_group=group if show_group else None, group_confidence=round(group_prob, 3)),
+        query=dict(predicted_group=group if show_group else None, group_confidence=round(group_prob, 3),
+                   colour_hex=lab_to_hex(query_colour)),
         not_sure=best < lam,
         best_similarity=best,
         shortlist_size=int((scores >= best - q).sum()),
