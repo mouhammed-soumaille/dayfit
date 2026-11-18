@@ -484,3 +484,24 @@ as Finding 25 -> tau = 0.3; false alarms 0.1% LookBench (976 crops of sold kinds
 Detection only testable on 5 umbrella crops (5/5) -> unmeasured in practice.
 Open: "not sure" lambda was calibrated against a smaller gallery; with 33k items best scores can only rise,
 so it may fire less often. To be checked on real photos (D9).
+
+## Finding 29: type-aware ranking for the app (serving/type_rerank.py -> serving/rerank.json)
+Problem found with own photo (my_photos/jeanstrial.jpg, flat lay of long light-wash jeans): top 1 = kids'
+denim shorts (0.660), adult jeans lower. Diagnosis (serving/diagnose_photo.py): NOT the centre crop (the
+model sees the whole garment; padding to a square changes nothing; my first guess was wrong) and not
+transparency (plain RGB JPG). Cause: photo style. Every adult pair of jeans in the catalogue is photographed
+on a person; only kids' denim lies flat on white, so a flat photo matches flat kids' items. Synthetic tests
+cannot show this (queries are made from catalogue images, same style).
+Fix: score = similarity + w * P(item's type | photo), P from the zero-shot type predictor (app vocabulary,
+ignores photo style). Shown similarity, "not sure" and shortlist stay on the plain similarity; evaluation
+catalogue unchanged (w = 0 there). Plan fixed before running: synthetic medium/strong photos (588) against the
+33,141-item app catalogue; w in {0, 0.02, 0.05, 0.1, 0.2}; keep the highest mean type P@5 with R@1 drop
+<= 1 pt on both. Check: w = 0 reproduces the app's top 5.
+                      R@1 medium / strong    type P@5 medium / strong
+  w = 0 (before)      0.929 / 0.769          0.845 / 0.815
+  w = 0.05 (chosen)   0.922 / 0.762          0.871 / 0.828
+  w = 0.1             0.912 / 0.748          0.877 / 0.835   (R@1 drop 1.7 / 2.1 pts: not allowed)
+  w = 0.2             0.891 / 0.731          0.861 / 0.805
+Own photos (shown only, did not choose w): jeans flat lay now Jeans first (Jeans, Shorts, Jeans, Jeans, Jeans);
+skirt photo: skirts now ranks 1-4 (Trousers moved from 4 to 5), dayfittrial4 (jeans) 2 -> 3 jeans, shoe photo formal shoe replaced by casual shoe (5/5 casual);
+others unchanged. Still to do: measure on real photos (LookBench, group P@5), the headline target.
