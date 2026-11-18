@@ -427,3 +427,27 @@ Group level (tops/outerwear/bottoms/dresses/footwear; group prob = sum of type p
 accuracy 0.969 / 0.973 / 0.942; shown only if group prob >= 0.9: 0.978 (94% shown) / 0.992 (89%) /
 0.983 (82%) -> shipped: group badge at confidence >= 0.9 (threshold chosen after seeing this table, on
 synthetic photos: a UI decision, not an accuracy claim; D9 checks it on real photos).
+## Finding 25: out-of-catalogue warning (serving/outside_check.py -> serving/outside.json)
+The catalogue has 14 types and no skirts, bags, hats, jumpsuits, ...; for such photos the results are
+necessarily poor (manual tests: floral skirt, white skirt -> "not sure", shortlists 252-688). New zero-shot
+check (pretrained FashionSigLIP, 9 out-of-catalogue prompts, same image embedding as the type badge; group
+badge provably unchanged): outside_prob = total probability of the outside prompts in a 23-way softmax.
+Labels fixed before running: LookBench OUT = skirts, jumpsuit, bags, hat, scarf, belt, sock, glasses, glove,
+tie, umbrella, headband (251 crops); IN = categories we sell (606 crops); coat/cape excluded; + 588 synthetic
+in-catalogue photos. Threshold rule fixed before running (smallest tau with false alarms <= 5% on both IN
+sets) -> tau = 0.4: detects 91.6% of out-of-catalogue crops (skirts 93.9%, bags 100%, other 85.6%);
+false alarms 3.8% LookBench, 0.9% synthetic; detected skirts named "skirt" 97.8%.
+App: shows "This looks like a skirt. Our catalogue has no skirts, so the results are only loose suggestions."
+Coverage remains a limitation (proposal: catalogue coverage); a modern demo catalogue is planned.
+
+## Finding 26: deployment (E6/E7: Dockerfile, docker-compose.yml, serving/latency.py)
+CPU-only image (python 3.14-slim, torch 2.15 CPU), API + Streamlit page as two services; API container
+read-only (cannot write files). Build note: copying the checkpoint into the image changed its modification
+time, so the index cache rebuilt the index on CPU once (25 min); fixed by restoring the recorded time
+(index built on the Mac reused; build then reports "loaded saved catalog embeddings").
+Latency, 100 synthetic medium photos after 5 warm-up (median / p95): Mac GPU (MPS) 36 / 37 ms;
+Docker CPU (4 vCPU) 266 / 278 ms server time; round trip the same within ~1 ms (clocks of VM and host
+differ, so upload/JSON overhead is negligible). Top 5 equal to the evaluated results for 105/105 photos.
+About half of the time is the second model (type badge); making it optional would roughly halve latency.
+Caution recorded: a first measurement (36 ms) accidentally hit a local MPS server on the same port;
+checked with lsof and the container log, then re-measured.
