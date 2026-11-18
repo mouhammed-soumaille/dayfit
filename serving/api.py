@@ -16,8 +16,12 @@ Uncertainty (constants from serving/calibration.json, calibrated on LookBench re
   - shortlist_size: number of catalogue items within q of the best similarity (conformal, alpha 0.1)
   Neither guarantee formally holds here (different gallery); the response says so.
 
+Catalogue: DAYFIT_CATALOG=evaluation (default, 6,197 items) or app (~33k items, demo only); the badge
+vocabulary and the out-of-catalogue threshold follow the catalogue.
+
 Run from the repo root:
     uvicorn serving.api:app --port 8000
+    DAYFIT_CATALOG=app uvicorn serving.api:app --port 8000
 """
 import io
 import json
@@ -28,7 +32,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from serving.badges import GROUP_OF_TYPE, TypePredictor, colour_band, garment_colour, lab_to_hex
+from serving.badges import TypePredictor, colour_band, garment_colour, lab_to_hex
 from serving.engine import SearchEngine
 
 try:  # lets PIL open iPhone .heic photos
@@ -39,16 +43,17 @@ except ImportError:
 
 MAX_BYTES = 10 * 1024 * 1024
 K = 5
+OUTSIDE_FILE = {"evaluation": "serving/outside.json", "app": "serving/outside_app.json"}
 
 app = FastAPI(title="DAYFIT visual clothing search")
 engine = SearchEngine()                        # fine-tuned model + catalogue index, loaded once
-types = TypePredictor()                        # pretrained model for the type badge, loaded once
+types = TypePredictor(engine.catalogue)        # pretrained model for the type badge, loaded once
 with open("serving/calibration.json") as f:
     calibration = json.load(f)
 with open("serving/badges.json") as f:
     badges = json.load(f)
-with open("serving/outside.json") as f:
-    outside = json.load(f)                     # out-of-catalogue warning threshold (serving/outside_check.py)
+with open(OUTSIDE_FILE[engine.catalogue]) as f:
+    outside = json.load(f)                     # out-of-catalogue warning threshold (outside_check.py / app_badges_check.py)
 
 
 async def read_photo(request):
@@ -87,7 +92,7 @@ def search_photo(image):
         row = engine.item.loc[item_id]
         item_colour = garment_colour(Image.open(row["image_path"]))
         band, delta_e = colour_band(query_colour, item_colour, badges["colour_bands"])
-        item_group = GROUP_OF_TYPE[row["article_type"]]
+        item_group = types.group_of[row["article_type"]]
         results.append(dict(
             rank=rank, item_id=item_id, score=float(scores[i]),
             article_type=row["article_type"], color=row["color"], image_url=f"/catalog/{item_id}",
@@ -125,4 +130,4 @@ def catalog_image(item_id: str):
 
 @app.get("/health")
 def health():
-    return dict(status="ok", model=engine.method, catalogue_items=len(engine.item))
+    return dict(status="ok", model=engine.method, catalogue=engine.catalogue, catalogue_items=len(engine.item))

@@ -25,7 +25,8 @@ import streamlit as st
 API = os.environ.get("DAYFIT_API", "http://localhost:8000")
 PLURAL = {"skirt": "skirts", "jumpsuit": "jumpsuits", "handbag": "handbags", "hat": "hats",
           "scarf": "scarves", "belt": "belts", "socks": "socks", "sunglasses": "sunglasses",
-          "swimsuit": "swimsuits"}
+          "swimsuit": "swimsuits", "watch": "watches", "necklace": "necklaces",
+          "earrings": "earrings", "wallet": "wallets", "umbrella": "umbrellas"}
 
 
 def swatch(hex_code):

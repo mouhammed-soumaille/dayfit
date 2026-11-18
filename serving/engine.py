@@ -8,29 +8,44 @@ lives in memory while it is embedded.
 This is a thin layer over the retriever used in all experiments (RETRIEVERS in
 evaluation/run_eval.py), so the app searches exactly like the evaluated model.
 
-Sanity check (run this file): for a few saved synthetic test queries, the engine must
-return the same top 5 items as the saved evaluation results, with the same scores
-(up to tiny floating-point differences).
+Two catalogues (chosen with the environment variable DAYFIT_CATALOG):
+  evaluation (default): data/catalog.csv, the 6,197 items every reported number uses
+  app                 : data/app_catalog.csv, ~33k items (data_prep/app_catalog.py), for the demo only
+Each catalogue has its own saved embeddings in models/index/, so they never overwrite each other.
+
+Sanity checks (run this file):
+  evaluation: for 10 saved synthetic test queries, the engine returns the same top 5 items
+              as the saved evaluation results, with the same scores.
+  app       : the first 6,197 rows of the app catalogue ARE the evaluation catalogue, so their
+              new embeddings must equal the saved evaluation embeddings; and since the app
+              catalogue contains the evaluation one, each query's best score can only go up.
 
 Run from the repo root:
     python -m serving.engine
+    python -m serving.engine --catalog app        (the first run embeds ~33k images, several minutes)
 """
+import argparse
+import os
 import time
 
+import numpy as np
 import pandas as pd
 from PIL import Image
 
 from evaluation.run_eval import RETRIEVERS
 
 METHOD = "finetuned_random"
-CATALOG = "data/catalog.csv"
+CATALOGS = {"evaluation": "data/catalog.csv", "app": "data/app_catalog.csv"}
 
 
 class SearchEngine:
-    def __init__(self, method=METHOD, catalog_path=CATALOG):
-        self.catalog = pd.read_csv(catalog_path, dtype={"item_id": str})
+    def __init__(self, method=METHOD, catalogue=None):
+        self.catalogue = catalogue or os.environ.get("DAYFIT_CATALOG", "evaluation")
+        self.catalog = pd.read_csv(CATALOGS[self.catalogue], dtype={"item_id": str})
         self.retriever = RETRIEVERS[method]()
-        self.retriever.build_index(self.catalog)          # loads the saved embeddings
+        if self.catalogue != "evaluation":                # own embeddings file, e.g. finetuned_random_app.npy
+            self.retriever.index_name = f"{method}_{self.catalogue}"
+        self.retriever.build_index(self.catalog)          # loads the saved embeddings (or makes them once)
         self.item = self.catalog.set_index("item_id")
         self.method = method
 
@@ -49,9 +64,37 @@ class SearchEngine:
 
 
 def main():
-    engine = SearchEngine()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--catalog", default="evaluation", choices=list(CATALOGS))
+    args = parser.parse_args()
+
+    engine = SearchEngine(catalogue=args.catalog)
     saved = pd.read_csv(f"results/{METHOD}_phone_medium.csv", dtype={"item_id": str})
     queries = pd.read_csv("data/queries.csv", dtype={"source_item_id": str}).set_index("query_id")
+
+    if args.catalog == "app":
+        # check 1: the evaluation items got the same embeddings as in the saved evaluation index
+        old = np.load(f"models/index/{METHOD}.npy")
+        new = engine.retriever.features[:len(old)]
+        same_order = list(engine.catalog["item_id"][:len(old)]) == list(
+            pd.read_csv(CATALOGS["evaluation"], dtype={"item_id": str})["item_id"])
+        diff = float(np.abs(new - old).max())
+        print(f"  check 1: first {len(old)} items in the same order -> {same_order}; "
+              f"largest embedding difference {diff:.1e}")
+        if not same_order or diff > 1e-3:
+            raise SystemExit("sanity check failed: app index does not contain the evaluation index")
+        # check 2: a bigger catalogue can only raise each query's best score
+        for query_id in saved["query_id"].unique()[:10]:
+            old_best = saved[saved["query_id"] == query_id]["score"].max()
+            found, ms = engine.search(Image.open(queries.loc[query_id, "image_path"]))
+            ok = found[0]["score"] >= old_best - 1e-3
+            print(f"  {query_id}: best score {old_best:.3f} -> {found[0]['score']:.3f} "
+                  f"({found[0]['article_type']})  {'OK' if ok else 'LOWER'}  ({ms:.0f} ms)")
+            if not ok:
+                raise SystemExit("sanity check failed: a best score went down")
+        print(f"  check 2: 10 queries, no best score went down; catalogue size {len(engine.item)}")
+        return
+
     worst = 0.0
     for query_id in saved["query_id"].unique()[:10]:
         expected = saved[saved["query_id"] == query_id].sort_values("rank")

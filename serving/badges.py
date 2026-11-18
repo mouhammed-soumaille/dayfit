@@ -65,33 +65,90 @@ OUTSIDE_WORDS = {"skirt": "a skirt", "jumpsuit": "a jumpsuit", "handbag": "a han
 OUTSIDE_EMB = "serving/outside_text.npy"
 
 
-class TypePredictor:
-    """Zero-shot garment type with the pretrained FashionSigLIP."""
+# ---- the bigger APP catalogue (data/app_catalog.csv, data_prep/app_catalog.py) ----
+# Same zero-shot idea with more types; the evaluation vocabulary above is left exactly as it was.
+APP_TYPE_WORDS = {
+    "Tshirts": "a t-shirt", "Shirts": "a shirt", "Kurtas": "a kurta", "Tops": "a top",
+    "Sweatshirts": "a sweatshirt", "Sweaters": "a sweater", "Kurtis": "a kurti", "Tunics": "a tunic",
+    "Camisoles": "a camisole", "Lounge Tshirts": "a lounge t-shirt", "Shrug": "a shrug",
+    "Waistcoat": "a waistcoat",
+    "Jackets": "a jacket", "Rain Jacket": "a rain jacket", "Blazers": "a blazer",
+    "Nehru Jackets": "a nehru jacket", "Tracksuits": "a tracksuit", "Suits": "a suit",
+    "Jeans": "jeans", "Shorts": "shorts", "Trousers": "trousers", "Track Pants": "track pants",
+    "Leggings": "leggings", "Capris": "capri pants", "Skirts": "a skirt", "Lounge Pants": "lounge pants",
+    "Patiala": "patiala pants", "Jeggings": "jeggings", "Lounge Shorts": "lounge shorts",
+    "Salwar": "salwar pants", "Churidar": "churidar pants", "Rain Trousers": "rain trousers",
+    "Dresses": "a dress", "Sarees": "a saree", "Jumpsuit": "a jumpsuit", "Rompers": "a romper",
+    "Kurta Sets": "a kurta set", "Clothing Set": "a clothing set",
+    "Salwar and Dupatta": "a salwar suit with a dupatta", "Lehenga Choli": "a lehenga choli",
+    "Casual Shoes": "casual shoes", "Sports Shoes": "sports shoes", "Heels": "heels",
+    "Flip Flops": "flip flops", "Sandals": "sandals", "Formal Shoes": "formal shoes", "Flats": "flats",
+    "Sports Sandals": "sports sandals", "Booties": "ankle boots",
+    "Handbags": "a handbag", "Backpacks": "a backpack", "Clutches": "a clutch", "Duffel Bag": "a duffel bag",
+    "Laptop Bag": "a laptop bag", "Messenger Bag": "a messenger bag", "Rucksacks": "a rucksack",
+    "Waist Pouch": "a waist pouch", "Trolley Bag": "a trolley bag",
+    "Sunglasses": "sunglasses", "Belts": "a belt", "Caps": "a cap", "Scarves": "a scarf", "Ties": "a tie",
+    "Mufflers": "a muffler", "Gloves": "gloves", "Hat": "a hat", "Headband": "a headband",
+    "Socks": "socks", "Stockings": "stockings", "Tights": "tights", "Dupatta": "a dupatta",
+    "Stoles": "a stole",
+}
+# 7 coarse groups (judgment calls, fixed before measuring: one-piece garments and full outfits go
+# with dresses; dupattas and stoles are worn like scarves)
+APP_GROUP_LISTS = {
+    "tops": ["Tshirts", "Shirts", "Kurtas", "Tops", "Sweatshirts", "Sweaters", "Kurtis", "Tunics",
+             "Camisoles", "Lounge Tshirts", "Shrug", "Waistcoat"],
+    "outerwear": ["Jackets", "Rain Jacket", "Blazers", "Nehru Jackets", "Tracksuits", "Suits"],
+    "bottoms": ["Jeans", "Shorts", "Trousers", "Track Pants", "Leggings", "Capris", "Skirts", "Lounge Pants",
+                "Patiala", "Jeggings", "Lounge Shorts", "Salwar", "Churidar", "Rain Trousers"],
+    "dresses": ["Dresses", "Sarees", "Jumpsuit", "Rompers", "Kurta Sets", "Clothing Set",
+                "Salwar and Dupatta", "Lehenga Choli"],
+    "footwear": ["Casual Shoes", "Sports Shoes", "Heels", "Flip Flops", "Sandals", "Formal Shoes", "Flats",
+                 "Sports Sandals", "Booties"],
+    "bags": ["Handbags", "Backpacks", "Clutches", "Duffel Bag", "Laptop Bag", "Messenger Bag", "Rucksacks",
+             "Waist Pouch", "Trolley Bag"],
+    "accessories": ["Sunglasses", "Belts", "Caps", "Scarves", "Ties", "Mufflers", "Gloves", "Hat", "Headband",
+                    "Socks", "Stockings", "Tights", "Dupatta", "Stoles"],
+}
+APP_GROUP_OF_TYPE = {t: group for group, types in APP_GROUP_LISTS.items() for t in types}
+# what the app catalogue still does NOT sell (skirts, bags, hats, ... are now sold)
+APP_OUTSIDE_WORDS = {"swimsuit": "a swimsuit", "watch": "a wrist watch", "necklace": "a necklace",
+                     "earrings": "earrings", "wallet": "a wallet", "umbrella": "an umbrella"}
 
-    def __init__(self):
+VOCAB = {
+    "evaluation": dict(types=TYPE_WORDS, groups=GROUP_OF_TYPE, outside=OUTSIDE_WORDS,
+                       type_emb=TEXT_EMB, outside_emb=OUTSIDE_EMB),
+    "app": dict(types=APP_TYPE_WORDS, groups=APP_GROUP_OF_TYPE, outside=APP_OUTSIDE_WORDS,
+                type_emb="serving/type_text_app.npy", outside_emb="serving/outside_text_app.npy"),
+}
+
+
+class TypePredictor:
+    """Zero-shot garment type with the pretrained FashionSigLIP.
+    catalogue: "evaluation" (14 types, 5 groups) or "app" (72 types, 7 groups)."""
+
+    def __init__(self, catalogue="evaluation"):
+        vocab = VOCAB[catalogue]
         self.device = pick_device()
         self.model, _, self.preprocess = open_clip.create_model_and_transforms(SIGLIP)
         self.model = self.model.to(self.device).eval()
-        self.types = list(TYPE_WORDS)
-        if not os.path.exists(TEXT_EMB):        # first run only: the app then needs no tokenizer
+        self.group_of = vocab["groups"]
+        self.types = list(vocab["types"])
+        self.text = self.prompt_embeddings(vocab["types"], vocab["type_emb"])
+        self.outside_types = list(vocab["outside"])
+        self.outside = self.prompt_embeddings(vocab["outside"], vocab["outside_emb"])
+
+    def prompt_embeddings(self, words, path):
+        """'a photo of <words>' -> normalised text embeddings. Computed once and saved,
+        so the app itself never needs the tokenizer (which needs the transformers package)."""
+        if not os.path.exists(path):
             tokenizer = open_clip.get_tokenizer(SIGLIP)
             with torch.no_grad():
-                text = tokenizer([f"a photo of {TYPE_WORDS[t]}" for t in self.types]).to(self.device)
+                text = tokenizer([f"a photo of {w}" for w in words.values()]).to(self.device)
                 t = self.model.encode_text(text)
                 t = t / t.norm(dim=-1, keepdim=True)
-            np.save(TEXT_EMB, t.float().cpu().numpy())
-            print(f"  saved the {len(self.types)} prompt embeddings to {TEXT_EMB}")
-        self.text = torch.from_numpy(np.load(TEXT_EMB)).to(self.device)
-        self.outside_types = list(OUTSIDE_WORDS)
-        if not os.path.exists(OUTSIDE_EMB):     # first run only, like TEXT_EMB
-            tokenizer = open_clip.get_tokenizer(SIGLIP)
-            with torch.no_grad():
-                text = tokenizer([f"a photo of {OUTSIDE_WORDS[t]}" for t in self.outside_types]).to(self.device)
-                t = self.model.encode_text(text)
-                t = t / t.norm(dim=-1, keepdim=True)
-            np.save(OUTSIDE_EMB, t.float().cpu().numpy())
-            print(f"  saved the {len(self.outside_types)} out-of-catalogue prompt embeddings to {OUTSIDE_EMB}")
-        self.outside = torch.from_numpy(np.load(OUTSIDE_EMB)).to(self.device)
+            np.save(path, t.float().cpu().numpy())
+            print(f"  saved the {len(words)} prompt embeddings to {path}")
+        return torch.from_numpy(np.load(path)).to(self.device)
 
     @torch.no_grad()
     def predict(self, image):
@@ -106,8 +163,8 @@ class TypePredictor:
 
     def analyse(self, image):
         """One image embedding -> group badge AND out-of-catalogue warning.
-        group, group_prob : softmax over the 14 catalogue types only (exactly as predict_group)
-        outside_prob      : softmax over the 14 catalogue + 9 outside types; total probability of
+        group, group_prob : softmax over the catalogue types only (exactly as predict_group)
+        outside_prob      : softmax over the catalogue + outside types; total probability of
                             the outside types; outside_type = the most likely of them"""
         x = self.preprocess(image.convert("RGB")).unsqueeze(0).to(self.device)
         with torch.no_grad():
@@ -119,7 +176,7 @@ class TypePredictor:
             inside = inside.softmax(dim=-1).float().cpu().numpy()
         by_group = {}
         for t, p in zip(self.types, inside):
-            by_group[GROUP_OF_TYPE[t]] = by_group.get(GROUP_OF_TYPE[t], 0.0) + float(p)
+            by_group[self.group_of[t]] = by_group.get(self.group_of[t], 0.0) + float(p)
         group = max(by_group, key=by_group.get)
         out = both[len(self.types):]
         return dict(group=group, group_prob=by_group[group],
@@ -134,7 +191,7 @@ class TypePredictor:
             probs = (self.model.logit_scale.exp() * v @ self.text.T).softmax(dim=-1)[0].float().cpu().numpy()
         by_group = {}
         for t, p in zip(self.types, probs):
-            by_group[GROUP_OF_TYPE[t]] = by_group.get(GROUP_OF_TYPE[t], 0.0) + float(p)
+            by_group[self.group_of[t]] = by_group.get(self.group_of[t], 0.0) + float(p)
         best = max(by_group, key=by_group.get)
         return best, by_group[best]
 
