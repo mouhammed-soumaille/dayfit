@@ -397,3 +397,19 @@ Descriptive only (hub slots are not independent).
 Biggest hubs (fig11_hubs.png): plain generic garments (white t-shirts, cream cardigans, beige trench),
 likely near the centre of their type; tops are 30% of queries, so part of their popularity is legitimate.
 Conclusion: hub reduction (e.g. CSLS, mutual proximity) is not a priority for the recommended model.
+
+## Finding 23: app calibration (E2, serving/calibrate.py -> serving/calibration.json)
+Decision 1a: app uncertainty calibrated on LookBench real photos (all 981; finetuned_random). Checks: best
+similarity equals saved rank-1 score for all photos; exact-name loss 0.2736 reproduces F11.
+Shortlist (relative conformal, alpha 0.1): q = 0.228; 200 random 50/50 splits: coverage 0.901, median size 59
+(reproduces F10) -> too large to display in full; the UI shows the count and the first items.
+"Not sure" (risk control on top similarity; loss = share of top 5 in the wrong GROUP, F19):
+alpha 0.2 is VACUOUS (loss already 0.130 without abstention -> answers 99.9%), so alpha set to 0.1 (chosen
+after seeing the 0.2 result; a product decision, not an accuracy claim; D9 is the independent check).
+LookBench (200 splits): none: answer 100%, loss 0.130, group P@5 0.870 | 0.2: 99.9%, 0.128, 0.872 |
+0.1: 91.1%, 0.098, 0.893 | 0.05: 58.3%, 0.047, 0.920. lambda(0.1) = 0.671 (exact-name lambda 0.823).
+Interpretation: the guarantee is met mostly by abstaining more, not by abstaining on the right photos
+(precision when answering only 0.87 -> 0.89 -> 0.92): top similarity is a weak confidence signal
+(consistent with F11, F17 confident outerwear misses, F22).
+Limitation: calibrated on LookBench's gallery; our catalogue may give different similarity levels, so no
+formal guarantee in the app; D9 measures the app's answer rate and wrong-type rate when answering.
