@@ -44,6 +44,8 @@ except ImportError:
 
 MAX_BYTES = 10 * 1024 * 1024
 K = 5
+KIDS = ["Boys", "Girls"]                        # app catalogue is for adults (data_prep/app_catalog.py)
+SAME_PRODUCT = 0.97                            # results this similar to an earlier result are the same product photo
 OUTSIDE_FILE = {"evaluation": "serving/outside.json", "app": "serving/outside_app.json"}
 RERANK_FILE = "serving/rerank.json"           # type-aware ranking weight w (serving/type_rerank.py), app only
 
@@ -62,6 +64,26 @@ if engine.catalogue == "app" and os.path.exists(RERANK_FILE):
         rerank_w = json.load(f)["w"]
 # position of each catalogue item's type in the type predictor's list (for P(item's type | photo))
 type_index = np.array([types.types.index(engine.item.loc[i, "article_type"]) for i in engine.retriever.item_ids])
+# app catalogue only: hide the kids' items that came in with the evaluation catalogue
+hidden = np.zeros(len(engine.retriever.item_ids), dtype=bool)
+if engine.catalogue == "app":
+    hidden = engine.item.loc[engine.retriever.item_ids, "gender"].isin(KIDS).to_numpy()
+
+
+def pick_results(ranking):
+    """The K best catalogue items by ranking, skipping hidden items and (app catalogue only) items that are
+    nearly identical to a result already chosen (the same product photographed again)."""
+    features = engine.retriever.features
+    chosen = []
+    for i in np.argsort(-ranking):
+        if hidden[i]:
+            continue
+        if engine.catalogue == "app" and any(features[i] @ features[j] >= SAME_PRODUCT for j in chosen):
+            continue
+        chosen.append(i)
+        if len(chosen) == K:
+            return chosen
+    return chosen
 
 
 async def read_photo(request):
@@ -88,8 +110,9 @@ def search_photo(image):
     seen = types.analyse(image)                         # group badge + out-of-catalogue check, one embedding
     # order: similarity + w * P(item's type | photo); w = 0 for the evaluation catalogue
     ranking = scores + rerank_w * seen["type_probs"][type_index]
-    order = np.argsort(-ranking)[:K]
-    best = float(scores.max())                          # "not sure" and shortlist use the plain similarity
+    order = pick_results(ranking)
+    visible = scores[~hidden]
+    best = float(visible.max())                         # "not sure" and shortlist use the plain similarity
     group, group_prob = seen["group"], seen["group_prob"]
     not_sold = seen["outside_prob"] >= outside["tau"]
     show_group = group_prob >= badges["type_badge"]["min_confidence"]
@@ -119,9 +142,10 @@ def search_photo(image):
         not_sure=best < lam,
         best_similarity=best,
         type_bonus_w=rerank_w,
-        shortlist_size=int((scores >= best - q).sum()),
+        shortlist_size=int((visible >= best - q).sum()),
         latency_ms=round((time.perf_counter() - start) * 1000, 1),
-        note="Badges describe measured differences; the ranking comes from overall visual similarity. "
+        note=("Order: visual similarity plus a small bonus for the garment type the photo looks like. "
+              if rerank_w else "") + "Badges describe measured differences; the ranking comes from overall visual similarity. "
              + calibration["limitation"])
 
 

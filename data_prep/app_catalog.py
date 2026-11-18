@@ -13,7 +13,8 @@ Selection rules (fixed before building):
   - near-duplicate images are removed with the same rule as data_prep/build_catalog.py
     (same detailed dHash AND same coarse average colour)
   - images are read straight from the zip and resized to MAX_SIDE pixels
-Output: data/app_catalog.csv (same columns as data/catalog.csv + source) and data/app_images/.
+Output: data/app_catalog.csv (same columns as data/catalog.csv + source + gender) and data/app_images/.
+(gender is kept so the app can hide the 267 kids' items that come in with the evaluation catalogue.)
 
 Sanity checks: every evaluation item is in the app catalogue; every image opens; counts per type printed.
 
@@ -88,7 +89,8 @@ def main():
                 image.thumbnail((MAX_SIDE, MAX_SIDE))
                 image.save(path, quality=90)
             rows.append(dict(item_id=item.item_id, image_path=path, category=item.subCategory,
-                             article_type=item.articleType, color=item.baseColour, source="extra"))
+                             article_type=item.articleType, color=item.baseColour, source="extra",
+                             gender=item.gender))
             if n % 1000 == 0:
                 print(f"  {n}/{len(extra)} extracted")
 
@@ -103,7 +105,9 @@ def main():
         seen.add(key)
         kept.append(row)
 
-    app = pd.concat([evaluation.assign(source="evaluation"), pd.DataFrame(kept)], ignore_index=True)
+    gender_of = dict(zip(styles["item_id"], styles["gender"]))
+    evaluation = evaluation.assign(source="evaluation", gender=evaluation["item_id"].map(gender_of))
+    app = pd.concat([evaluation, pd.DataFrame(kept)], ignore_index=True)
     assert set(evaluation["item_id"]) <= set(app["item_id"]), "an evaluation item is missing"
     for p in app["image_path"]:                                   # check: every image opens
         Image.open(p).verify()
