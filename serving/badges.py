@@ -165,7 +165,8 @@ class TypePredictor:
         """One image embedding -> group badge AND out-of-catalogue warning.
         group, group_prob : softmax over the catalogue types only (exactly as predict_group)
         outside_prob      : softmax over the catalogue + outside types; total probability of
-                            the outside types; outside_type = the most likely of them"""
+                            the outside types; outside_type = the most likely of them
+        type_probs        : the softmax over the catalogue types (used by the app's type-aware ranking)"""
         x = self.preprocess(image.convert("RGB")).unsqueeze(0).to(self.device)
         with torch.no_grad():
             v = self.model.encode_image(x)
@@ -180,7 +181,8 @@ class TypePredictor:
         group = max(by_group, key=by_group.get)
         out = both[len(self.types):]
         return dict(group=group, group_prob=by_group[group],
-                    outside_type=self.outside_types[int(out.argmax())], outside_prob=float(out.sum()))
+                    outside_type=self.outside_types[int(out.argmax())], outside_prob=float(out.sum()),
+                    type_probs=inside)                  # probability of each type in self.types
 
     def predict_group(self, image):
         """PIL image -> (predicted group, probability) = sum of the type probabilities in each group."""

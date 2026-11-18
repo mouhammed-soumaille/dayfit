@@ -25,6 +25,7 @@ Run from the repo root:
 """
 import io
 import json
+import os
 import time
 
 import numpy as np
@@ -44,6 +45,7 @@ except ImportError:
 MAX_BYTES = 10 * 1024 * 1024
 K = 5
 OUTSIDE_FILE = {"evaluation": "serving/outside.json", "app": "serving/outside_app.json"}
+RERANK_FILE = "serving/rerank.json"           # type-aware ranking weight w (serving/type_rerank.py), app only
 
 app = FastAPI(title="DAYFIT visual clothing search")
 engine = SearchEngine()                        # fine-tuned model + catalogue index, loaded once
@@ -54,6 +56,12 @@ with open("serving/badges.json") as f:
     badges = json.load(f)
 with open(OUTSIDE_FILE[engine.catalogue]) as f:
     outside = json.load(f)                     # out-of-catalogue warning threshold (outside_check.py / app_badges_check.py)
+rerank_w = 0.0                                 # evaluation catalogue: plain similarity, exactly as evaluated
+if engine.catalogue == "app" and os.path.exists(RERANK_FILE):
+    with open(RERANK_FILE) as f:
+        rerank_w = json.load(f)["w"]
+# position of each catalogue item's type in the type predictor's list (for P(item's type | photo))
+type_index = np.array([types.types.index(engine.item.loc[i, "article_type"]) for i in engine.retriever.item_ids])
 
 
 async def read_photo(request):
@@ -77,10 +85,11 @@ def search_photo(image):
     retriever = engine.retriever
     query = retriever.embed_query(image)
     scores = retriever.features @ query                 # similarity with every catalogue item
-    order = np.argsort(-scores)[:K]
-    best = float(scores[order[0]])
-
     seen = types.analyse(image)                         # group badge + out-of-catalogue check, one embedding
+    # order: similarity + w * P(item's type | photo); w = 0 for the evaluation catalogue
+    ranking = scores + rerank_w * seen["type_probs"][type_index]
+    order = np.argsort(-ranking)[:K]
+    best = float(scores.max())                          # "not sure" and shortlist use the plain similarity
     group, group_prob = seen["group"], seen["group_prob"]
     not_sold = seen["outside_prob"] >= outside["tau"]
     show_group = group_prob >= badges["type_badge"]["min_confidence"]
@@ -109,6 +118,7 @@ def search_photo(image):
                    not_in_catalogue_prob=round(seen["outside_prob"], 3)),
         not_sure=best < lam,
         best_similarity=best,
+        type_bonus_w=rerank_w,
         shortlist_size=int((scores >= best - q).sum()),
         latency_ms=round((time.perf_counter() - start) * 1000, 1),
         note="Badges describe measured differences; the ranking comes from overall visual similarity. "
