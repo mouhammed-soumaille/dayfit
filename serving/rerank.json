@@ -22,5 +22,7 @@
     "r1_phone_strong_w0.2": 0.7312925170068028,
     "type_p5_phone_medium_w0.2": 0.8605442176870748,
     "type_p5_phone_strong_w0.2": 0.8054421768707484
-  }
+  },
+  "level": "group",
+  "evidence": "w chosen at TYPE level on synthetic photos (Finding 29); the app uses the GROUP-level bonus with the same w, chosen on LookBench dev and tested once on LookBench test (Finding 32: group P@5 0.871 -> 0.905)"
 }

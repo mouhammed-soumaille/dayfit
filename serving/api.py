@@ -64,6 +64,11 @@ if engine.catalogue == "app" and os.path.exists(RERANK_FILE):
         rerank_w = json.load(f)["w"]
 # position of each catalogue item's type in the type predictor's list (for P(item's type | photo))
 type_index = np.array([types.types.index(engine.item.loc[i, "article_type"]) for i in engine.retriever.item_ids])
+# GROUP-level bonus (Finding 32: tested on held-out real photos, group P@5 0.871 -> 0.905, R@1 unchanged):
+# P(item's group | photo) = sum of the type probabilities of the types in the item's group
+GROUP_NAMES = sorted(set(types.group_of.values()))
+group_member = np.array([[types.group_of[t] == g for g in GROUP_NAMES] for t in types.types], dtype=float)
+group_index = np.array([GROUP_NAMES.index(types.group_of[types.types[k]]) for k in type_index])
 # app catalogue only: hide the kids' items that came in with the evaluation catalogue
 hidden = np.zeros(len(engine.retriever.item_ids), dtype=bool)
 if engine.catalogue == "app":
@@ -108,8 +113,9 @@ def search_photo(image):
     query = retriever.embed_query(image)
     scores = retriever.features @ query                 # similarity with every catalogue item
     seen = types.analyse(image)                         # group badge + out-of-catalogue check, one embedding
-    # order: similarity + w * P(item's type | photo); w = 0 for the evaluation catalogue
-    ranking = scores + rerank_w * seen["type_probs"][type_index]
+    # order: similarity + w * P(item's group | photo); w = 0 for the evaluation catalogue
+    group_probs = seen["type_probs"] @ group_member
+    ranking = scores + rerank_w * group_probs[group_index]
     order = pick_results(ranking)
     visible = scores[~hidden]
     best = float(visible.max())                         # "not sure" and shortlist use the plain similarity
@@ -144,7 +150,7 @@ def search_photo(image):
         type_bonus_w=rerank_w,
         shortlist_size=int((visible >= best - q).sum()),
         latency_ms=round((time.perf_counter() - start) * 1000, 1),
-        note=("Order: visual similarity plus a small bonus for the garment type the photo looks like. "
+        note=("Order: visual similarity plus a small bonus for the kind of garment (group) the photo looks like. "
               if rerank_w else "") + "Badges describe measured differences; the ranking comes from overall visual similarity. "
              + calibration["limitation"])
 
