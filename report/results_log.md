@@ -257,3 +257,23 @@ C2 LookBench: R@1 counts ties in the item's favour, so it equals the dedup proto
 count duplicate entries of OTHER pictures (slightly pessimistic).
 Not re-run: conformal set sizes and risk control count gallery entries, not pictures (set sizes inflated
 at most 3278/2537 = 1.29x; coverage unaffected) -> stated as a limitation.
+
+
+## Finding 16: per-category breakdown (D10a, evaluation/per_category.py, finetuned_random)
+Sanity check: query-weighted per-category means reproduce every saved overall number (4 synthetic
+conditions + LookBench dedup R@1 0.520 / P@5 0.725). Saved in results/per_category.csv (97 rows).
+LookBench real (dedup), 7 groups fixed for F12, R@1 / category P@5 (95% CI):
+dresses 0.65 / 0.32 [0.24, 0.41] (n=40); bags 0.63 / 0.52 (n=49); accessories 0.52 / 0.66 (n=96);
+tops 0.57 / 0.72 (n=296); footwear 0.62 / 0.73 (n=55); outerwear 0.38 [0.32, 0.44] / 0.80 (n=216);
+bottoms 0.52 / 0.80 (n=229).
+Low dress/bag P@5 is a base-rate effect, not a failure to find the item: dresses are 47 of 2,537 distinct
+gallery pictures (1.9%; chance P@5 ~0.02, model ~17x) and bags 169; the exact item is often found
+(R@1 0.65), but its neighbours are mostly other categories (tops/skirts for dresses); P@5 also needs the
+exact category (dress vs jumpsuit counts as wrong). Outerwear is the opposite: type almost always right,
+exact item hardest (601 near-identical coat/jacket pictures).
+Synthetic strong photos (n=21 per type): lowest P@5 Jackets 0.69, Sports Shoes 0.72, Tops 0.74;
+lowest R@1 Trousers 0.48 (P@5 still 0.86: right type, wrong pair), Track Pants 0.62.
+Caveats: descriptive only (no correction across 7 groups / 14 types; n=21 gives CIs of about +-0.15).
+Category P@5 depends on how common the category is in the gallery -> state as a metric limitation.
+Implication: the "unreliable match" warning matters most for rare categories (dresses, bags) and for
+exact-item claims on outerwear; feeds D10b (failure gallery) and F (per-category fairness).
