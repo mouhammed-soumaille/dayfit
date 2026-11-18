@@ -413,3 +413,17 @@ Interpretation: the guarantee is met mostly by abstaining more, not by abstainin
 (consistent with F11, F17 confident outerwear misses, F22).
 Limitation: calibrated on LookBench's gallery; our catalogue may give different similarity levels, so no
 formal guarantee in the app; D9 measures the app's answer rate and wrong-type rate when answering.
+
+## Finding 24: match badges (E3, serving/badges.py -> serving/badges.json)
+Badges describe measured differences, never the model's reasons. Checks: CIELAB(white) = (100, 0, 0);
+catalogue Black items darker than White (median L 21 vs 76).
+Colour badge: median CIELAB of image centre (near-white background dropped); CIEDE2000 bands from 3,060
+same-colour-label catalogue pairs: very close <= 16.5 (median), different > 37.0 (90th pct).
+True match (query vs its own item) badged "different": 3.7% medium, 7.1% strong phone photos -> shipped.
+Type badge: zero-shot PRETRAINED FashionSigLIP ("a photo of ...", 14 types; prompt embeddings saved once,
+so the app needs no tokenizer). Fine-type accuracy clean 0.840, medium 0.830, strong 0.769 (chance 0.071);
+"same type" badge agrees with truth only 0.78-0.85, worse than the ranking's own P@5 -> fine type DROPPED.
+Group level (tops/outerwear/bottoms/dresses/footwear; group prob = sum of type probs):
+accuracy 0.969 / 0.973 / 0.942; shown only if group prob >= 0.9: 0.978 (94% shown) / 0.992 (89%) /
+0.983 (82%) -> shipped: group badge at confidence >= 0.9 (threshold chosen after seeing this table, on
+synthetic photos: a UI decision, not an accuracy claim; D9 checks it on real photos).
