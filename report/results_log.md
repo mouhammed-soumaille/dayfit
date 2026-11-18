@@ -341,3 +341,20 @@ real R@1 (+3.4, p<0.0005), tied on garment type"; the P@5 gain was in arbitrary 
 low dress P@5 is real (neighbours are tops/skirts, another group; plus label noise, F17).
 Report: new section "Category names and group P@5", row in the ablation table, bullets and summary rewritten.
 Limitation: groups are lenient (cardigan counts for blouse); exact and group P@5 bracket the truth.
+
+## Finding 20: manual check of 61 LookBench queries (D8b, evaluation/manual_check.py)
+Sample fixed before looking: all 31 dress/jumpsuit queries with P@5 <= 0.4 (finetuned_random, dedup) +
+30 random other queries (seed 1). Contact sheet per query: full photo, LookBench crop, top 5 with borders.
+Verdicts: label_check (crop shows the labelled garment: correct / wrong / ambiguous) and metric_fair (would a
+shopper agree with the exact-category scoring). AI-annotated (Claude), then reviewed row by row by the author,
+who agreed with all 61 (review, not independent annotation: anchoring possible). results/manual_check.csv.
+Random sample (generalises, 95% Wilson): label wrong 1/30 = 3% [1, 17]; wrong or ambiguous 6/30 = 20% [10, 37];
+metric unfair 9/30 = 30% [17, 48]. All 9 unfair rows are same-group results scored wrong by exact names
+(coat/jacket, bag/handbag, shirt/t-shirt, sweater/cardigan) -> independent confirmation of Finding 19.
+Dress failures (selected, does not generalise): label wrong 7/31 = 23% [11, 40]; wrong or ambiguous 10/31;
+metric unfair 15/31 = 48% [32, 65], mostly label errors (crop shows a top or shorts) or dresses listed under
+other categories; group P@5 cannot fix these (consistent with dresses 0.32 -> 0.32 in F19).
+New data issue found: identical query crops. Only 700 of 981 query crops are distinct; 503 queries fall into
+222 groups of identical crops, each copy asking for a DIFFERENT item (query-side twin of F15). Queries are
+therefore not independent; bootstrap CIs and p-values that resample queries are likely too narrow -> next:
+cluster bootstrap (resample crops).
