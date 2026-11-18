@@ -383,6 +383,19 @@ fashion_siglip, ensemble_mv. Metric: Precision@5 = same catalogue article type (
 catalogue, so no Recall). Primary result: finetuned_random P@5 with 95% bootstrap CI. Comparisons are
 descriptive (n~30 has little power). No re-shooting, no dropping photos after seeing results;
 any photo that fails to load is reported.
+Amendment (Nov 19, 00:55, BEFORE any photo was taken; reason: plan changed from ~30 photos to the whole
+wardrobe, and the group bonus of Finding 32 became the headline method):
+- Photos: every garment in the wardrobe, one photo each, taken in one session, phone camera, no editing.
+  All photos are used; none dropped or re-shot after seeing results; a photo that fails to load is reported.
+- Each photo is labelled BEFORE running anything: garment group (tops, outerwear, bottoms, dresses,
+  footwear, bags, accessories) and, if it exists, the evaluation-catalogue article type (one of the 14).
+- Primary results (frozen methods, run once):
+  (1) group P@5 of finetuned_random + group bonus w = 0.05 against the APP catalogue (the app as shipped),
+      with 95% bootstrap CI; this is the D9 check of the 0.905 headline;
+  (2) article-type P@5 of finetuned_random against the EVALUATION catalogue, only for photos whose type is
+      one of the 14 (the original protocol).
+- Also reported, descriptive: color_hist, fashion_siglip, ensemble_mv on (2); the app's "not sure" rate,
+  group-badge accuracy, out-of-catalogue warnings and shortlist sizes.
 
 ## Finding 22: hubness on LookBench (T5, evaluation/hubness.py)
 k-occurrence N_k(x) = number of distinct query crops (700; identical crops counted once, F20) whose top-k
