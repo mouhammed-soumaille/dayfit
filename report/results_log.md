@@ -358,3 +358,20 @@ New data issue found: identical query crops. Only 700 of 981 query crops are dis
 222 groups of identical crops, each copy asking for a DIFFERENT item (query-side twin of F15). Queries are
 therefore not independent; bootstrap CIs and p-values that resample queries are likely too narrow -> next:
 cluster bootstrap (resample crops).
+
+## Finding 21: cluster bootstrap over identical query crops (evaluation/cluster_bootstrap.py) (correction)
+981 LookBench queries use only 700 distinct crops (F20), so queries are not independent. New paired test
+resamples whole crops (cluster bootstrap, ratio estimator sum(S_c)/sum(n_c)); with one query per cluster it
+reproduces every earlier paired test exactly. CIs widen x1.06-1.36 (design effect ~1.1-1.9).
+finetuned_random minus ... (naive -> cluster):
+FashionSigLIP R@1 +0.034, p<0.0005 -> [+0.015, +0.052] p=0.001 (survives Holm over 4 tests: 0.001 < 0.0125);
+FashionSigLIP exact P@5 +0.011, p=0.009 -> [+0.000, +0.021] p=0.047 (fails Holm: 0.047 > 0.0167);
+FashionSigLIP group P@5 -0.001, n.s. both;
+finetuned (hard) exact P@5 +0.036 and group P@5 +0.026: p<0.0005 both ways; R@1 n.s. both;
+ensemble_mv: all n.s. (cluster p >= 0.13).
+Correction to the report's ablation caption (it said both FashionSigLIP results survive Holm).
+Robust real-photo claims: (1) better exact-item R@1 than the pretrained base, (2) random batches recover the
+precision lost to hard batches, (3) tie with the pretrained ensemble at half the latency. Dropped: "better
+garment-type precision than the base" (borderline exact, absent at group level).
+Note: naive group-P@5 p here 0.898 vs 0.852 in group_p5 (different query order -> different resamples;
+Monte Carlo noise, same estimate).
