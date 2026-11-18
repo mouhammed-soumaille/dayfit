@@ -298,3 +298,24 @@ Gallery = 6 random rows (seed 0) per case, qualitative only:
 Implications: (1) misses are mostly fine-grained or label ambiguity, supporting a top-5 shortlist over a
 single answer; (2) confident misses (high top similarity) explain why risk control on top similarity only
 lifts answered P@5 0.73 -> 0.79 (F11); (3) D8 should quantify dress-label noise and near-duplicates.
+
+## Finding 18: near-duplicate gallery photos (D8a/D8c, evaluation/near_duplicates.py, near_dedup.py)
+Beyond exact duplicates (F15), the gallery has the same photo saved as different files (re-encoded,
+resized, cropped). Candidates: pairs of distinct pictures with PRETRAINED FashionSigLIP cosine >= 0.90
+(2,305 pairs; the evaluated model is not used to define duplicates in its own test set). Contact sheet,
+4 random pairs per bin: same photo in 12/12 pairs with cosine >= 0.97, mixed in [0.95, 0.97), mostly
+different photos below. dHash misses crops (a cropped copy had Hamming 17), so the rule uses cosine only.
+Rule fixed BEFORE recomputing metrics: cosine >= 0.97 (0.95, 0.98 as sensitivity). Near-duplicates joined
+into connected components (union-find): 2,537 pictures -> 2,406 groups (2,441 at 0.98; 2,303 at 0.95).
+The same photo sometimes carries different categories (a leopard heel listed as "pants, shoes" and "sock").
+Near-dedup protocol = dedup with "same file" replaced by "same photo"; computed from saved top-20 rankings
+(every query had >= 5 groups); with no merging it reproduces all saved dedup per-query results.
+R@1 dedup -> near 0.97: FashionSigLIP 0.486 -> 0.495, ensemble_mv 0.505 -> 0.516, finetuned 0.525 -> 0.535,
+finetuned_random 0.520 -> 0.532 (about +1 pt for every model; 0.95: +1.6 to +2.1). Category P@5 within 0.004.
+Paired tests (dedup / 0.98 / 0.97 / 0.95): fashion_siglip -> finetuned_random R@1 +0.034/+0.036/+0.037/+0.040
+(all p<0.0005); P@5 +0.011 (p=0.009) / +0.011 (0.004) / +0.012 (0.002) / +0.008 (p=0.083, n.s.);
+finetuned -> finetuned_random P@5 +0.036 to +0.038 (p<0.0005), R@1 n.s.; ensemble_mv -> finetuned_random
+n.s. everywhere (smallest p 0.058).
+Conclusion: dedup stays the main protocol; near-dedup is a sensitivity check in the report. All conclusions
+hold, but "better P@5 than the pretrained base" is small (+0.01) and not significant at the loosest
+threshold; state it as such. Many tests, no correction: p ~ 0.01 results are suggestive, not strong.
