@@ -1,0 +1,121 @@
+"""E4: the DAYFIT web API.
+
+  POST /search          body = the photo's raw bytes (any common image format, max 10 MB)
+                        -> JSON: top 5 catalogue items with match badges, the conformal
+                           shortlist size, and a "not sure" flag
+  GET  /catalog/{id}    the catalogue image of one item (for the UI)
+  GET  /health          is the service up, which model, how big the catalogue is
+
+Privacy: the uploaded photo is NEVER written to disk. We read the request body ourselves,
+in chunks, into memory (FastAPI's usual UploadFile would silently spill uploads over 1 MB
+into a temporary FILE), decode it with PIL from memory, and drop it when the request ends.
+Nothing about the photo is logged. tests/test_api.py checks that no file is written.
+
+Uncertainty (constants from serving/calibration.json, calibrated on LookBench real photos):
+  - not_sure: the best similarity is below lambda (risk control at alpha 0.1)
+  - shortlist_size: number of catalogue items within q of the best similarity (conformal, alpha 0.1)
+  Neither guarantee formally holds here (different gallery); the response says so.
+
+Run from the repo root:
+    uvicorn serving.api:app --port 8000
+"""
+import io
+import json
+import time
+
+import numpy as np
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse
+from PIL import Image, ImageOps, UnidentifiedImageError
+
+from serving.badges import GROUP_OF_TYPE, TypePredictor, colour_band, garment_colour
+from serving.engine import SearchEngine
+
+try:  # lets PIL open iPhone .heic photos
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    pass
+
+MAX_BYTES = 10 * 1024 * 1024
+K = 5
+
+app = FastAPI(title="DAYFIT visual clothing search")
+engine = SearchEngine()                        # fine-tuned model + catalogue index, loaded once
+types = TypePredictor()                        # pretrained model for the type badge, loaded once
+with open("serving/calibration.json") as f:
+    calibration = json.load(f)
+with open("serving/badges.json") as f:
+    badges = json.load(f)
+
+
+async def read_photo(request):
+    """Read the body into memory in chunks, refusing anything above MAX_BYTES."""
+    data = bytearray()
+    async for chunk in request.stream():
+        data.extend(chunk)
+        if len(data) > MAX_BYTES:
+            raise HTTPException(status_code=413, detail="photo too large (max 10 MB)")
+    try:
+        image = Image.open(io.BytesIO(bytes(data)))
+        image = ImageOps.exif_transpose(image).convert("RGB")   # respect the phone's rotation
+    except (UnidentifiedImageError, OSError):
+        raise HTTPException(status_code=400, detail="the body is not an image we can read")
+    return image
+
+
+def search_photo(image):
+    """Everything the app shows for one photo. Pure function of the image (no files written)."""
+    start = time.perf_counter()
+    retriever = engine.retriever
+    query = retriever.embed_query(image)
+    scores = retriever.features @ query                 # similarity with every catalogue item
+    order = np.argsort(-scores)[:K]
+    best = float(scores[order[0]])
+
+    group, group_prob = types.predict_group(image)
+    show_group = group_prob >= badges["type_badge"]["min_confidence"]
+    query_colour = garment_colour(image)
+
+    results = []
+    for rank, i in enumerate(order, start=1):
+        item_id = retriever.item_ids[i]
+        row = engine.item.loc[item_id]
+        band, delta_e = colour_band(query_colour, garment_colour(Image.open(row["image_path"])),
+                                    badges["colour_bands"])
+        item_group = GROUP_OF_TYPE[row["article_type"]]
+        results.append(dict(
+            rank=rank, item_id=item_id, score=float(scores[i]),
+            article_type=row["article_type"], color=row["color"], image_url=f"/catalog/{item_id}",
+            type_badge=("same type" if item_group == group else "different type") if show_group else None,
+            colour_badge=band, colour_delta_e=round(delta_e, 1)))
+
+    q = calibration["shortlist"]["q"]
+    lam = calibration["not_sure"]["lambda"]
+    return dict(
+        results=results,
+        query=dict(predicted_group=group if show_group else None, group_confidence=round(group_prob, 3)),
+        not_sure=best < lam,
+        best_similarity=best,
+        shortlist_size=int((scores >= best - q).sum()),
+        latency_ms=round((time.perf_counter() - start) * 1000, 1),
+        note="Badges describe measured differences; the ranking comes from overall visual similarity. "
+             + calibration["limitation"])
+
+
+@app.post("/search")
+async def search(request: Request):
+    image = await read_photo(request)
+    return search_photo(image)
+
+
+@app.get("/catalog/{item_id}")
+def catalog_image(item_id: str):
+    if item_id not in engine.item.index:
+        raise HTTPException(status_code=404, detail="unknown item")
+    return FileResponse(engine.item.loc[item_id, "image_path"])
+
+
+@app.get("/health")
+def health():
+    return dict(status="ok", model=engine.method, catalogue_items=len(engine.item))
