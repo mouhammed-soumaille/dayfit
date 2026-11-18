@@ -1,0 +1,26 @@
+{
+  "w": 0.05,
+  "rule": "highest mean type P@5 with R@1 drop <= 0.01 on medium and strong",
+  "table": {
+    "r1_phone_medium_w0.0": 0.9285714285714286,
+    "r1_phone_strong_w0.0": 0.7687074829931972,
+    "type_p5_phone_medium_w0.0": 0.8448979591836735,
+    "type_p5_phone_strong_w0.0": 0.8149659863945578,
+    "r1_phone_medium_w0.02": 0.9251700680272109,
+    "r1_phone_strong_w0.02": 0.7687074829931972,
+    "type_p5_phone_medium_w0.02": 0.8564625850340136,
+    "type_p5_phone_strong_w0.02": 0.8231292517006803,
+    "r1_phone_medium_w0.05": 0.9217687074829932,
+    "r1_phone_strong_w0.05": 0.7619047619047619,
+    "type_p5_phone_medium_w0.05": 0.8714285714285714,
+    "type_p5_phone_strong_w0.05": 0.827891156462585,
+    "r1_phone_medium_w0.1": 0.9115646258503401,
+    "r1_phone_strong_w0.1": 0.7482993197278912,
+    "type_p5_phone_medium_w0.1": 0.8768707482993198,
+    "type_p5_phone_strong_w0.1": 0.8353741496598639,
+    "r1_phone_medium_w0.2": 0.891156462585034,
+    "r1_phone_strong_w0.2": 0.7312925170068028,
+    "type_p5_phone_medium_w0.2": 0.8605442176870748,
+    "type_p5_phone_strong_w0.2": 0.8054421768707484
+  }
+}
