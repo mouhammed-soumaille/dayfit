@@ -48,3 +48,4 @@ PROJECT_STATUS.md
 !results/per_category.csv
 !results/near_dedup_summary.csv
 !results/near_dedup_tests.csv
+results/manual_check/
