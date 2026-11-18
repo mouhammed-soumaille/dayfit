@@ -42,6 +42,8 @@ from PIL import Image
 from evaluation.run_eval import RETRIEVERS
 from evaluation.stats import bootstrap_ci
 
+SAVE_DEPTH = 20     # distinct pictures saved per query in results/rankings/ (metrics still use the top 5)
+
 
 def prepare(subset, root="data/lookbench"):
     """Download one LookBench subset once and save it as image files + 2 CSVs."""
@@ -119,10 +121,10 @@ def main():
     category_of = dict(zip(gallery["item_id"], gallery["category"]))
     picture, pic_labels, pic_cats = picture_groups(gallery)
     max_copies = max(pd.Series(list(picture.values())).value_counts())
-    k_search = 5 * max_copies               # enough results to always find 5 distinct pictures
+    k_search = SAVE_DEPTH * max_copies      # enough results to always find SAVE_DEPTH distinct pictures
 
     found = {p: dict(hit1=[], hit5=[], p5=[]) for p in ["official", "dedup"]}
-    ranking_rows = []                       # top-5 distinct pictures per query (dedup), for D8/D10/T5
+    ranking_rows = []                       # top-SAVE_DEPTH distinct pictures per query, for D8/D10/T5
     for n, q in enumerate(queries.itertuples(), start=1):
         image = Image.open(getattr(q, args.query_image)).convert("RGB")
         results = retriever.search(image, k=k_search)
@@ -138,14 +140,14 @@ def main():
         for i in ranked:
             if picture[i] not in pictures:
                 pictures.append(picture[i])
-        pictures = pictures[:5]
         first_copy = {}                     # each picture's highest-ranked gallery entry and its score
         for item_id, score in results:
             first_copy.setdefault(picture[item_id], (item_id, float(score)))
-        for rank, p in enumerate(pictures, start=1):
+        for rank, p in enumerate(pictures[:SAVE_DEPTH], start=1):
             item_id, score = first_copy[p]
             ranking_rows.append(dict(query_id=q.query_id, rank=rank, item_id=item_id,
                                      picture=p, score=score))
+        pictures = pictures[:5]             # the metrics use the first 5 distinct pictures
         found["dedup"]["hit1"].append(float(q.label in pic_labels[pictures[0]]))
         found["dedup"]["hit5"].append(float(any(q.label in pic_labels[p] for p in pictures)))
         found["dedup"]["p5"].append(np.mean([q.category in pic_cats[p] for p in pictures]))
@@ -169,7 +171,7 @@ def main():
             row[f"{name}_lo"], row[f"{name}_hi"] = bootstrap_ci(values[column])
         rows.append(row)
 
-    # save the top-5 distinct pictures of every query (used by D8 manual check, D10 gallery, T5 hubness)
+    # save the top-SAVE_DEPTH distinct pictures of every query (D8 near-duplicates, D10 gallery, T5 hubness)
     os.makedirs("results/rankings", exist_ok=True)
     pd.DataFrame(ranking_rows).to_csv(
         f"results/rankings/{args.method}_lookbench_{args.subset}_{args.query_image}_dedup.csv",

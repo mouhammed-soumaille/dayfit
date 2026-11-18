@@ -51,6 +51,7 @@ def lookbench_rows(method):
 
     ranks = pd.read_csv(f"results/rankings/{method}_lookbench_real_streetlook_image_dedup.csv",
                         dtype={"item_id": str})
+    ranks = ranks[ranks["rank"] <= 5]                 # the file may hold more ranks; we show the top 5
     ranks = ranks.merge(queries.rename(columns={"image": "query_path"})
                         [["query_id", "query_path", "label", "category"]], on="query_id")
     ranks["result_path"] = ranks["item_id"].map(path_of)
