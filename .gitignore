@@ -56,3 +56,4 @@ results/manual_check/
 !results/hubness.csv
 !serving/type_text.npy
 !serving/outside_text.npy
+data/hm/
