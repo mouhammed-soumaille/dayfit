@@ -505,3 +505,80 @@ catalogue unchanged (w = 0 there). Plan fixed before running: synthetic medium/s
 Own photos (shown only, did not choose w): jeans flat lay now Jeans first (Jeans, Shorts, Jeans, Jeans, Jeans);
 skirt photo: skirts now ranks 1-4 (Trousers moved from 4 to 5), dayfittrial4 (jeans) 2 -> 3 jeans, shoe photo formal shoe replaced by casual shoe (5/5 casual);
 others unchanged. Still to do: measure on real photos (LookBench, group P@5), the headline target.
+
+## Finding 30: app clean-up (serving/api.py, data_prep/app_catalog.py; app catalogue only)
+The app catalogue now keeps each item's `gender`. The app hides the 267 kids' items (Boys 123, Girls 144; all of
+them came in with the evaluation catalogue) and skips a result whose cosine with an already chosen result is
+>= 0.97 (same product photographed again; the same girls' jeans had appeared 3x in one top 5). "Not sure" and
+the shortlist size use only visible items. Checks: 33,141 rows, no missing gender, index vectors have unit
+length (so the dot product is a cosine), evaluation catalogue unaffected (nothing hidden, no skipping), 6 tests pass.
+Own jeans flat lay afterwards: looks right to me (TODO Mouhammed: paste the top 5 here).
+
+## Pre-registration (Nov 19, 00:00, BEFORE any of the experiments below)
+Accuracy target (agreed definition): group P@5 on LookBench real photos (dedup protocol), goal 0.90.
+Secondary: exact-item R@1 on real photos (no 90% goal; any significant gain counts).
+LookBench dev/test split (evaluation/lookbench_split.py -> data/lookbench/real_streetlook/split.csv): queries
+joined by same crop, same street photo or same target item (union-find, 621 clusters), shuffled with seed 490;
+dev 500 queries, test 481; nothing shared between the sides. Baseline finetuned_random:
+  dev  R@1 0.528, group P@5 0.866      test R@1 0.511, group P@5 0.871     (all 981: 0.520 / 0.869, check OK)
+Rules: every new method is tuned ONLY on dev, with its grid and choice rule written here before running.
+Default choice rule: highest dev R@1 such that dev group P@5 does not drop by more than 0.5 pt (for methods
+aimed at group P@5: highest dev group P@5 such that dev R@1 does not drop by more than 0.5 pt).
+Each chosen method is run ONCE on test; paired cluster bootstrap (clusters = the split clusters) vs
+finetuned_random, Holm over all methods taken to test. Negative results are logged. D9 own photos stay last.
+
+## Finding 31: failure analysis on LookBench dev (finetuned_random, 500 queries, top-20 rankings)
+Exact item at rank 1: 264. Misses: 236, of which 206 (87%) have the RIGHT garment group at rank 1 but the wrong
+item, and 30 the wrong group. True item at rank 2-5: 80, rank 6-20: 59, not in the top 20: 97.
+Meaning: the model mostly finds the right kind of garment but not the right design (print, colour blocking,
+details). Re-ranking the top 20 can win at most 139 of 236 misses (R@1 ceiling 0.81 on dev); the 97 outside
+the top 20 need a better embedding (DINOv2 fusion, training on real street-to-shop pairs).
+
+## Pre-registration: colour re-ranking on real photos (evaluation/color_rerank.py)
+Re-rank the top 20 of finetuned_random: score = similarity + beta * colour similarity (cosine of 128-bin HSV
+histograms, retrieval/color_hist.py). Variants: "plain" (whole images) and "masked" (gallery pixels that are
+near-white, S < 26 and V > 230 on 0-255, are left out; product photos have white backgrounds, street crops do not).
+Grid beta in {0, 0.02, 0.05, 0.1, 0.2} x 2 variants, DEV only, default choice rule. Check: beta = 0 reproduces
+the saved R@1 and group P@5.
+Dev result (results/color_rerank_dev.csv; check OK, beta = 0 gives 0.528):
+  plain  beta 0 / 0.02 / 0.05 / 0.1 / 0.2:  R@1 0.528 / 0.540 / 0.532 / 0.524 / 0.514; group P@5 0.866 / 0.865 / 0.864 / 0.869 / 0.862
+  masked beta 0 / 0.02 / 0.05 / 0.1 / 0.2:  R@1 0.528 / 0.540 / 0.528 / 0.530 / 0.510; group P@5 0.866 / 0.864 / 0.864 / 0.870 / 0.859
+Choice by the rule: plain, beta = 0.02 (tie with masked on R@1, plain keeps more group P@5). Gain +1.2 pts on dev:
+small, may be noise; goes to test in the final batch.
+
+## Pre-registration: group bonus and DINOv2 fusion on real photos (evaluation/fusion_lookbench.py)
+Embeddings saved once by evaluation/export_lookbench_features.py (check: reproduces every saved rank-1 picture);
+all tuning in numpy on DEV only.
+(a) Group bonus (the old "step 2"): score = similarity + w * P(gallery item's group | photo); P = zero-shot
+    FashionSigLIP with the app prompts (serving/type_text_app.npy), summed per group; the gallery item's group
+    comes from its label (the app also knows each item's type). w in {0, 0.02, 0.05, 0.1, 0.2}; rule for
+    group-aimed methods (highest dev group P@5, dev R@1 drop <= 0.5 pt).
+(b) DINOv2 fusion: score = (1 - a) * finetuned_random similarity + a * DINOv2 similarity (ViT-B/14, 518 px),
+    a in {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.7, 1}; default rule.
+(c) Combined: the chosen (b), then the chosen (a) bonus, then the chosen colour re-ranking, each with its own
+    chosen value, NO re-tuning; reported on dev, then taken to test with (a), (b), colour separately.
+Check: a = 0, w = 0 reproduces the saved R@1 and group P@5 of finetuned_random.
+
+## Finding 32: group bonus, DINOv2 fusion and colour on real photos (dev choice, then test ONCE)
+Embeddings: evaluation/export_lookbench_features.py (check: rank-1 picture reproduced). Tuning:
+evaluation/fusion_lookbench.py on DEV (check: plain model gives the saved 0.528). results/fusion_dev.csv:
+  DINOv2 a = 0 / 0.1 / 0.2 / 0.3 / 0.5 / 1:   R@1 0.528 / 0.538 / 0.510 / 0.500 / 0.448 / 0.306
+                                           group P@5 0.866 / 0.876 / 0.878 / 0.873 / 0.860 / 0.791
+  group bonus w = 0 / 0.02 / 0.05 / 0.1 / 0.2: R@1 0.528 / 0.536 / 0.528 / 0.520 / 0.512
+                                           group P@5 0.866 / 0.883 / 0.903 / 0.913 / 0.916
+Choices by the rules: DINOv2 a = 0.1; group bonus w = 0.05 (w = 0.1 drops R@1 by 0.8 pt: not allowed).
+Combined (a 0.1, w 0.05, colour beta 0.02, no re-tuning) on dev: R@1 0.534, group P@5 0.904.
+(Exploratory, not pre-registered: without colour 0.528 / 0.903; without DINOv2 0.536 / 0.904.)
+TEST, run once (evaluation/fusion_test_stats.py -> results/fusion_test.csv; paired cluster bootstrap vs
+finetuned_random over the 621 split clusters; Holm over the 4 methods per metric; check: base = saved 0.511):
+                  R@1 (base 0.511)                     group P@5 (base 0.871)
+  colour          0.516  +0.4 [-0.4, +1.5]  p_Holm 1   0.866  -0.5 [-0.9, -0.2]  p_Holm <0.0005
+  DINOv2          0.516  +0.4 [-1.5, +2.6]  p_Holm 1   0.867  -0.5 [-1.6, +0.6]  p_Holm 0.44
+  group bonus     0.509  -0.2 [-0.7,  0.0]  p_Holm 1   0.905  +3.4 [+2.4, +4.5]  p_Holm <0.0005
+  combined        0.522  +1.0 [-1.0, +3.3]  p_Holm 1   0.902  +3.1 [+1.9, +4.3]  p_Holm <0.0005
+Meaning: the agreed target is reached on held-out real photos: group P@5 0.905 with the group bonus alone
+(w = 0.05, the same weight the app already uses at type level), exact-item R@1 unchanged. Negative results:
+DINOv2 is much weaker than our model on its own (dev R@1 0.306 vs 0.528) and adds nothing significant in
+fusion; colour re-ranking costs a little group P@5 and gains no significant R@1. The hope that a
+higher-resolution self-supervised model keeps design detail is NOT supported. Exact-item R@1 (~0.51) stays
+the open problem (Finding 31: design-level misses); only real street-to-shop training is left as a lever.
