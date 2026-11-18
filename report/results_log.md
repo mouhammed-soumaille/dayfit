@@ -375,3 +375,25 @@ precision lost to hard batches, (3) tie with the pretrained ensemble at half the
 garment-type precision than the base" (borderline exact, absent at group level).
 Note: naive group-P@5 p here 0.898 vs 0.852 in group_p5 (different query order -> different resamples;
 Monte Carlo noise, same estimate).
+
+## D9 protocol (fixed BEFORE taking the photos, Nov 18)
+Final untouched test: ~30 phone photos of the author's own clothes, used ONCE.
+Model choice frozen: finetuned_random (recommended); also reported, not used for choosing: color_hist,
+fashion_siglip, ensemble_mv. Metric: Precision@5 = same catalogue article type (own clothes are not in the
+catalogue, so no Recall). Primary result: finetuned_random P@5 with 95% bootstrap CI. Comparisons are
+descriptive (n~30 has little power). No re-shooting, no dropping photos after seeing results;
+any photo that fails to load is reported.
+
+## Finding 22: hubness on LookBench (T5, evaluation/hubness.py)
+k-occurrence N_k(x) = number of distinct query crops (700; identical crops counted once, F20) whose top-k
+contains gallery picture x (2,537 distinct pictures). Check: sum of N_k = crops x k for every model and k.
+Skewness of N_5 (random-list baseline Bin(700, 5/2537): 0.85): FashionSigLIP 2.20, ensemble_mv 2.31,
+finetuned 2.34, finetuned_random 2.32 (N_10: 2.00-2.29). Never in any top 5: 35-39% (random: 25%).
+Top 1% of pictures (26) fill 7.3-7.8% of all top-5 slots; max N_5 14-16.
+-> hubness present but moderate, and essentially unchanged by fine-tuning.
+Hubs in failures (share of hub slots that are wrong-group results vs other slots): finetuned_random 14.4% vs
+14.8% (no difference); FashionSigLIP 11.3% vs 14.8%; ensemble_mv 22.4% vs 14.6%; finetuned 21.5% vs 16.9%.
+Descriptive only (hub slots are not independent).
+Biggest hubs (fig11_hubs.png): plain generic garments (white t-shirts, cream cardigans, beige trench),
+likely near the centre of their type; tops are 30% of queries, so part of their popularity is legitimate.
+Conclusion: hub reduction (e.g. CSLS, mutual proximity) is not a priority for the recommended model.
