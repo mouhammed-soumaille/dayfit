@@ -62,3 +62,5 @@ data/app_images/
 !serving/outside_text_app.npy
 !results/learned_confidence.csv
 !results/confidence_features.csv
+my_photos/
+!results/type_rerank.csv
