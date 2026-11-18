@@ -1,0 +1,24 @@
+# Start both services:  docker compose up --build
+#   API  -> http://localhost:8000/health
+#   page -> http://localhost:8501
+services:
+  api:
+    build: .
+    image: dayfit
+    ports:
+      - "8000:8000"
+    environment:
+      - HF_HUB_OFFLINE=1        # weights are already in the image; never download at run time
+    read_only: true             # privacy by construction: the API cannot write any file
+    tmpfs:
+      - /tmp
+  ui:
+    image: dayfit
+    command: ["streamlit", "run", "serving/ui.py", "--server.address", "0.0.0.0", "--server.port", "8501"]
+    environment:
+      - DAYFIT_API=http://api:8000
+      - HF_HUB_OFFLINE=1
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
