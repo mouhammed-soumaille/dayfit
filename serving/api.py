@@ -131,9 +131,14 @@ def search_photo(image):
         item_colour = garment_colour(Image.open(row["image_path"]))
         band, delta_e = colour_band(query_colour, item_colour, badges["colour_bands"])
         item_group = types.group_of[row["article_type"]]
+        # name shown to the shopper: H&M's own product type if the item comes from H&M (data_prep/app_add_hm.py),
+        # otherwise the catalogue type; badges and ranking always use article_type
+        shop_type = row.get("hm_type")
+        display_type = shop_type if isinstance(shop_type, str) else row["article_type"]
         results.append(dict(
             rank=rank, item_id=item_id, score=float(scores[i]),
-            article_type=row["article_type"], color=row["color"], image_url=f"/catalog/{item_id}",
+            article_type=row["article_type"], display_type=display_type, color=row["color"],
+            image_url=f"/catalog/{item_id}",
             type_badge=("same type" if item_group == group else "different type") if show_group else None,
             colour_badge=band, colour_delta_e=round(delta_e, 1), colour_hex=lab_to_hex(item_colour)))
 

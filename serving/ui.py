@@ -118,7 +118,8 @@ if photo is not None:
     for col, r in zip(cols, shown):
         image = requests.get(f"{API}{r['image_url']}", timeout=30).content
         col.image(image)
-        col.markdown(f"**{r['rank']}. {r['article_type']}** ({r['color']})")
+        col.markdown(f"**{r['rank']}. {r.get('display_type', r['article_type'])}**")
+        col.caption(f"listed as: {r['color']}")      # the shop's own colour label; the swatch below is measured
         if r["type_badge"]:
             col.caption(("✅ " if r["type_badge"] == "same type" else "⚠️ ") + r["type_badge"])
         col.caption({"very close": "🎨 colour very close", "slightly different": "🎨 colour slightly different",
