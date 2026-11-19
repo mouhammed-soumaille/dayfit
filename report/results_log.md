@@ -1073,3 +1073,20 @@ trained on dev + studio pairs. Reported: dev 5-fold CV by cluster (studio always
 (Finding 43's and this one); this one minus Finding 43's, descriptive.
 Sanity check: the dev-only model reproduces Finding 43's test R@1 (0.520).
 Expectation written now: small extra gain at most; studio photos are a different kind of photo from street crops.
+
+## Finding 44: re-ranker with extra studio training photos (evaluation/rerank_studio.py -> results/rerank_studio*.csv)
+Check OK: the dev-only model reproduces Finding 43's test R@1 (0.5198).
+Leakage check: 0 of 1,011 studio photos and 0 of 3,951 studio gallery pictures are identical or near-duplicates
+(cosine >= 0.97) of a streetlook test crop or test-item picture; all 1,011 studio photos kept.
+Studio stage 1 is much easier: the true item is in the top 20 for 92.7% of studio photos (street dev: 76.4%).
+                                     dev CV R@1   test R@1   test R@5   vs stage 1 (test)
+  stage 1 (finetuned_random)         0.502        0.499      0.688
+  re-ranker, dev only (Finding 43)   0.508        0.520                 +0.021 [-0.004, +0.050] p 0.120, p_Holm 0.240
+  re-ranker, dev + studio            0.484        0.516      0.705      +0.017 [-0.007, +0.046] p 0.226, p_Holm 0.240
+  dev + studio minus dev only:       -0.004 [-0.033, +0.027] p 0.82
+Meaning: NEGATIVE. Adding 1,011 studio photos does not help: on dev it makes the re-ranker worse than doing nothing
+(0.484 vs 0.502), and on test it changes nothing (-0.4 points, n.s.). After Holm neither re-ranker is significant
+(p_Holm 0.24). The learning curve of Finding 43 rose with more STREET photos; studio and flat-lay photos are a
+different kind of photo (and an easier task), so they do not substitute. Conclusion for task 5: a learned re-ranker
+on real photos gives at most about +2 points R@1 here, not significant with 500 street photos; more labelled street
+photos of the shop's own items are what it would need (Finding 43's curve).
