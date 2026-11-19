@@ -8,7 +8,9 @@ What the shopper sees:
   - a "not sure" banner when the best match is weak (risk control, calibrated on real photos)
   - the top 5 results, each with a type badge (only when the type prediction is confident)
     and a colour badge (very close / slightly different / different)
-  - the shortlist size: how many catalogue items are about as similar as the best one
+  - the shortlist size: how many catalogue items are about as similar as the best one, shown only
+    when it is at most SHORTLIST_SHOW_MAX; above that the page only says that many items are about
+    as similar (the API still returns the exact number)
   - two optional filters that HIDE results without changing the ranking:
     "same type only" and "hide clearly different colours"
   - one honest line: badges describe differences, the ranking is overall visual similarity
@@ -38,6 +40,9 @@ PLURAL = {"skirt": "skirts", "jumpsuit": "jumpsuits", "handbag": "handbags", "ha
           "scarf": "scarves", "belt": "belts", "socks": "socks", "sunglasses": "sunglasses",
           "swimsuit": "swimsuits", "watch": "watches", "necklace": "necklaces",
           "earrings": "earrings", "wallet": "wallets", "umbrella": "umbrellas"}
+# A shortlist only helps if a shopper could actually look through it. 50 items is about one or two pages
+# of a shop's product grid; a number like "6304" gives the shopper nothing they can act on.
+SHORTLIST_SHOW_MAX = 50
 
 
 def crop_box(image, x_range, y_range):
@@ -105,8 +110,14 @@ if photo is not None:
     right.write(f"Looks like: **{group}**" if group else "Garment type: not sure")
     right.markdown(f"Estimated colour of your garment: {swatch(answer['query']['colour_hex'])} "
                    "(from the photo; lighting can shift it)", unsafe_allow_html=True)
-    right.write(f"About **{answer['shortlist_size']}** catalogue items are about as similar as the "
-                f"best match (90% shortlist, calibrated on other photos; see note below).")
+    size = answer["shortlist_size"]
+    if size <= SHORTLIST_SHOW_MAX:
+        items = "item is" if size == 1 else "items are"
+        right.write(f"About **{size}** catalogue {items} about as similar as the best match "
+                    "(90% shortlist, calibrated on other photos; see note below).")
+    else:
+        right.write("Many catalogue items are about as similar as the best match, so treat the "
+                    "results below as similar options rather than the exact item.")
 
     shown = [r for r in answer["results"]
              if not (same_type_only and r["type_badge"] == "different type")
