@@ -314,9 +314,9 @@ report/       results log and figures
 What is in git: code, saved summary tables (`results/*.csv`), figures and the LookBench dev/test split.
 What is **not** in git (too big, or licensed): the datasets, their images, the fine-tuned checkpoint, the
 saved indexes and the per-query result files (`results/perquery/`) that the test-half numbers above are
-computed from. Everything below regenerates them. `tests/test_api.py` needs the evaluation catalogue and
-the saved synthetic results, so on a fresh clone run only
-`python -m pytest tests/test_metrics.py tests/test_stats.py tests/test_conformal.py` until these steps are done.
+computed from. Everything below regenerates them. `tests/test_api.py` needs the evaluation catalogue, the
+checkpoint and the saved synthetic results; on a fresh clone `python -m pytest` skips it and runs the other
+tests.
 
 1. **Data.**
    - Kaggle "Fashion Product Images (Small)": unpack `styles.csv` and `images/` into `data/raw/`.
@@ -381,6 +381,11 @@ are not recomputed on the merged catalogue.
 Data: Kaggle "Fashion Product Images" (catalogue), LookBench (`srpone/look-bench` on Hugging Face, real
 photos and the 58,275 distractor images) and Kaggle "H&M Personalized Fashion Recommendations" (demo
 catalogue only). Pretrained models: Marqo FashionSigLIP, FashionCLIP and DINOv2.
+
+## Contributions
+
+I wrote the code with the help of Claude (an AI assistant) and reviewed all of its outputs. The analysis is
+mine.
 
 ## Documents
 
