@@ -98,7 +98,9 @@ def main():
     pictures = gallery["picture"].drop_duplicates().tolist()
     pic_labels = gallery.groupby("picture")["label"].apply(set)
     pic_groups = gallery.groupby("picture")["group"].apply(set)
-    pic_words = text.groupby(gallery["picture"]).apply(lambda t: Counter(w for x in t for w in words(x)))
+    pic_words = {}                                    # picture -> word counts of all its entries' text
+    for p, t in zip(gallery["picture"], text):
+        pic_words.setdefault(p, Counter()).update(words(t))
     docs = [pic_words[p] for p in pictures]
     df = Counter(w for d in docs for w in d)
     avg_len = np.mean([sum(d.values()) for d in docs])
@@ -158,8 +160,12 @@ def main():
                                  p=p, p_holm=p_holm))
     table = pd.DataFrame(rows)
     table.to_csv("results/keyword_baseline.csv", index=False)
+    # one CSV with two kinds of rows (results and tests); printed as two tables so no column is empty
+    results_part = table[table["metric"].isna()].dropna(axis=1, how="all")
+    tests_part = table[table["metric"].notna()].dropna(axis=1, how="all")
     with pd.option_context("display.width", 200, "display.float_format", "{:.3f}".format):
-        print(table.to_string(index=False))
+        print(results_part.to_string(index=False))
+        print(tests_part.to_string(index=False))
     print("saved results/keyword_baseline.csv")
 
 

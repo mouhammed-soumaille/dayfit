@@ -950,3 +950,29 @@ results). Metrics: R@1, R@5, group P@5, on all 981 and on the test half; paired 
 keywords for R@1 and group P@5, Holm over the 2 variants. Also reported: how often a query's annotation is
 identical to its true item's annotation (how idealised the shopper is).
 Expectation written now: keywords get the KIND of garment right (high group P@5) but rarely the exact item.
+
+## Finding 41: keyword search baseline (task 4a, evaluation/keyword_baseline.py -> results/keyword_baseline.csv)
+Checks OK: the Hugging Face text lines up row by row with our saved LookBench files; the saved photo-model
+gallery results are reproduced (R@1 0.520, group P@5 0.869). 3,278-gallery protocol (dedup), random tie-breaking
+averaged over 50 orders. 35.8% of queries have an annotation word-for-word identical to their true item's.
+                                   all 981: R@1 / R@5 / group P@5      test 481: R@1 / R@5 / group P@5
+  keywords_basic (category + main)  0.309 / 0.626 / 0.981              0.312 / 0.634 / 0.983
+  keywords_detailed (+ other attr.) 0.490 / 0.753 / 0.986              0.486 / 0.760 / 0.986
+  photo (finetuned_random)          0.520 / 0.694 / 0.869              0.511 / 0.701 / 0.871
+Photo - keywords (paired cluster bootstrap, Holm over the 2 variants), test half:
+  basic:    R@1 +0.199 [+0.121, +0.284] p_Holm < 0.001;  group P@5 -0.112 [-0.144, -0.085] p_Holm < 0.001
+  detailed: R@1 +0.025 [-0.042, +0.096] p_Holm 0.46 (n.s.); group P@5 -0.115 [-0.145, -0.089] p_Holm < 0.001
+Meaning, stated plainly because it goes against us: (1) the expectation was WRONG for the detailed variant:
+an idealised shopper who types the category and every attribute in the shop's own words finds the exact item
+first about as often as our photo model (0.49 vs 0.51 on the test half, no significant difference), and finds the
+right kind of garment far more often (0.99 vs 0.87). (2) The photo model clearly beats the shorter, more realistic
+query (category + main attribute): +20 points R@1. (3) Typing the category makes group P@5 almost trivial (0.98),
+which confirms that group P@5 is a sanity floor, not a headline: a text box gets it nearly for free.
+Why the idealised shopper is so strong here, and why it is optimistic: the query words are LookBench's own
+annotation of the photo (identical to the target's annotation for 36% of queries); real shoppers do not know the
+words "applique" or "suede", which is the problem the app exists for (the user cannot describe the garment). And
+the gallery is small (2,537 distinct pictures); in a real shop many more items share the same few attribute words,
+so ties would grow. This could not be measured: the noise images have no text.
+Implication: the honest pitch is not "photos beat text" but "photos match a perfect description without the
+shopper having to produce one"; and photo + a typed or menu-chosen category is the natural combination
+(Finding 14: type menu + our ranking, R@1 0.554 on the gallery, not tested on the frozen split).
