@@ -633,3 +633,23 @@ Shortlist size 1,784: with 54k items many more are about as similar as the best 
 calibrated on LookBench's 3,278-item gallery, so in the app it is only indicative (as already stated).
 Colour names are the shops' own labels (H&M: one main colour per item), the swatch is measured; the page
 now says "listed as".
+
+### Finding 34 addendum (Nov 19, 13:10): jeans photos after the H&M merge; photo style beats cut
+Qualitative only: 5 photos, not chosen at random, shown after the app was frozen; no setting was changed.
+None is a D9 wardrobe photo (web/product photos). App catalogue 54,178 items, group bonus w = 0.05, no crop box.
+- F29 flat lay (my_photos/jeanstrial.jpg, light-wash straight): top 5 all adult straight light/mid-wash jeans,
+  all H&M flat lays, similarity 0.81-0.75 (before: kids' denim shorts first at 0.660; note kids' items were
+  also hidden in between (F30), so the H&M effect is the flat-lay adult jeans and the higher similarity).
+- F30 worn wide-leg (my_photos/images.jpg): top 5 IDENTICAL to before (same 5 men's straight/bootcut jeans
+  photographed on a person, 0.67/0.67/0.66/0.62/0.59); only the shortlist grew (66 -> 182).
+  Yet the catalogue now has the cut: of 999 H&M Trousers, 250 descriptions say denim, 37 denim + "wide",
+  14 + "loose", 8 + "flare", 5 + "relaxed".
+- Three more flat-lay web photos: wide-leg light wash with stains -> 5/5 H&M wide-leg light denim (0.66-0.68);
+  faded black straight -> grey/black denim, 4 H&M + 1 FPI, #3 an H&M "Leggings/Tights" (still bottoms);
+  dark greenish vintage wash, wide straight -> 5/5 H&M jeans (0.72-0.75), cut roughly right but the
+  vintage tone is missed (3/5 "colour slightly different", all brighter blue).
+Reading: with a flat-lay photo, the H&M flat-lay items with the right cut (incl. wide-leg) come first; with a
+worn photo, the old worn-on-model jeans come first even though wide-leg items now exist. The model matches HOW
+the garment was photographed before WHAT the cut is. Correction to F30: catalogue coverage is necessary but
+not sufficient; photo style decides (same mechanism as F29, in the other direction).
+Not measured: the rank of the 37 wide-leg denim items for the worn photo (would need a small script).
