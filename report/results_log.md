@@ -782,3 +782,29 @@ Also: the R@1 ceiling on whole photos (one photo is the query for several items 
 and R@1 for photos with one query vs photos shared by several queries.
 Sanity check: the crop numbers reproduce the saved R@1 (lookbench_summary.csv) and group P@5 (group_p5.csv).
 Expectation written now: whole photo is worse; the size of the drop is the result.
+
+## Finding 37: whole photo vs crop on LookBench (task 2a, evaluation/whole_photo.py -> results/whole_photo.csv)
+Checks OK: crop R@1 and group P@5 reproduce the saved values for both models (0.520 / 0.869 and 0.486 / 0.869).
+981 queries come from 621 distinct whole photos; 589 queries share their photo with other queries. R@1 ceiling
+on whole photos (one ranking per photo): 0.902, so the shared photos are NOT what limits the score (many
+gallery pictures are outfit photos that show several of the photo's items).
+                         all 981: R@1 / R@5 / group P@5      test 481: R@1 / R@5 / group P@5
+  finetuned_random crop   0.520 / 0.694 / 0.869               0.511 / 0.701 / 0.871
+  finetuned_random whole  0.406 / 0.549 / 0.668               0.407 / 0.559 / 0.684
+  fashion_siglip   crop   0.486 / 0.657 / 0.869               0.489 / 0.665 / 0.874
+  fashion_siglip   whole  0.376 / 0.498 / 0.649               0.378 / 0.509 / 0.664
+Paired cluster bootstrap, Holm over 3 tests per metric and side (test half):
+  finetuned_random whole - crop: R@1 -0.104 [-0.145, -0.063], group P@5 -0.187 [-0.232, -0.142], p_Holm < 0.001
+  fashion_siglip whole - crop:   R@1 -0.110 [-0.156, -0.069], group P@5 -0.210 [-0.256, -0.163], p_Holm < 0.001
+  whole photos, finetuned_random - fashion_siglip: R@1 +0.029 [+0.006, +0.054] p_Holm 0.020;
+                                                   group P@5 +0.020 [+0.005, +0.035] p_Holm 0.013
+(All 981 gives the same picture: -0.114 / -0.200 and +0.030 / +0.019, all p_Holm <= 0.001.)
+Meaning: (1) the app's default (whole photo) is much worse than the evaluated setting: about 11 points of
+exact-item R@1 and about 20 points of group P@5. The headline group P@5 (0.905 with the group bonus) is a
+CROP number; the app's default is nearer 0.67-0.68 (without the bonus; the bonus was not measured on whole
+photos). (2) Marking the garment matters more than any model change tried so far (crop vs whole: +10 to +11
+points R@1; fine-tuning vs pretrained: +3). (3) Fine-tuning still helps on whole photos, and there it also
+gives a small significant group P@5 gain (+2.0 points), which it did not on crops (Finding 21).
+(4) Photos shared by several queries are harder in BOTH settings (whole 0.28 vs 0.60, crop 0.38 vs 0.72):
+outfit photos with several garments, not only the whole-photo ambiguity.
+Not measured here: the 54k app catalogue (task 2b) and the group bonus on whole photos.
