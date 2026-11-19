@@ -746,3 +746,26 @@ disagreements makes the app look more self-consistent; later app measurements of
 slightly flattered by it.
 Sanity checks: the pretrained embeddings of the first 6,197 app rows equal the saved fashion_siglip.npy;
 the batch zero-shot group equals TypePredictor("app").analyse on 5 random items.
+
+## Finding 36: app catalogue clean-up (data_prep/app_cleanup.py -> serving/app_hidden.csv, results/app_cleanup.csv)
+Checks OK: pretrained embeddings of the first 6,197 app rows equal the saved fashion_siglip.npy; batch
+zero-shot groups equal TypePredictor("app").analyse on 5 random items. Items each rule would hide
+(evaluation rows / Kaggle extra / H&M / whole app): closeup 1 / 24 / 154 / 179; wrong_image 30 / 32 / 413 / 475;
+kids_name 395 / 411 / 0 / 806 (542 not already hidden by gender).
+Contact sheets (report/figures/cleanup_*_dropped.png, 24 random drops each; counted by Claude, counts
+accepted by the author, as in Finding 20; not an independent annotation), correct drops:
+- kids_name 24/24 -> SHIPPED. No kids' item seen among the 24 kept. The app now hides 809 items
+  (267 by gender, 542 more by name); "not sure" and the shortlist use only visible items, as before.
+- closeup 11/24 real fabric close-ups (15/24 counting 4 items whose image is another product) -> NOT shipped.
+  The rest are whole garments with odd H&M labels (scarves listed as "Hat/beanie"). One close-up was missed
+  among the 24 kept (a partial bag shot).
+- wrong_image about 0/24 -> NOT shipped. It flags H&M's own label noise on normal garments, not broken
+  items: parkas and hooded jackets listed as "Hoodie" (mapped to Sweatshirts; 163 of the 413 H&M hits),
+  jumpsuits and playsuits listed as "Trousers"/"Shorts", shirts listed as "Jacket". It did not catch the
+  wallet (13378); the wallet is hidden anyway by kids_name (its name says "Infant").
+Meaning: (1) fabric close-ups and wrong-image rows stay a stated limitation of the app catalogue; no second
+rule was tried (re-tuning after seeing the sheets would be fishing). (2) H&M's own type labels are noisy, so
+the app's group badge and group bonus inherit that noise on H&M items. (3) 395 of the 6,197 evaluation
+items (6.4%) are kids' items by name; harmless for the evaluation (nothing is hidden there), noted as label noise.
+Limitation: kids' items are hidden, not detected in the photo; a photo of a kids' garment gets the most
+similar ADULT items, with no warning.

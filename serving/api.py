@@ -33,6 +33,7 @@ import os
 import time
 
 import numpy as np
+import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -50,6 +51,7 @@ except ImportError:
 MAX_BYTES = 10 * 1024 * 1024
 K = 5
 KIDS = ["Boys", "Girls"]                        # app catalogue is for adults (data_prep/app_catalog.py)
+HIDDEN_FILE = "serving/app_hidden.csv"          # data_prep/app_cleanup.py; only the kids_name rule ships (Finding 36)
 SAME_PRODUCT = 0.97                            # results this similar to an earlier result are the same product photo
 OUTSIDE_FILE = {"evaluation": "serving/outside.json", "app": "serving/outside_app.json"}
 RERANK_FILE = "serving/rerank.json"           # type-aware ranking weight w (serving/type_rerank.py), app only
@@ -77,10 +79,14 @@ type_index = np.array([types.types.index(engine.item.loc[i, "article_type"]) for
 GROUP_NAMES = sorted(set(types.group_of.values()))
 group_member = np.array([[types.group_of[t] == g for g in GROUP_NAMES] for t in types.types], dtype=float)
 group_index = np.array([GROUP_NAMES.index(types.group_of[types.types[k]]) for k in type_index])
-# app catalogue only: hide the kids' items that came in with the evaluation catalogue
+# app catalogue only: hide kids' items, by Kaggle gender (Boys/Girls) and by product name (Finding 36:
+# many kids' items are listed as Men/Women/Unisex but their name says Kids, Infant, Boys, ...)
 hidden = np.zeros(len(engine.retriever.item_ids), dtype=bool)
 if engine.catalogue == "app":
     hidden = engine.item.loc[engine.retriever.item_ids, "gender"].isin(KIDS).to_numpy()
+    flagged = pd.read_csv(HIDDEN_FILE, dtype=str)
+    kids_by_name = set(flagged.loc[flagged["reasons"].str.contains("kids_name"), "item_id"])
+    hidden |= np.array([i in kids_by_name for i in engine.retriever.item_ids])
 
 
 def pick_results(ranking):
