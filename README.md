@@ -1,74 +1,70 @@
 # DAYFIT: find a garment from a photo
 
-DAYFIT is a visual clothing search. A shopper uploads a photo of a garment they saw and cannot
-describe; DAYFIT returns the 5 most similar items of a catalogue, says when it is not sure, and
-explains each result with measured badges (type, colour). Course project for EECE 490 (Machine
-Learning), American University of Beirut, Fall 2026.
+You see a jacket on someone in the street, or a pair of jeans in a photo, and you can't describe it well
+enough to search for it. DAYFIT lets you search with the photo instead: upload it, and you get the five
+most similar items from a shop's catalogue. The app also tells you when it isn't sure, and labels each
+result with what it measured (kind of garment, colour) so you can judge the matches yourself.
 
-![The app on a flat-lay photo of wide-leg jeans: five wide-leg jeans from the H&M part of the catalogue](report/figures/hm_flat_wide.png)
-*The app on a photo of wide-leg jeans (not in the catalogue): the five closest items the shop sells, with
-type and colour badges and the shortlist size.*
+Course project for EECE 490 (Machine Learning), American University of Beirut, Fall 2026.
+
+![The app on a photo of a sweater, whole photo](report/figures/demo_sweater_worn.png)
+![The same photo with the crop box around the sweater](report/figures/demo_sweater_crop.png)
+*My own sweater, which is not in the catalogue. Top: the whole photo. Bottom: the same photo with the
+garment marked (only the red box is searched). Both find similar brown knit sweaters and put the same one
+first; marking the garment makes the matches tighter (top similarity 0.71 to 0.74) and removes a beige
+sweater from the top 5.*
 
 ## What the app shows
 
-For one photo:
+For each photo:
 
-- **Top 5 catalogue items**, ranked by visual similarity (a FashionSigLIP model fine-tuned on our
-  catalogue with random batches; see "Results"). With the app catalogue, the order also adds a small
-  bonus for the kind of garment the photo looks like (`similarity + 0.05 * P(item's group | photo)`),
-  the version tested on held-out real photos; kids' items are hidden and repeated photos of the same
-  product are skipped.
-- **Type badge** (`same type` / `different type`): the photo's garment group (tops, outerwear,
-  bottoms, dresses, footwear; plus bags and accessories with the app catalogue) predicted zero-shot by
-  the *pretrained* FashionSigLIP. Shown only when the prediction is at least 90% confident (then correct
-  for 98-99% of our synthetic test photos).
-- **Colour badge** and **estimated colour** (hex code + swatch): the median colour of the image
-  centre in CIELAB, compared with CIEDE2000. It is an estimate from the photo; lighting shifts it.
-  Each result also shows the shop's own colour name ("listed as").
-- **"Not sure"** when the best match is weak, and a **shortlist size** ("about N items are as similar
-  as the best match"), both calibrated on real street photos (LookBench). They come from conformal
-  methods, but the guarantees do not formally hold in the app, because the app searches a different
-  catalogue than the one they were calibrated on (with 54k items the shortlist is often in the hundreds).
-- **"This looks like a skirt; our catalogue has no skirts"** when the photo shows a kind of garment the
-  catalogue does not sell (zero-shot check; on the evaluation catalogue it detects 92% of such real
-  photos with 4% false alarms).
-- Two optional filters (`Same type only`, `Hide clearly different colours`) that **hide** results;
-  they never change the ranking.
-- An optional **crop box** ("Mark the garment"): two sliders mark the garment so that the background and
-  other clothes do not count. The crop is made in memory; with the default box the photo is sent unchanged.
+- **The 5 closest catalogue items.** The ranking comes from a FashionSigLIP model that we fine-tuned on
+  the catalogue. On the demo catalogue it also gives a small bonus to items of the kind of garment the
+  photo seems to show (`similarity + 0.05 * P(item's group | photo)`), the version we tested on held-out
+  real photos. Kids' items are hidden, and the same product photographed twice is shown only once.
+- **A type badge** (`same type` / `different type`): which group the photo belongs to (tops, outerwear,
+  bottoms, dresses, footwear, bags, accessories), guessed by the pretrained FashionSigLIP. It only appears
+  when the guess is at least 90% confident; then it was right for 98-99% of our synthetic test photos.
+- **A colour badge** and the photo's estimated colour (hex code and swatch), next to the shop's own colour
+  name ("listed as"). The estimate comes from the photo, so lighting moves it.
+- **"Not sure"** when even the best match is weak, and a **shortlist size** ("about N items are as
+  similar as the best match"). Both were calibrated on real street photos (LookBench); because the app
+  searches a different, much bigger catalogue, they are rough guides there rather than guarantees.
+- **"This looks like a skirt; our catalogue has no skirts"** when the photo shows something the shop does
+  not sell at all (on the evaluation catalogue this catches 92% of such real photos, with 4% false alarms).
+- Two optional filters, *same type only* and *hide clearly different colours*. They hide results; they
+  never change the order.
+- An optional **crop box** ("Mark the garment") to search only part of the photo, as in the picture
+  above. The crop happens in memory; by default the whole photo is sent.
 
-![The app on the author's own sweater, worn, whole photo](report/figures/demo_sweater_worn.png)
-![The same photo with the crop box around the sweater](report/figures/demo_sweater_crop.png)
-*The author's own sweater, worn: whole photo (top) and with the crop box around the sweater (bottom; only
-the red box is searched). The same item comes first in both; the crop box raises the top similarity
-(0.71 -> 0.74), shrinks the shortlist (1,386 -> 1,081) and drops a beige sweater with a different colour.*
+The badges describe differences we measured; they are not the model's reasons. The order comes from
+overall visual similarity.
 
 ## Two catalogues
 
 | `DAYFIT_CATALOG` | Catalogue | Used for |
 |---|---|---|
-| unset (default) | `data/catalog.csv`: 6,197 items, 14 types (Fashion Product Images) | **every reported number** and the tests |
+| unset (default) | `data/catalog.csv`: 6,197 items, 14 types | **every number we report**, and the tests |
 | `app` | `data/app_catalog.csv`: **54,178 items**, 68 types | the demo |
 
-The app catalogue has three parts: the 6,197 evaluation items, 26,944 more adult items from the full
-Fashion Product Images dataset (2011-12; skirts, bags, hats, ...), and 21,037 H&M products (2018-20,
-adult sections, at most 1,000 per product type). Each H&M product type was mapped, before running, to an
-existing app type (e.g. Hoodie -> Sweatshirts), so the badges, the out-of-catalogue threshold and the
-group bonus did not need recalibration; the page shows H&M's own type name. The app catalogue has its own
-index (`models/index/finetuned_random_app.npy`), badge vocabulary (72 prompts, 7 groups) and
-out-of-catalogue threshold (`serving/outside_app.json`). Check which one is running with
-`curl -s localhost:8000/health` (`"catalogue":"app","catalogue_items":54178`).
+All our measurements use the smaller evaluation catalogue (from Kaggle's Fashion Product Images). For the
+demo we wanted something closer to a real shop, so the app catalogue adds 26,944 more adult items from the
+same dataset (skirts, bags, hats, ...) and 21,037 newer H&M products (2018-20). Each H&M product type was
+mapped to one of our existing types before anything was run (a hoodie counts as a sweatshirt, boots as
+casual shoes, ...), so the badges and the ranking bonus did not have to be recalibrated; the page still
+shows H&M's own name for the product. `curl -s localhost:8000/health` tells you which catalogue is
+running (`"catalogue":"app","catalogue_items":54178`).
 
 ## Privacy
 
-Uploaded photos are **never stored**. The API reads the photo into memory (not FastAPI's `UploadFile`,
-which writes uploads over 1 MB to a temporary file), and nothing about the photo is logged.
-`tests/test_api.py` checks that no file is written during a search, and in Docker the API container
-runs with a **read-only file system**.
+Uploaded photos are **never stored**. The API reads the photo straight into memory (FastAPI's usual
+`UploadFile` would write anything over 1 MB to a temporary file) and logs nothing about it.
+`tests/test_api.py` checks that a search writes no file, and in Docker the API runs on a read-only file
+system.
 
 ## Run it
 
-### Locally (Mac with Apple Silicon, or any machine with Python 3.14)
+### On your machine (Mac with Apple Silicon, or anything with Python 3.14)
 
 ```
 python -m venv .venv
@@ -78,31 +74,30 @@ pip install -r requirements.txt
 DAYFIT_CATALOG=app uvicorn serving.api:app --port 8000
 ```
 
-Leave out `DAYFIT_CATALOG=app` for the evaluation catalogue. If the page shows old behaviour, an old
-server is probably still on port 8000: `lsof -ti :8000 | xargs kill -9`.
+Without `DAYFIT_CATALOG=app` you get the evaluation catalogue. If the page behaves like an older version,
+an old server is probably still running on port 8000: `lsof -ti :8000 | xargs kill -9`.
 
-In a second terminal:
+Then, in a second terminal:
 
 ```
 source .venv/bin/activate
 streamlit run serving/ui.py
 ```
 
-Then open http://localhost:8501. The app needs the catalogues and their images, the fine-tuned
-checkpoint (`models/finetuned_random.pt`) and the saved indexes (`models/index/finetuned_random*`);
-these are generated or downloaded files and are not in git (see "Reproduce").
+and open http://localhost:8501. You need the catalogues and their images, the fine-tuned checkpoint
+(`models/finetuned_random.pt`) and the saved indexes (`models/index/finetuned_random*`). These are
+generated or downloaded, not stored in git (see "Reproduce").
 
-### With Docker (CPU)
+### With Docker (CPU only)
 
 ```
 docker compose up --build
 ```
 
-API on http://localhost:8000/health, page on http://localhost:8501. The image is CPU-only; the first
-build downloads the pretrained weights into the image. It contains both catalogues (including the H&M
-images) and serves the app catalogue by default (`DAYFIT_CATALOG=evaluation docker compose up` for the
-evaluation one); the build stops early if the saved app index does not match, instead of re-embedding
-54k images on the CPU. On a Mac without Docker Desktop, Colima works
+The API is on http://localhost:8000/health and the page on http://localhost:8501. The image contains
+both catalogues and serves the demo one (`DAYFIT_CATALOG=evaluation docker compose up` for the other).
+The build stops early if the saved demo index does not match the catalogue, rather than spending a long
+time re-embedding 54k images on the CPU. On a Mac without Docker Desktop, Colima works
 (`brew install colima docker-compose`, then `colima start --cpu 4 --memory 8`).
 
 ### API
@@ -111,84 +106,86 @@ evaluation one); the build stops early if the saved app index does not match, in
 curl -X POST --data-binary @photo.jpg http://localhost:8000/search
 ```
 
-returns JSON with `results` (rank, item, score, type and colour badges, colour hex), `query`
+returns JSON with the `results` (rank, item, score, type and colour badges, colour), the `query`
 (predicted group, estimated colour, out-of-catalogue warning), `not_sure`, `shortlist_size`,
-`latency_ms` and a `note` with the limitations.
+`latency_ms` and a `note` on the limitations.
 
-## Results (recommended model: fine-tuned FashionSigLIP, random batches)
+## Results
+
+The recommended model is FashionSigLIP fine-tuned on our catalogue with randomly mixed batches.
 
 | Test | Metric | Value |
 |---|---|---|
 | Synthetic phone photos of the catalogue (294 items), medium / strong | exact item first (Recall@1) | 0.949 / 0.813 |
-| Same, medium / strong | right article type among the other 5 (P@5) | 0.867 / 0.822 |
-| Real street photos (LookBench, 981 queries, duplicate-aware) | Recall@1 | 0.520 |
-| Same | right kind of garment in the top 5 (exact names / groups) | 0.725 / 0.869 |
-| Real photos, held-out test half (481 queries), with the group bonus | right kind of garment in the top 5 (groups) | **0.905** (+3.4 points, 95% CI +2.4 to +4.5) |
-| Docker on CPU (4 vCPU), median / p95, evaluation / app catalogue (33k items, before H&M) | response time | 266 / 282 ms; 265 / 282 ms |
+| Same photos, medium / strong | right article type among the other 5 (P@5) | 0.867 / 0.822 |
+| Real street photos (LookBench, 981, duplicate-aware) | exact item first (Recall@1) | 0.520 |
+| Same photos | right kind of garment in the top 5 (exact names / groups) | 0.725 / 0.869 |
+| Held-out half of the real photos (481), with the group bonus | right kind of garment in the top 5 (groups) | **0.905** (+3.4 points, 95% CI +2.4 to +4.5) |
+| Docker on CPU (4 cores), median / 95th percentile | response time | 266 / 282 ms |
 | Mac GPU (MPS), median | response time | 36 ms |
 
-Main findings, each with its statistics in `report/results_log.md`:
+The Docker times were measured before the H&M items were added; the extra items should cost very little,
+since comparing the photo with every catalogue item is cheap next to running the models.
 
-- **Target reached on held-out real photos**: the right kind of garment is in the top 5 for 90.5% of
-  photos with a small zero-shot group bonus (chosen on a development half, tested once; random ranking:
-  21.4%). The exact item comes first for only about 51%: most misses are the right kind of garment with
-  the wrong design. DINOv2 fusion and colour re-ranking did not help (negative results, kept).
-- Fine-tuning helps on real photos: +3.4 points Recall@1 over the pretrained model (p = 0.001,
-  clustered bootstrap), at the same speed; it ties the pretrained two-model ensemble at half the latency.
-- Fine-tuning with same-type ("hard") batches lowered type precision; random batches fix it.
-- Conformal shortlists keep their 90% guarantee on real photos only if calibrated on real photos.
-- An ideal type-and-colour menu filter finds the exact item first in 3-5% of cases; the model in 52-95%.
-- LookBench has duplicate pictures, overlapping category names and identical query crops; all are
-  handled (duplicate-aware protocol, group-level P@5, clustered bootstrap), and the report says which
-  conclusions they change.
+What we found (details and statistics in `report/results_log.md`):
+
+- **On held-out real photos, the right kind of garment is in the top 5 for 90.5% of photos** (random
+  ranking: 21.4%). The bonus that gets us there was chosen on one half of the photos and tested once on
+  the other half. Finding the *exact* item first is much harder: about 51%. Most misses are the right
+  kind of garment with a different design.
+- Fine-tuning helps on real photos: +3.4 points Recall@1 over the pretrained model (p = 0.001), at the
+  same speed, and it matches a two-model ensemble at half the cost.
+- Our first fine-tuning recipe (batches of the same garment type) made the model worse at telling types
+  apart; mixing types randomly in each batch fixed it.
+- The "not sure" and shortlist calibration only holds on real photos if it is calibrated on real photos;
+  calibrated on our synthetic photos, it covers 52-67% instead of 90%.
+- Searching with an ideal type-and-colour menu instead of a photo finds the exact item first in only
+  3-5% of cases.
+- Things we tried that did not help, and kept in the report: combining with DINOv2 features, re-ranking
+  by colour, and a learned "not sure" score.
+- LookBench has duplicate pictures, overlapping category names and repeated query crops. We correct for
+  all three and the report says which conclusions change.
 
 ![Exact-item Recall@1 for each step of the pipeline on synthetic phone photos](report/figures/fig1_ladder.png)
-*Each step of the pipeline on synthetic phone photos. Row 7 is the first ("hard batch") fine-tuned model;
-the recommended random-batch model reaches 0.949 / 0.813 with better type precision (see the table).*
+*How each step of the pipeline does on synthetic phone photos. Row 7 is our first fine-tuned model; the
+recommended one (random batches) gets 0.949 / 0.813 and is better at garment types.*
 
-![Conformal coverage on real photos: calibrating on synthetic photos breaks the 90% guarantee, calibrating on real photos restores it](report/figures/fig7_conformal_shift.png)
-*Conformal shortlists on real photos: calibrated on synthetic photos they cover only 52-67% (light bars,
-close to the total-variation bound in black); calibrated on real photos they reach 90% (dark bars).*
+![Conformal coverage on real photos with synthetic vs real calibration](report/figures/fig7_conformal_shift.png)
+*The shortlist's 90% promise on real photos: broken when calibrated on synthetic photos (light bars),
+kept when calibrated on real ones (dark bars).*
 
-## What we learned from trying it
+## Two more examples
 
-Photo style matters, at least for jeans. The older catalogue photographs adult jeans on a person and H&M
-lays them flat. A flat-lay photo of wide-leg jeans finds wide-leg H&M jeans (top of this page); the same
-kind of jeans **worn by a person** still finds older straight and bootcut jeans photographed on a person
-(below), although the catalogue now has about 40 wide or loose denim items. A worn sweater (above), in contrast,
-matched flat H&M sweaters without trouble, so this is not a general rule. These are a handful of photos,
-an illustration rather than a measurement.
+![Light-wash straight jeans: five similar straight jeans](report/figures/hm_flat_straight.png)
+*Light-wash straight jeans: five straight jeans in similar washes.*
 
-![Flat-lay photo of straight light-wash jeans: five adult straight jeans laid flat](report/figures/hm_flat_straight.png)
-*Flat-lay straight jeans: five adult straight jeans, laid flat (before H&M was added, kids' denim shorts came first).*
-
-![Wide-leg jeans worn by a person: the app returns straight and bootcut jeans photographed on a person](report/figures/hm_worn_wide.png)
-*Wide-leg jeans worn by a person: straight and bootcut jeans photographed on a person.*
+![Wide-leg jeans: five jeans of a similar wash](report/figures/hm_worn_wide.png)
+*Wide-leg jeans: the right kind of garment and a similar wash, but straighter cuts. The app can only
+suggest what the shop sells, and the closest match is not always the same cut.*
 
 ## Limitations
 
-- **Photo style and catalogue coverage.** Similarity search can only rank what the shop sells, and for
-  some garments (jeans) results follow the catalogue's photo style: a worn photo finds items photographed
-  on a person, a flat photo finds flat ones.
-- Most testing uses synthetic phone photos; real-photo results come from LookBench, which was also
-  used to choose the model (only the later group bonus has a clean held-out test). The author's own
-  wardrobe photos are the final untouched test (protocol fixed in `report/results_log.md`; not run yet).
-- The 90% target is coarse (7 garment groups); finding the exact item on real photos is about 51%.
-- "Not sure" and the shortlist are calibrated on LookBench's 3,278-item gallery, so in the 54k-item app
-  they are only indicative.
-- **Licence.** Fashion Product Images, LookBench and the H&M data are for non-commercial research: this
-  is a research demo and cannot be sold with these images.
-- The confidence signal behind "not sure" (top similarity) is weak: it lowers the error rate mostly
-  by answering less often, not by recognising the bad cases.
-- The colour estimate uses the image centre and can pick up a second garment or a shadow; lighting
-  changes it.
+- The app can only return what the catalogue sells, so for many photos the best answer is "similar",
+  not "the same". Exact-item matching on real photos is about 51%.
+- Most of our testing uses synthetic phone photos. The real-photo results come from LookBench, which we
+  also used to choose the model; only the group bonus has a clean held-out test. A final test on my own
+  wardrobe is planned with its rules fixed in advance (`report/results_log.md`).
+- The 90% figure is for 7 broad garment groups.
+- "Not sure" and the shortlist were calibrated on a 3,278-item gallery; in the 54k-item app they are
+  rough guides, and the shortlist is often in the hundreds.
+- The "not sure" signal (the best similarity) is weak: it lowers the error rate mostly by answering less
+  often.
+- The colour estimate looks at the middle of the photo, so it can pick up a shadow or another garment,
+  and lighting changes it.
+- **Licence.** Fashion Product Images, LookBench and the H&M data are for non-commercial research only.
+  This is a research demo and cannot be sold with these images.
 
 ## Repository layout
 
 ```
 data_prep/    build the catalogues (evaluation, app, H&M), high-resolution images, synthetic phone photos
 retrieval/    colour histogram, CLIP / FashionSigLIP retrievers, ensembles
-training/     fine-tuning (contrastive, hard or random batches)
+training/     fine-tuning (contrastive, same-type or random batches)
 evaluation/   metrics, bootstrap tests, LookBench, conformal methods, analyses, own-photo test (D9)
 serving/      search engine, calibration, badges, API, Streamlit page, latency
 tests/        unit tests (metrics, statistics, conformal) and API tests
@@ -220,12 +217,11 @@ python -m evaluation.fusion_test_stats
 python -m pytest
 ```
 
-The H&M items are added after the app badges, threshold and group bonus were fixed on the 33k catalogue
-(they are not recomputed on the merged one).
+The H&M items are added after the badges, the out-of-catalogue threshold and the bonus were fixed; those
+are not recomputed on the merged catalogue.
 
 Data: Kaggle "Fashion Product Images" (catalogue), LookBench (`srpone/look-bench` on Hugging Face, real
-street photos) and Kaggle "H&M Personalized Fashion Recommendations" (app catalogue only; accept the
-competition rules first). Pretrained models: Marqo FashionSigLIP and FashionCLIP; DINOv2 (tested, not
-used). Tuning on real photos uses a frozen development/test split of LookBench
-(`evaluation/lookbench_split.py`); `evaluation/fusion_test_stats.py` needs the test runs saved first
-(`fusion_lookbench.py --side test ... --save NAME`, see `report/results_log.md`, Finding 32).
+street photos) and Kaggle "H&M Personalized Fashion Recommendations" (demo catalogue only; accept the
+competition rules first). Pretrained models: Marqo FashionSigLIP and FashionCLIP (DINOv2 was tried, not
+used). `evaluation/fusion_test_stats.py` needs the test runs saved first (`fusion_lookbench.py --side test
+... --save NAME`, see `report/results_log.md`, Finding 32).
