@@ -936,3 +936,17 @@ wrong "different" badge for the true item (the darkness flag was dropped in Find
 (5) The colour histogram finds the exact item 7.7% of the time on real crops (vs 1% on synthetic photos) but
 fails completely under any lighting or colour change (R@1 0.000), as expected for a pure colour method.
 "Not sure" numbers are only meaningful for finetuned_random (lambda is calibrated on its similarity scale).
+
+## Pre-registration: keyword search baseline, "how shops work today" (task 4a, evaluation/keyword_baseline.py)
+Replaces the strawman baselines (colour histogram; type menu in random order). A shopper types what they see
+and the shop ranks items by text match: BM25 (k1 = 1.2, b = 0.75, fixed, no tuning) over each gallery item's
+LookBench text (category + main attribute + other attributes; read from Hugging Face, checked row by row
+against our saved files). IDEALISED shopper: the query text is LookBench's own annotation of the photo, so it
+always uses the shop's words. Two variants: keywords_basic (category + main attribute) and keywords_detailed
+(+ other attributes). Ties broken at random, averaged over 50 orders.
+Protocol: the 3,278 gallery only (dedup), because the noise images have no text and would be invisible to
+keyword search on the full corpus; the photo model is compared on the same gallery (saved finetuned_random
+results). Metrics: R@1, R@5, group P@5, on all 981 and on the test half; paired cluster bootstrap photo -
+keywords for R@1 and group P@5, Holm over the 2 variants. Also reported: how often a query's annotation is
+identical to its true item's annotation (how idealised the shopper is).
+Expectation written now: keywords get the KIND of garment right (high group P@5) but rarely the exact item.
