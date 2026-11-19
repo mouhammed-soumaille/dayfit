@@ -20,10 +20,12 @@ per-query full-corpus R@1 (results/perquery/*_image_full.csv).
 Run from the repo root (~30k query embeddings + colour histograms of 61,553 images, about 20-30 min on MPS):
     python -m evaluation.robustness
 Writes results/robustness.csv, results/robustness_tests.csv and report/figures/robustness.png.
+Redraw the figure only:  python -m evaluation.robustness --plot_only
 """
 import hashlib
 import json
 import os
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
@@ -115,7 +117,29 @@ def corpus_features(method, gallery, noise):
     return retriever, np.concatenate([real, retriever.features])
 
 
+def plot(table):
+    """Bar chart of R@1 per filter for the three methods (legend above the bars, so nothing is hidden)."""
+    order = [c[0] for c in CONDITIONS]
+    fig, ax = plt.subplots(figsize=(11, 4.5))
+    x = np.arange(len(order))
+    for k, m in enumerate(MODELS):
+        values = table[table["method"] == m].set_index("condition").loc[order, "R1"]
+        ax.bar(x + (k - 1) * 0.27, values, width=0.27, label=m)
+    ax.set_xticks(x)
+    ax.set_xticklabels([c + ("" if inside else " *") for c, _, _, inside in CONDITIONS], rotation=45, ha="right")
+    ax.set_ylabel("R@1, 61,553-image corpus")
+    ax.set_ylim(0, 0.65)
+    ax.set_title("Real LookBench crops with filters (* = outside the training augmentation)")
+    ax.legend(loc="upper center", ncol=3, frameon=False)
+    fig.tight_layout()
+    fig.savefig("report/figures/robustness.png", dpi=150)
+
+
 def main():
+    if "--plot_only" in sys.argv:              # redraw the figure from the saved table, no re-run
+        plot(pd.read_csv("results/robustness.csv"))
+        print("saved report/figures/robustness.png")
+        return
     gallery, queries = prepare("real_streetlook")
     queries = queries.merge(pd.read_csv(f"{LB}/split.csv"), on="query_id")
     noise = pd.read_csv(f"{NOISE}/gallery.csv", dtype=str)
@@ -198,19 +222,7 @@ def main():
         print(table.to_string(index=False))
         print(pd.DataFrame(tests).to_string(index=False))
 
-    # figure: R@1 per filter for the three methods
-    fig, ax = plt.subplots(figsize=(11, 4))
-    x = np.arange(len(order))
-    for k, m in enumerate(MODELS):
-        values = table[table["method"] == m].set_index("condition").loc[order, "R1"]
-        ax.bar(x + (k - 1) * 0.27, values, width=0.27, label=m)
-    ax.set_xticks(x)
-    ax.set_xticklabels([c + ("" if inside else " *") for c, _, _, inside in CONDITIONS], rotation=45, ha="right")
-    ax.set_ylabel("R@1, 61,553-image corpus")
-    ax.set_title("Real LookBench crops with filters (* = outside the training augmentation)")
-    ax.legend()
-    fig.tight_layout()
-    fig.savefig("report/figures/robustness.png", dpi=150)
+    plot(table)
     print("saved results/robustness.csv, results/robustness_tests.csv, report/figures/robustness.png")
 
 

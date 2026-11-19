@@ -896,3 +896,43 @@ filter (R@1 and group P@5), paired cluster bootstrap over the split clusters, Ho
 per metric. Expectation written now: small drops inside the augmentation, larger outside; fine-tuning should
 help more inside than outside.
 Sanity check: with no filter both models reproduce the saved per-query full-corpus R@1.
+
+## Finding 40: robustness to bad photos on real LookBench crops (task 3, evaluation/robustness.py)
+Checks OK: with no filter both models reproduce the saved per-query full-corpus R@1. All 981 crops, R@1 on
+the 61,553 corpus (drop from clean, 95% cluster CI) / group P@5 on the gallery; * = outside the training augmentation.
+                    finetuned_random                  fashion_siglip                 colour histogram
+  clean             0.501            / 0.869         0.472            / 0.869        0.077 / 0.327
+  gauss 1.5         0.490 (-1.0, n.s.) / 0.838       0.389 (-8.3)     / 0.790        0.072
+  gauss 3           0.355 (-14.6)    / 0.718         0.147 (-32.5)    / 0.429        0.058
+  gauss 6 *         0.118 (-38.2)    / 0.415         0.022 (-45.0)    / 0.191        0.042
+  motion 5 *        0.501 (0.0)      / 0.848         0.444 (-2.8)     / 0.843        0.075
+  motion 9 *        0.454 (-4.7)     / 0.828         0.368 (-10.4)    / 0.795        0.068
+  motion 15 *       0.368 (-13.3)    / 0.751         0.244 (-22.8)    / 0.659        0.066
+  dark x0.5         0.501 (0.0)      / 0.865         0.461 (-1.1)     / 0.864        0.000
+  dark x0.3 *       0.490 (-1.0)     / 0.860         0.451 (-2.1)     / 0.850        0.000
+  dark x0.15 *      0.391 (-10.9)    / 0.829         0.358 (-11.4)    / 0.790        0.000
+  half colour *     0.505 (+0.4)     / 0.866         0.472 (0.0)      / 0.864        0.024
+  grayscale *       0.379 (-12.1)    / 0.846         0.388 (-8.4)     / 0.847        0.001
+  warm cast mild *  0.485 (-1.5)     / 0.861         0.456 (-1.6)     / 0.861        0.000
+  warm cast strong* 0.452 (-4.9)     / 0.862         0.432 (-4.0)     / 0.855        0.000
+finetuned_random - fashion_siglip, R@1 (paired cluster bootstrap, Holm over the 14 conditions):
+  clean +2.9 (p_Holm 0.006); gauss 1.5 / 3 / 6: +10.1 / +20.8 / +9.6; motion 5 / 9 / 15: +5.6 / +8.6 / +12.4
+  (all p_Holm < 0.001); dark x0.5 / x0.3 / x0.15: +4.0 / +4.0 / +3.4 (p_Holm < 0.001 / 0.006 / 0.052);
+  half colour +3.3 (< 0.001); grayscale -0.9 (0.43); warm cast mild / strong +3.0 / +1.9 (0.052 / 0.27).
+  Group P@5: big gains only under blur (gauss 3 +29.0, gauss 6 +22.4, motion 15 +9.2 points); none for
+  colour changes.
+"Not sure" (finetuned_random): 7% of clean photos, 15% at gauss 3, 19% at gauss 6, 14% at motion 15, 22% at
+dark x0.15. The colour badge calls the TRUE item "different" for 4% of clean photos, 12% / 36% / 47% at dark
+x0.5 / x0.3 / x0.15 and 4% for grayscale; after the black-and-white fix: grayscale 0%, dark x0.3 33%, dark x0.15 27%.
+Meaning: (1) the expectation was only partly right. Inside the augmentation, mild blur and half brightness cost
+nothing, but blur radius 3 (the edge of the training range) already costs 15 points. (2) The fine-tuning's
+main value is ROBUSTNESS TO BLUR: on clean real photos it adds +3 points, on blurred ones +6 to +21 points,
+including motion blur, a kind of blur it never saw in training. For colour changes it never saw (grayscale,
+colour casts) it adds nothing beyond its clean-photo gain. So the synthetic augmentation does transfer to
+real photos, for the kinds of damage it simulates. (3) Very blurry photos break every model (gauss 6: R@1
+0.12), and "not sure" catches few of them (fires on 19% while R@1 is 12%): it is a weak safety net.
+(4) Dark photos are the colour badge's real problem: even after the fix, 27-33% of very dark photos get a
+wrong "different" badge for the true item (the darkness flag was dropped in Finding 35).
+(5) The colour histogram finds the exact item 7.7% of the time on real crops (vs 1% on synthetic photos) but
+fails completely under any lighting or colour change (R@1 0.000), as expected for a pure colour method.
+"Not sure" numbers are only meaningful for finetuned_random (lambda is calibrated on its similarity scale).
