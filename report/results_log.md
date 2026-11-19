@@ -808,3 +808,18 @@ gives a small significant group P@5 gain (+2.0 points), which it did not on crop
 (4) Photos shared by several queries are harder in BOTH settings (whole 0.28 vs 0.60, crop 0.38 vs 0.72):
 outfit photos with several garments, not only the whole-photo ambiguity.
 Not measured here: the 54k app catalogue (task 2b) and the group bonus on whole photos.
+
+## Pre-registration: LookBench against the official corpus (task 2b, evaluation/lookbench_full.py)
+Checked on Hugging Face (srpone/look-bench, version_info.json): the official corpus of each subset is its
+own gallery plus the 58,275 shared "noise" images; for real_streetlook 3,278 + 58,275 = 61,553 entries,
+the number in the paper's Table 1. Noise images have no category or attributes (category "noise data"),
+so on this corpus only exact-item metrics are defined (R@1, R@5); group P@5 stays a 3,278-gallery metric.
+(The paper lists 1,000 real_streetlook queries; the release has 981, the set we use.)
+Runs, nothing tuned: finetuned_random and fashion_siglip, crop and whole photo; noise embedded once per
+model, gallery embeddings = the saved ones; dedup protocol (identical image files merged). Reported:
+R@1, R@5 (95% CIs), share of noise images in the top 5, and paired cluster bootstrap finetuned_random -
+fashion_siglip (split clusters) on all 981 and on the test half.
+Sanity check: ranking only the 3,278 gallery entries reproduces the saved R@1 of every query.
+Not in this step: re-calibrating "not sure" and the shortlist at this scale (next step), ensemble_mv
+(three times the embedding cost), and near-duplicates between noise and gallery (only exact copies merged).
+Decision to take after the results, with the author: which corpus later experiments use.
