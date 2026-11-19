@@ -990,3 +990,26 @@ our photo model. Tests on the test half: photo - classical (full corpus) and pho
 + menu, R@1, paired cluster bootstrap, Holm over these 2.
 Sanity check: saved finetuned_random query embeddings reproduce the saved gallery R@1 (0.520).
 Expectation written now: far below the photo model on exact items; the menu helps it a lot.
+
+## Finding 42: classical image baseline (task 4b, evaluation/classical_baseline.py -> results/classical_*.csv)
+Check OK: saved finetuned_random query embeddings reproduce the saved gallery R@1 (0.5199).
+Dev choice (66 weight settings, official corpus): best dev R@1 0.112 for colour 0.3 / texture 0.2 / shape 0.5,
+tied with 0.3 / 0.1 / 0.6 (the first in the sorted table was taken; the two differ by 0.1 in two weights).
+Shape matters most, colour second, texture least. TEST half (481), run once:
+                                corpus           R@1 [95% CI]          R@5     group P@5 (gallery)
+  photo (finetuned_random)      full 61,553      0.499                 0.688   (0.871, Finding 37)
+  classical                     full 61,553      0.123 [0.096, 0.154]  0.162   0.387
+  colour only (masked)          full 61,553      0.081 [0.056, 0.106]  0.123   0.315
+  classical + menu (idealised)  gallery 3,278    0.237 [0.200, 0.277]  0.360   1.000
+  photo + menu (reference)      gallery 3,278    0.536 [0.491, 0.580]  0.713   1.000
+Photo - classical (full corpus): R@1 +0.376 [+0.323, +0.435]; photo on the gallery without menu (0.511) -
+classical + menu: +0.274 [+0.220, +0.329]; both p_Holm < 0.001.
+Meaning: the expectation was right. A fair classical system (colour + texture + shape, tuned on dev) finds the
+exact item first 12% of the time on the official corpus, 4 times less than the photo model; even with an
+idealised menu in front it reaches 24%, half of the photo model without a menu. The menu adds +2.5 points to the
+photo model (0.511 -> 0.536 on the same test half), consistent with Finding 14.
+Note on the code: the LBP step received a float copy of the grayscale image (a warning was printed); skimage
+converts every input to float internally, so the numbers are the same as with integer input.
+Baseline ladder on the real test half (exact item first): colour histogram 0.08, classical 0.12 (full corpus);
+classical + menu 0.24, short keywords 0.31, detailed idealised keywords 0.49 (gallery); photo 0.50 (full corpus),
+0.51 (gallery); photo + menu 0.54 (gallery).
