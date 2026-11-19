@@ -1,0 +1,16 @@
+source,label,version,n,flag_bw,flag_dark,flag_any,estimate_moved
+lookbench_test,real crop,original,338,0.011834319526627219,0.014792899408284023,0.026627218934911243,0.0
+lookbench_test,real crop,grayscale,338,1.0,0.014792899408284023,1.0,0.0
+lookbench_test,real crop,bright_0.5,338,0.020710059171597635,1.0,1.0,0.0
+lookbench_test,real crop,bright_0.3,338,0.09171597633136094,1.0,1.0,0.3905325443786982
+lookbench_test,real crop,bright_0.15,338,0.46745562130177515,1.0,1.0,0.47633136094674555
+catalogue,colour listed,original,172,0.005813953488372093,0.0,0.005813953488372093,0.0
+catalogue,colour listed,grayscale,172,1.0,0.0,1.0,0.0
+catalogue,colour listed,bright_0.5,172,0.029069767441860465,1.0,1.0,0.0
+catalogue,colour listed,bright_0.3,172,0.08139534883720931,1.0,1.0,0.4069767441860465
+catalogue,colour listed,bright_0.15,172,0.3023255813953488,1.0,1.0,0.5174418604651163
+catalogue,neutral listed,original,128,0.2265625,0.0,0.2265625,0.0
+catalogue,neutral listed,grayscale,128,1.0,0.0,1.0,0.0
+catalogue,neutral listed,bright_0.5,128,0.359375,1.0,1.0,0.0
+catalogue,neutral listed,bright_0.3,128,0.4453125,1.0,1.0,0.3203125
+catalogue,neutral listed,bright_0.15,128,0.6171875,1.0,1.0,0.3984375

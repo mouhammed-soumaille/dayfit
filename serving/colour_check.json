@@ -1,0 +1,8 @@
+{
+  "colourfulness_min": 3.64002078418877,
+  "brightness_min": 54.405797905239716,
+  "rule": "1st percentile over 362 distinct LookBench dev crops",
+  "test_false_alarm": 0.026627218934911243,
+  "test_grayscale_found": 1.0,
+  "ship": false
+}
