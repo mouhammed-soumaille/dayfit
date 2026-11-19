@@ -66,3 +66,4 @@ my_photos/
 !results/type_rerank.csv
 report/progress_report_*.tex
 report/progress_report_*.pdf
+.DS_Store

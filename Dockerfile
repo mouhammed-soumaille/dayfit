@@ -18,7 +18,7 @@ COPY retrieval/ retrieval/
 COPY serving/ serving/
 COPY data/catalog.csv data/catalog.csv
 COPY data/images_hires/ data/images_hires/
-# the bigger demo catalogue (DAYFIT_CATALOG=app): 33,141 items, own index
+# the bigger demo catalogue (DAYFIT_CATALOG=app): 54,178 items (Kaggle + H&M), own index
 COPY data/app_catalog.csv data/app_catalog.csv
 COPY data/app_images/ data/app_images/
 COPY data/hm/images/ data/hm/images/
@@ -31,7 +31,7 @@ RUN python -c "import os; t = float(open('models/index/finetuned_random_paths.tx
 # catalogue index (if it could not be reused, it is rebuilt here once, not at every start)
 RUN python -c "import serving.api"
 # app catalogue: first CHECK that its saved index matches (same weights line + same image paths),
-# so a mismatch stops the build at once instead of re-embedding 33k images on the CPU for hours
+# so a mismatch stops the build at once instead of re-embedding 54k images on the CPU for hours
 RUN python -c "import os, pandas as pd; t = os.path.getmtime('models/finetuned_random.pt'); key = ['weights: hf-hub:Marqo/marqo-fashionSigLIP None models/finetuned_random.pt %.0f' % t] + list(pd.read_csv('data/app_catalog.csv')['image_path']); saved = open('models/index/finetuned_random_app_paths.txt').read().split(chr(10)); assert saved == key, 'app index does not match: it would be rebuilt'; print('app index OK')"
 RUN DAYFIT_CATALOG=app python -c "import serving.api"
 

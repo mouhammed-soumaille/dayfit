@@ -23,7 +23,7 @@ is false and no colour badges are given (colour_badge = None). Threshold from se
 Type model (latency, Finding 45): DAYFIT_TYPE_MODEL=off skips the second model (pretrained FashionSigLIP).
 Then there is no type badge, no group bonus (plain similarity order) and no out-of-catalogue warning.
 
-Catalogue: DAYFIT_CATALOG=evaluation (default, 6,197 items) or app (~33k items, demo only); the badge
+Catalogue: DAYFIT_CATALOG=evaluation (default, 6,197 items) or app (54,178 items, demo only); the badge
 vocabulary and the out-of-catalogue threshold follow the catalogue.
 
 Run from the repo root:

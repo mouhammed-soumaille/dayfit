@@ -9,8 +9,8 @@ This is a thin layer over the retriever used in all experiments (RETRIEVERS in
 evaluation/run_eval.py), so the app searches exactly like the evaluated model.
 
 Two catalogues (chosen with the environment variable DAYFIT_CATALOG):
-  evaluation (default): data/catalog.csv, the 6,197 items every reported number uses
-  app                 : data/app_catalog.csv, ~33k items (data_prep/app_catalog.py), for the demo only
+  evaluation (default): data/catalog.csv, the 6,197 items used for the synthetic-photo results and the tests (LookBench results use LookBench's own gallery)
+  app                 : data/app_catalog.csv, 54,178 items (data_prep/app_catalog.py + app_add_hm.py), for the demo only
 Each catalogue has its own saved embeddings in models/index/, so they never overwrite each other.
 
 Sanity checks (run this file):
@@ -22,7 +22,7 @@ Sanity checks (run this file):
 
 Run from the repo root:
     python -m serving.engine
-    python -m serving.engine --catalog app        (the first run embeds ~33k images, several minutes)
+    python -m serving.engine --catalog app        (the first run embeds ~54k images, several minutes)
 """
 import argparse
 import os

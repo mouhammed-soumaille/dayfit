@@ -22,10 +22,26 @@ first; marking the garment makes the matches tighter.*
 
 ## Results on real photos
 
-All numbers below are on **real street photos** (LookBench `real_streetlook`) that were never used to choose
-anything: the 481 photos of the held-out test half (a 500 / 481 split fixed in advance, photos of the same
-street picture or item kept on one side). Each method was tuned only on the other half and run once on
-these photos. The main question is the hard one the app exists for: **is the exact item first?**
+All numbers below are on **real street photos** (LookBench `real_streetlook`): the 481 photos of the test
+half of a 500 / 481 split (photos of the same street picture or item kept on one side).
+
+**How these photos were used, honestly.** I chose the app's model (fine-tuned with random batches, rather than
+same-type batches, the pretrained model or an ensemble) on **all 981** LookBench photos, *before* I froze the
+split (Findings 5-7). So the test half is clean for everything decided after the split (the group bonus,
+DINOv2 and colour fusion, the re-ranker, the classical and keyword baselines): each was tuned on the dev half
+only and run once on the test half. It is **not** clean for the choice of the model itself, so the fine-tuned
+vs pretrained comparison below is slightly optimistic. The final untouched check is my own photos (D9), with
+rules fixed before any photo was taken; it has not been run yet.
+
+Two questions, two metrics:
+
+- **Right kind of garment in the top 5 (group P@5)**: the main metric of the approved proposal ("show me
+  things like this"), target 0.90.
+- **Exact item first (R@1)**: a harder question I added, "is this the very item in the photo?".
+
+I report both, but lead with R@1, because group P@5 turned out to be nearly free for the alternatives: a
+typed category reaches 0.98 and a type menu 1.0 by construction (second table). So group P@5 cannot show
+that a photo adds anything; R@1 can.
 
 **Against the benchmark's official corpus of 61,553 images** (the 3,278 shop items + 58,275 distractors):
 
@@ -55,14 +71,20 @@ What these show:
   photo model finds the exact item first 4 times as often as a classical image search (0.50 vs 0.12) and
   clearly more often than a short typed search (0.51 vs 0.31). Only an idealised shopper who types every
   attribute in the shop's own words ties it (0.49 vs 0.51, no significant difference); real shoppers cannot
-  do that, which is the problem the app solves.
-- **"Right kind of garment in the top 5" is a sanity floor, not a headline.** A typed category gets 0.98 and
-  a menu gets 1.0 by construction; the group bonus raises the photo model from 0.87 to 0.905 by adding a
-  zero-shot type classifier's probability, so it optimises this metric fairly directly.
-- **The fine-tuning's real value is robustness to blur.** On clean real photos it adds about +2 to +3 points
-  over the pretrained model. On blurred real photos it adds +6 to +21 points, including motion blur, which it
-  never saw in training (table below). For colour changes it never saw (black-and-white, coloured light) it
-  adds nothing.
+  do that, which is the problem the app solves. The honest pitch is not "photos beat text" but "a photo
+  matches a perfect description without the shopper having to write one".
+- **On the proposal's metric the photo alone loses to a menu.** The photo model puts the right kind of garment
+  in the top 5 for 0.87 of photos; a typed category gets 0.98 and a menu 1.0. The app's group bonus (adding
+  `0.05 * P(item's group | photo)` from a zero-shot type classifier) raises this to 0.905, which meets the
+  proposal's 0.90 target on held-out photos, at no significant cost in R@1 (0.509 vs 0.511). The bonus is
+  aimed at this metric fairly directly. Photo + an ideal type menu chosen by the shopper does better on both
+  (0.536 / 1.0); the app has no such menu, only a *same type only* filter based on the predicted type.
+- **Fine-tuning helps a little on clean photos and a lot on blurred ones.** On clean real crops it adds +2.3
+  points R@1 over the pretrained model on the test half, which is **not significant** there (p = 0.07; on all
+  981 photos +2.9, p = 0.001, but those include the photos the model was chosen on). On whole photos it adds
+  +2.5 points (test half, p = 0.04). Its clearest value is robustness to blur: on blurred real photos it adds
+  +6 to +21 points, including motion blur, which it never saw in training (table below). For colour changes it
+  never saw (black-and-white, coloured light) it adds no more than on clean photos.
 - **A learned re-ranker on real photos does not help significantly yet.** Trained on 500 labelled street
   photos with 9 features (similarities of three models, small-patch matching, colour, garment-type agreement),
   it gains +2.1 points, not significant. Its learning curve is still rising at 500 photos (50 photos: worse
@@ -70,6 +92,18 @@ What these show:
   the wrong design, and the re-ranker mostly re-weighs the two models' similarities.
 - **A 19 times bigger corpus costs only about 2 points** (0.520 -> 0.501 on all 981 photos): the distractors
   rarely beat the true item.
+
+### Where it fails
+
+On the dev half, 87% of the misses (206 of 236) already have the right kind of garment first, just not the
+right design: the model finds "a black leather jacket with a shearling collar", not *that* jacket (Finding 31).
+And 97 of the 236 misses do not have the true item in the top 20 at all, so no re-ranking can fix them;
+that needs a better embedding, for example training on real street-to-shop pairs, which I did not do.
+
+![Outerwear photos whose first result is not the exact item: 6 random rows](report/figures/fig10_failures_real_outerwear.png)
+*Six random outerwear photos whose first result is not the exact item (orange: right category, red: wrong
+category, green: the exact item). The results are near-identical coats and jackets. Some "wrong" ones are
+arguably fine (wrap coats for a cape), and one row shows the same gallery picture more than once.*
 
 ### The app's real setting: whole photos and bad photos
 
@@ -81,16 +115,24 @@ garment**, and that is much harder (official corpus, test half):
 | Garment marked (crop) | 0.499 | 0.688 |
 | Whole photo (person, background, other clothes) | 0.391 | 0.530 |
 
-Marking the garment matters more than any model change I tried, so the page now recommends it.
+Marking the garment matters more than any model change I tried, so the page now recommends it. The same holds
+for the proposal's metric: on whole photos the right kind of garment is in the top 5 for only 0.68 of photos
+(test half, without the group bonus; the bonus was not measured on whole photos), so the 0.905 above is a
+**crop** number.
 
-Bad photos (all 981 real crops with fixed filters; * = outside the training augmentation):
+None of the real-photo numbers in this README are measured on the app's own 54,178-item catalogue: LookBench's target
+items are not in it, so exact-item R@1 cannot be measured there. My own-photo test (D9) is the planned check of
+the app as shipped.
+
+Bad photos (all 981 real crops, so including the dev photos and the photos the model was chosen on; fixed
+filters; * = outside the training augmentation; differences Holm-corrected over the 14 filters):
 
 | Filter | Fine-tuned R@1 | Pretrained R@1 | Fine-tuned minus pretrained |
 |---|---|---|---|
 | none | 0.501 | 0.472 | +2.9 |
 | blur, radius 1.5 / 3 / 6* px | 0.490 / 0.355 / 0.118 | 0.389 / 0.147 / 0.022 | +10.1 / +20.8 / +9.6 |
 | motion blur 5* / 9* / 15* px | 0.501 / 0.454 / 0.368 | 0.444 / 0.368 / 0.244 | +5.6 / +8.6 / +12.4 |
-| brightness x0.5 / x0.3* / x0.15* | 0.501 / 0.490 / 0.391 | 0.461 / 0.451 / 0.358 | +4.0 / +4.0 / +3.4 |
+| brightness x0.5 / x0.3* / x0.15* | 0.501 / 0.490 / 0.391 | 0.461 / 0.451 / 0.358 | +4.0 / +4.0 / +3.4 (last n.s.) |
 | grayscale* | 0.379 | 0.388 | -0.9 (n.s.) |
 | warm colour cast, mild* / strong* | 0.485 / 0.452 | 0.456 / 0.432 | +3.0 / +1.9 (n.s.) |
 
@@ -102,11 +144,12 @@ For each photo:
 
 - **The 5 closest catalogue items.** The ranking comes from FashionSigLIP fine-tuned on the catalogue, plus a
   small bonus for items of the kind of garment the photo seems to show
-  (`similarity + 0.05 * P(item's group | photo)`, tested on held-out real photos). Kids' items are hidden,
+  (`similarity + 0.05 * P(item's group | photo)`, tested on held-out real crops: same R@1, right kind of
+  garment in the top 5 0.871 -> 0.905). Kids' items are hidden,
   and the same product photographed twice is shown only once.
 - **A type badge** (`same type` / `different type`): which group the photo belongs to (tops, outerwear,
   bottoms, dresses, footwear, bags, accessories), guessed by the pretrained FashionSigLIP. It only appears
-  when the guess is at least 90% confident; on real photos it then appears for 65% of photos and is right
+  when the guess is at least 90% confident; on real photos (LookBench crops) it then appears for 65% of photos and is right
   95% of the time.
 - **A colour badge** and the photo's estimated colour, next to the shop's own colour name ("listed as").
   The estimate comes from the photo, so lighting moves it. When the photo has almost no colour (a
@@ -114,7 +157,9 @@ For each photo:
 - **"Not sure"** when even the best match is weak, and a **shortlist size** (how many items are about as
   similar as the best one, a 90% conformal shortlist calibrated on real photos at the official-corpus scale).
   The page shows the size only when it is 50 or fewer; for a marked garment the honest 90% list is about 116
-  items long, for a whole photo about 880.
+  items long, for a whole photo about 880. Both were calibrated on LookBench, not on the app's catalogue, so
+  in the app the 90% is not guaranteed (the API's `note` says so). "Not sure" was calibrated on crops; on
+  whole photos it fires for about half of them.
 - **"This looks like a skirt; our catalogue has no skirts"** when the photo shows something the shop does
   not sell at all.
 - Two optional filters, *same type only* and *hide clearly different colours*. They hide results; they
@@ -224,7 +269,15 @@ promise on real photos if it is calibrated on real photos (Finding 10).
 - The app can only return what the catalogue sells, so for many photos the best answer is "similar", not
   "the same". The exact item comes first about half the time on real crops, 39% on whole photos.
 - The real-photo test is one benchmark (LookBench street photos, 981 photos, 621 independent groups); the
-  95% confidence intervals are about +-4 to 5 points. My own wardrobe test (D9) was planned with fixed rules but not run.
+  95% confidence intervals are about +-4 to 5 points. The model itself was chosen on all 981 photos before the
+  dev / test split existed, so the test half is only clean for what was decided afterwards (see "How these
+  photos were used"). My own wardrobe test (D9), the final untouched check, was planned with fixed rules but
+  not run.
+- **The app as shipped is not measured.** Every accuracy number is on LookBench's catalogue, mostly with
+  crops; none is on the 54,178-item app catalogue with whole photos, which is what a shopper actually uses.
+- **"Similar" is only measured as "same kind of garment".** For a photo of something the shop does not sell
+  (the common case), the useful answer is a similar item, but the only measure of that here is group P@5,
+  which a menu gets for free. Whether the top 5 actually look alike was not judged by people.
 - Very blurry photos break every model (strong blur: R@1 0.12), and "not sure" catches few of them (it fires
   on 19% of such photos). Very dark photos often get a wrong "colour different" badge (27-33% for the true
   item even after the black-and-white fix).
@@ -258,9 +311,12 @@ report/       results log and figures
 
 ## Reproduce
 
-What is in git: code, saved result tables (`results/*.csv`), figures and the LookBench dev/test split.
-What is **not** in git (too big, or licensed): the datasets, their images, the fine-tuned checkpoint and
-the saved indexes. Everything below regenerates them.
+What is in git: code, saved summary tables (`results/*.csv`), figures and the LookBench dev/test split.
+What is **not** in git (too big, or licensed): the datasets, their images, the fine-tuned checkpoint, the
+saved indexes and the per-query result files (`results/perquery/`) that the test-half numbers above are
+computed from. Everything below regenerates them. `tests/test_api.py` needs the evaluation catalogue and
+the saved synthetic results, so on a fresh clone run only
+`python -m pytest tests/test_metrics.py tests/test_stats.py tests/test_conformal.py` until these steps are done.
 
 1. **Data.**
    - Kaggle "Fashion Product Images (Small)": unpack `styles.csv` and `images/` into `data/raw/`.

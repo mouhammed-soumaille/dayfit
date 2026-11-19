@@ -1167,3 +1167,14 @@ is the FIRST (hard-batch) model of Finding 4; for the recommended random-batch m
 medium photos). (2) "confidence intervals are 4-5 points wide" was wrong: they are about +-4 to 5 points (twice
 that wide). After the fixes: 0 mismatches. Numbers that exist only in this log (Docker 266 ms, MPS 36 ms, the
 wide-leg jeans check, H&M label noise, the 500 / 481 split) are listed by the script for a check by eye.
+
+## D9 amendment 2 (Nov 19, 21:25, BEFORE any wardrobe photo is taken; only the sweater of the 13:20 rehearsal has been searched)
+Reason: the app changed today after the "frozen since the H&M merge" note, before any D9 photo existed:
+(a) kids' items are also hidden by product name (Finding 36; changes which items can appear); (b) the shortlist
+constant was re-calibrated (Finding 39; changes only the shortlist size); (c) the "colour can't be judged" flag
+(Finding 35) and the type-model switch (Finding 45, default on) do not change the ranking. Decision: D9 tests the
+app at the commit on which it is run (recorded with the result), i.e. with all of these; nothing else in the
+protocol changes. Still the whole photo, no crop box, as pre-registered (Finding 37 now shows this is the harder
+setting). Expectation written now, from Finding 37 (whole street photos, gallery, no bonus: group P@5 0.67-0.68):
+own photos with the garment filling the frame should be easier than street photos; the primary group P@5 is
+expected between 0.70 and 0.90. Any value is reported.
