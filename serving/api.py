@@ -20,6 +20,9 @@ Colour (Finding 35): if the photo has almost no colour anywhere (black-and-white
 white or grey garment on a plain background), the colour estimate means nothing, so query.colour_judged
 is false and no colour badges are given (colour_badge = None). Threshold from serving/colour_check.py.
 
+Type model (latency, Finding 45): DAYFIT_TYPE_MODEL=off skips the second model (pretrained FashionSigLIP).
+Then there is no type badge, no group bonus (plain similarity order) and no out-of-catalogue warning.
+
 Catalogue: DAYFIT_CATALOG=evaluation (default, 6,197 items) or app (~33k items, demo only); the badge
 vocabulary and the out-of-catalogue threshold follow the catalogue.
 
@@ -38,7 +41,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from serving.badges import TypePredictor, colour_band, garment_colour, lab_to_hex
+from serving.badges import VOCAB, TypePredictor, colour_band, garment_colour, lab_to_hex
 from serving.colour_check import photo_numbers
 from serving.engine import SearchEngine
 
@@ -58,7 +61,10 @@ RERANK_FILE = "serving/rerank.json"           # type-aware ranking weight w (ser
 
 app = FastAPI(title="DAYFIT visual clothing search")
 engine = SearchEngine()                        # fine-tuned model + catalogue index, loaded once
-types = TypePredictor(engine.catalogue)        # pretrained model for the type badge, loaded once
+TYPE_MODEL = os.environ.get("DAYFIT_TYPE_MODEL", "on") != "off"
+types = TypePredictor(engine.catalogue) if TYPE_MODEL else None   # second model: type badge, bonus, warning
+TYPE_NAMES = list(VOCAB[engine.catalogue]["types"])   # same order as the type model's prompts
+GROUP_OF = VOCAB[engine.catalogue]["groups"]
 with open("serving/calibration.json") as f:
     calibration = json.load(f)
 with open("serving/badges.json") as f:
@@ -73,12 +79,12 @@ if engine.catalogue == "app" and os.path.exists(RERANK_FILE):
     with open(RERANK_FILE) as f:
         rerank_w = json.load(f)["w"]
 # position of each catalogue item's type in the type predictor's list (for P(item's type | photo))
-type_index = np.array([types.types.index(engine.item.loc[i, "article_type"]) for i in engine.retriever.item_ids])
+type_index = np.array([TYPE_NAMES.index(engine.item.loc[i, "article_type"]) for i in engine.retriever.item_ids])
 # GROUP-level bonus (Finding 32: tested on held-out real photos, group P@5 0.871 -> 0.905, R@1 unchanged):
 # P(item's group | photo) = sum of the type probabilities of the types in the item's group
-GROUP_NAMES = sorted(set(types.group_of.values()))
-group_member = np.array([[types.group_of[t] == g for g in GROUP_NAMES] for t in types.types], dtype=float)
-group_index = np.array([GROUP_NAMES.index(types.group_of[types.types[k]]) for k in type_index])
+GROUP_NAMES = sorted(set(GROUP_OF.values()))
+group_member = np.array([[GROUP_OF[t] == g for g in GROUP_NAMES] for t in TYPE_NAMES], dtype=float)
+group_index = np.array([GROUP_NAMES.index(GROUP_OF[TYPE_NAMES[k]]) for k in type_index])
 # app catalogue only: hide kids' items, by Kaggle gender (Boys/Girls) and by product name (Finding 36:
 # many kids' items are listed as Men/Women/Unisex but their name says Kids, Infant, Boys, ...)
 hidden = np.zeros(len(engine.retriever.item_ids), dtype=bool)
@@ -126,15 +132,19 @@ def search_photo(image):
     retriever = engine.retriever
     query = retriever.embed_query(image)
     scores = retriever.features @ query                 # similarity with every catalogue item
-    seen = types.analyse(image)                         # group badge + out-of-catalogue check, one embedding
-    # order: similarity + w * P(item's group | photo); w = 0 for the evaluation catalogue
-    group_probs = seen["type_probs"] @ group_member
-    ranking = scores + rerank_w * group_probs[group_index]
+    if types is not None:
+        seen = types.analyse(image)                     # group badge + out-of-catalogue check, one embedding
+        # order: similarity + w * P(item's group | photo); w = 0 for the evaluation catalogue
+        group_probs = seen["type_probs"] @ group_member
+        ranking = scores + rerank_w * group_probs[group_index]
+    else:                                               # type model off: plain similarity, no type information
+        seen = dict(group=None, group_prob=0.0, outside_type=None, outside_prob=0.0)
+        ranking = scores
     order = pick_results(ranking)
     visible = scores[~hidden]
     best = float(visible.max())                         # "not sure" and shortlist use the plain similarity
     group, group_prob = seen["group"], seen["group_prob"]
-    not_sold = seen["outside_prob"] >= outside["tau"]
+    not_sold = types is not None and seen["outside_prob"] >= outside["tau"]
     show_group = group_prob >= badges["type_badge"]["min_confidence"]
     query_colour = garment_colour(image)
     colourfulness, _ = photo_numbers(image)
@@ -148,7 +158,7 @@ def search_photo(image):
         band, delta_e = colour_band(query_colour, item_colour, badges["colour_bands"])
         if not colour_judged:                           # no colour in the photo: no colour badge
             band, delta_e = None, None
-        item_group = types.group_of[row["article_type"]]
+        item_group = GROUP_OF[row["article_type"]]
         # name shown to the shopper: H&M's own product type if the item comes from H&M (data_prep/app_add_hm.py),
         # otherwise the catalogue type; badges and ranking always use article_type
         shop_type = row.get("hm_type")
@@ -172,11 +182,13 @@ def search_photo(image):
                    not_in_catalogue_prob=round(seen["outside_prob"], 3)),
         not_sure=best < lam,
         best_similarity=best,
-        type_bonus_w=rerank_w,
+        type_bonus_w=rerank_w if types is not None else 0.0,
         shortlist_size=int((visible >= best - q).sum()),
         latency_ms=round((time.perf_counter() - start) * 1000, 1),
         note=("Order: visual similarity plus a small bonus for the kind of garment (group) the photo looks like. "
-              if rerank_w else "") + "Badges describe measured differences; the ranking comes from overall visual similarity. "
+              if rerank_w and types is not None else "")
+             + ("Type model off: no type badge, no group bonus, no out-of-catalogue warning. " if types is None else "")
+             + "Badges describe measured differences; the ranking comes from overall visual similarity. "
              + calibration["limitation"])
 
 

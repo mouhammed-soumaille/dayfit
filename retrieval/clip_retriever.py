@@ -26,6 +26,8 @@ from retrieval.preprocess import cached_crop, center_crop, crop_garment, pad_to_
 
 
 def pick_device():
+    if os.environ.get("DAYFIT_DEVICE"):    # e.g. DAYFIT_DEVICE=cpu to measure CPU latency on the Mac
+        return os.environ["DAYFIT_DEVICE"]
     if torch.backends.mps.is_available():  # Apple Silicon GPU
         return "mps"
     if torch.cuda.is_available():          # NVIDIA GPU (e.g. Colab)

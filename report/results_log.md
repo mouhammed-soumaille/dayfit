@@ -1132,3 +1132,17 @@ Meaning: NEGATIVE. Adding 1,011 studio photos does not help: on dev it makes the
 different kind of photo (and an easier task), so they do not substitute. Conclusion for task 5: a learned re-ranker
 on real photos gives at most about +2 points R@1 here, not significant with 500 street photos; more labelled street
 photos of the shop's own items are what it would need (Finding 43's curve).
+
+## Pre-registration: latency budget and the optional type model (task 6, serving/latency_cpu.py)
+Budget, fixed now: at most 500 ms server time per search, median, on 4 CPU threads. Reason: about 1 s is the
+limit for an answer to feel immediate; a phone upload and the page take roughly the other half.
+Question: Finding 26 says about half of the time is the second model (pretrained FashionSigLIP for the type
+badge, the group bonus and the out-of-catalogue warning); this was stated, not measured. New API switch
+DAYFIT_TYPE_MODEL=off skips that model (no type badge, plain similarity order, no warning).
+Measurement: the API's own search function in-process on the Mac CPU (DAYFIT_DEVICE=cpu, 4 threads), 100
+synthetic medium photos after 5 warm-up, for (evaluation catalogue, on), (app catalogue, on), (app, off).
+Reported: median and 95th percentile server time, and the ratio off / on. Not Docker: the Mac's CPU is faster
+than the container's, so the absolute numbers are optimistic; Docker gave 266 ms (Finding 26) on 4 vCPUs.
+What switching it off costs is already measured: group P@5 0.905 -> 0.871 on the test half (Finding 32), and
+no type badge or out-of-catalogue warning.
+Sanity check: (evaluation, on) reproduces the saved top 5 for at least 98% of photos.
