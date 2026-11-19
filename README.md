@@ -7,6 +7,13 @@ result with what it measured (kind of garment, colour) so you can judge the matc
 
 Course project for EECE 490 (Machine Learning), American University of Beirut, Fall 2026.
 
+**Who it is for.** The user is an online shopper; the system would run as a "search by photo" feature on
+one shop's site, so it can only suggest what that shop sells. **How it is done today:** on a shop's own
+site, with text search and menu filters (garment type, colour), which needs the shopper to name what they
+see; outside the shop, with general photo-search tools such as Google Lens, which search the whole web
+rather than one shop's stock. We compare against the menu-filter approach (see Results); we did not
+compare against general photo-search tools.
+
 ![The app on a photo of a sweater, whole photo](report/figures/demo_sweater_worn.png)
 ![The same photo with the crop box around the sweater](report/figures/demo_sweater_crop.png)
 *My own sweater, which is not in the catalogue. Top: the whole photo. Bottom: the same photo with the
@@ -29,7 +36,9 @@ For each photo:
   name ("listed as"). The estimate comes from the photo, so lighting moves it.
 - **"Not sure"** when even the best match is weak, and a **shortlist size** ("about N items are as
   similar as the best match"). Both were calibrated on real street photos (LookBench); because the app
-  searches a different, much bigger catalogue, they are rough guides there rather than guarantees.
+  searches a different, much bigger catalogue, they are rough guides there rather than guarantees. The
+  page shows the shortlist size only when it is 50 or fewer; otherwise it says that many items are
+  about as similar (the API still returns the number).
 - **"This looks like a skirt; our catalogue has no skirts"** when the photo shows something the shop does
   not sell at all (on the evaluation catalogue this catches 92% of such real photos, with 4% false alarms).
 - Two optional filters, *same type only* and *hide clearly different colours*. They hide results; they
@@ -114,27 +123,51 @@ returns JSON with the `results` (rank, item, score, type and colour badges, colo
 
 The recommended model is FashionSigLIP fine-tuned on our catalogue with randomly mixed batches.
 
-| Test | Metric | Value |
-|---|---|---|
-| Synthetic phone photos of the catalogue (294 items), medium / strong | exact item first (Recall@1) | 0.949 / 0.813 |
-| Same photos, medium / strong | right article type among the other 5 (P@5) | 0.867 / 0.822 |
-| Real street photos (LookBench, 981, duplicate-aware) | exact item first (Recall@1) | 0.520 |
-| Same photos | right kind of garment in the top 5 (exact names / groups) | 0.725 / 0.869 |
-| Held-out half of the real photos (481), with the group bonus | right kind of garment in the top 5 (groups) | **0.905** (+3.4 points, 95% CI +2.4 to +4.5) |
-| Docker on CPU (4 cores), median / 95th percentile | response time | 266 / 282 ms |
-| Mac GPU (MPS), median | response time | 36 ms |
+**Which number matters.** The hard question, and the one the app exists for, is finding the exact item
+(or a very close design) on real photos: **Recall@1 about 0.51**. "Right kind of garment in the top 5"
+over 7 broad groups is a *safety floor*, not the headline: a shopper choosing one of 7 groups from a
+menu and then ranking by our model gets that metric to 1.0 by construction (see the last baseline row).
 
-The Docker times were measured before the H&M items were added; the extra items should cost very little,
-since comparing the photo with every catalogue item is cheap next to running the models.
+| Test | Metric | Value | Used to choose the model? |
+|---|---|---|---|
+| Synthetic phone photos of the catalogue (294 items), medium / strong | exact item first (Recall@1) | 0.949 / 0.813 | no, but the model was trained on the same kind of synthetic photo |
+| Same photos, medium / strong | right article type among the other 5 (P@5) | 0.867 / 0.822 | as above |
+| Real street photos (LookBench, 981, duplicate-aware, hand-drawn crops) | exact item first (Recall@1) | 0.520 | **yes** (not a clean test) |
+| Same photos | right kind of garment in the top 5 (exact names / 7 groups) | 0.725 / 0.869 | **yes** (not a clean test) |
+| Held-out half of the real photos (481), with the group bonus | exact item first (Recall@1) | 0.509 (no change, 95% CI -0.7 to 0.0 points) | only the bonus weight was chosen, on the other half |
+| Same held-out half | right kind of garment in the top 5 (7 groups) | 0.905 (+3.4 points, 95% CI +2.4 to +4.5) | as above |
+| Docker on CPU (4 cores), median / 95th percentile | response time | 266 / 282 ms | n/a |
+| Mac GPU (MPS), median | response time | 36 ms | n/a |
+
+Baselines on the same real photos (LookBench):
+
+| Method | Recall@1 | Group P@5 | Notes |
+|---|---|---|---|
+| Menu filter by type, shop order (no photo) | 0.031 | 1.0 by construction | assumes the shopper can name the type (Finding 13/15) |
+| Pretrained FashionSigLIP, no training | 0.486 | 0.869 | no fine-tuning |
+| Pretrained two-model ensemble | 0.505 | 0.864 | twice the cost |
+| **Fine-tuned (recommended)** | **0.520** | **0.869** | |
+| Menu filter by type, then our ranking | 0.554 | 1.0 by construction | uses LookBench's labels as the "menu"; loses 5% of items whose labels disagree (Finding 14) |
+
+LookBench queries are hand-drawn crops of the garment. The app sends the **whole** photo by default, and
+that setting has not been measured yet; the own-wardrobe test (D9, rules fixed in
+`report/results_log.md`) is that measurement. The Docker times were measured before the H&M items were
+added; the extra items should cost very little, since comparing the photo with every catalogue item is
+cheap next to running the models.
 
 What we found (details and statistics in `report/results_log.md`):
 
-- **On held-out real photos, the right kind of garment is in the top 5 for 90.5% of photos** (random
-  ranking: 21.4%). The bonus that gets us there was chosen on one half of the photos and tested once on
-  the other half. Finding the *exact* item first is much harder: about 51%. Most misses are the right
-  kind of garment with a different design.
-- Fine-tuning helps on real photos: +3.4 points Recall@1 over the pretrained model (p = 0.001), at the
-  same speed, and it matches a two-model ensemble at half the cost.
+- **Finding the exact item first on real photos works about half the time (0.51-0.52).** Most misses
+  are the right kind of garment with a different design (87% of misses on the dev half, Finding 31).
+  Nothing we tried after fine-tuning (DINOv2 fusion, colour re-ranking, the group bonus) moved this.
+- On held-out real photos, the right broad group is in the top 5 for 90.5% of photos with the group bonus.
+  The bonus adds a pretrained zero-shot group classifier's probability to the score, so it optimises this
+  metric fairly directly; a group menu would do the same job.
+- **Is the fine-tuning worth it?** Only for exact items: +3.4 points Recall@1 over the pretrained model
+  (p = 0.001, cluster bootstrap), at the same speed. On garment type it is tied with the pretrained model
+  (group P@5 0.869 vs 0.869), and it is not significantly better than the training-free two-model
+  ensemble (which costs twice the time). A training-free version (pretrained model + group bonus) would
+  be a reasonable choice for a shop that cannot fine-tune.
 - Our first fine-tuning recipe (batches of the same garment type) made the model worse at telling types
   apart; mixing types randomly in each batch fixed it.
 - The "not sure" and shortlist calibration only holds on real photos if it is calibrated on real photos;
@@ -167,12 +200,23 @@ suggest what the shop sells, and the closest match is not always the same cut.*
 
 - The app can only return what the catalogue sells, so for many photos the best answer is "similar",
   not "the same". Exact-item matching on real photos is about 51%.
-- Most of our testing uses synthetic phone photos. The real-photo results come from LookBench, which we
-  also used to choose the model; only the group bonus has a clean held-out test. A final test on my own
-  wardrobe is planned with its rules fixed in advance (`report/results_log.md`).
-- The 90% figure is for 7 broad garment groups.
+- Most of our testing uses synthetic phone photos, made with the same augmentation used for
+  fine-tuning, so the synthetic gains are partly the model learning that augmentation (+17.7 points
+  synthetic vs +2.7 real, Finding 5). The real-photo results come from LookBench, which we also used to
+  choose the model; only the group bonus has a clean held-out test. A final test on my own wardrobe is
+  planned with its rules fixed in advance (`report/results_log.md`).
+- LookBench queries are hand-drawn crops; the app's default (whole photo) is not measured yet.
+- The 90% figure is for 7 broad garment groups, a much easier target than the exact item.
+- We did not compare with existing photo-search tools (for example Google Lens), which are what most
+  shoppers would actually use today.
 - "Not sure" and the shortlist were calibrated on a 3,278-item gallery; in the 54k-item app they are
-  rough guides, and the shortlist is often in the hundreds.
+  rough guides, and the shortlist is often in the hundreds or thousands. The page therefore only shows
+  the shortlist size when it is small enough to mean something (50 items or fewer).
+- **Catalogue coverage and bias.** The base catalogue is Fashion Product Images (Indian e-commerce,
+  2011-12) and leans towards men's and older styles: none of its jeans are wide-leg (Finding 30), and on
+  real photos the dresses group is weak (group P@5 0.32, Finding 16). Women's and current styles depend
+  mostly on the H&M items, which were added after all measurements. Results for a garment the catalogue
+  lacks can look confident and still be the wrong cut.
 - The "not sure" signal (the best similarity) is weak: it lowers the error rate mostly by answering less
   often.
 - The colour estimate looks at the middle of the photo, so it can pick up a shadow or another garment,
@@ -195,6 +239,23 @@ report/       results log and figures
 
 ## Reproduce
 
+What is in git: code, saved result tables (`results/*.csv`), figures and the LookBench dev/test split.
+What is **not** in git (too big, or licensed): the datasets, their images, the fine-tuned checkpoint and
+the saved indexes. Everything below regenerates them. The Docker image is built from these local files,
+so `docker compose up --build` only works after these steps (or with the files copied from a machine that
+ran them).
+
+1. **Data.**
+   - Kaggle "Fashion Product Images (Small)": unpack `styles.csv` and `images/` into `data/raw/`.
+   - Kaggle "Fashion Product Images Dataset" (full, high-resolution): save the zip as
+     `data/raw_full/fashion-product-images-dataset.zip`.
+   - LookBench: downloaded automatically from Hugging Face (`srpone/look-bench`) on the first
+     `run_lookbench` run; this needs `pip install datasets` (not in `requirements.txt`, which is the
+     app's runtime only).
+   - H&M (demo catalogue only): accept the Kaggle competition rules, then save the zip as
+     `data/hm/h-and-m-personalized-fashion-recommendations.zip`.
+2. **Run, in this order:**
+
 ```
 python -m data_prep.build_catalog
 python -m data_prep.hires_catalog --zip data/raw_full/fashion-product-images-dataset.zip
@@ -213,9 +274,18 @@ python -m data_prep.app_add_hm
 python -m evaluation.lookbench_split
 python -m evaluation.export_lookbench_features
 python -m evaluation.fusion_lookbench --side dev
+# the test half, once per method (values chosen on dev, Finding 32), then the paired tests
+python -m evaluation.fusion_lookbench --side test --a 0   --w 0                 --save base
+python -m evaluation.fusion_lookbench --side test --a 0   --w 0    --beta 0.02  --save colour
+python -m evaluation.fusion_lookbench --side test --a 0.1 --w 0                 --save dinov2
+python -m evaluation.fusion_lookbench --side test --a 0   --w 0.05              --save groupbonus
+python -m evaluation.fusion_lookbench --side test --a 0.1 --w 0.05 --beta 0.02  --save combined
 python -m evaluation.fusion_test_stats
 python -m pytest
 ```
+
+Every script checks itself against a saved number where it can (for example, the plain model must
+reproduce the saved Recall@1) and stops if it does not.
 
 The H&M items are added after the badges, the out-of-catalogue threshold and the bonus were fixed; those
 are not recomputed on the merged catalogue.
@@ -223,5 +293,11 @@ are not recomputed on the merged catalogue.
 Data: Kaggle "Fashion Product Images" (catalogue), LookBench (`srpone/look-bench` on Hugging Face, real
 street photos) and Kaggle "H&M Personalized Fashion Recommendations" (demo catalogue only; accept the
 competition rules first). Pretrained models: Marqo FashionSigLIP and FashionCLIP (DINOv2 was tried, not
-used). `evaluation/fusion_test_stats.py` needs the test runs saved first (`fusion_lookbench.py --side test
-... --save NAME`, see `report/results_log.md`, Finding 32).
+used).
+
+## Documents
+
+- `report/results_log.md`: the full lab notebook, in the order things were done, including the
+  corrections (Findings 15, 19, 21) and every pre-registration. Later findings can overrule earlier
+  ones; this README is the current summary.
+- `CONTRIBUTIONS.md`: who did what.
