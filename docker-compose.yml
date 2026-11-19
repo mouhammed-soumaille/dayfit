@@ -9,6 +9,7 @@ services:
       - "8000:8000"
     environment:
       - HF_HUB_OFFLINE=1        # weights are already in the image; never download at run time
+      - DAYFIT_CATALOG=${DAYFIT_CATALOG:-app}   # demo catalogue; DAYFIT_CATALOG=evaluation docker compose up
     read_only: true             # privacy by construction: the API cannot write any file
     tmpfs:
       - /tmp
