@@ -1,8 +1,50 @@
 # DAYFIT results log
 
-Running record of results and what we concluded, for writing the report.
-Numbers are copied from the terminal outputs; the raw files are
-`results/summary.csv` (with 95% CIs) and `results/comparisons.csv` (paired tests).
+## How to read this log (one-page index, Nov 19)
+
+This is my lab notebook, in the order things were done. Later findings can correct earlier ones (corrections:
+Findings 15, 19, 21); the README is the current summary. Every experiment from Nov 19 on has a pre-registration
+paragraph written BEFORE it was run, then a Finding with the result, including negative results.
+
+**Codes used below**
+- **Finding N**: a result. Findings 1-30 are the first phase (synthetic photos, first real-photo runs, the app);
+  31-44 are the Nov 19 phase (frozen dev/test split, official corpus, baselines, re-ranker).
+- **A1**: two-model ensembles. **B1**: conformal shortlist on synthetic photos. **C1 / C2**: the old menu-filter
+  baselines (random shop order / menu + our ranking).
+- **D8**: data-quality checks on LookBench (duplicates, near-duplicates, manual check). **D9**: own-wardrobe test,
+  rules fixed in advance (not run). **D10**: per-category breakdown and failure gallery.
+- **E1-E8**: the app (engine, calibration, badges, API, page, Docker, latency, README).
+- **T1-T6**: analysis questions: conformal under the synthetic-to-real shift (T1), why hard batches hurt (T2),
+  per-category and grouped conformal (T3), risk control / "not sure" (T4), hubness (T5), the coverage bound (T6).
+- **Tasks 1-6** (Nov 19 plan): 1 demo fixes (F35-36), 2 the app's real setting (F37-39), 3 bad photos (F40),
+  4 credible baselines (F41-42), 5 learned re-ranker (F43-44), 6 production and documentation.
+
+**Protocols**
+- *Main protocol (from Finding 38 on)*: LookBench real_streetlook, 981 real street photos, searched against the
+  OFFICIAL corpus of 61,553 images (3,278 gallery + 58,275 noise), identical image files merged ("dedup").
+  Exact-item metrics: R@1, R@5.
+- *Gallery protocol*: the same photos against the 3,278 gallery only. Needed for group P@5 (noise images have no
+  category) and for anything that needs item text or labels (keyword search, menus). Earlier findings use it.
+- *Dev / test split*: 500 / 481 photos, 621 clusters (same crop, street photo or item stay together), seed 490.
+  Methods are tuned on dev and run ONCE on test; paired cluster bootstrap; Holm across methods taken to test.
+- *Synthetic photos*: catalogue images degraded with the training augmentation; they mostly measure that
+  augmentation (Finding 5), so they are a secondary result.
+
+**Current headline numbers and their source (test half, 481 real photos, LookBench crop)**
+| claim | number | source |
+|---|---|---|
+| exact item first, recommended model, official corpus | R@1 0.499, R@5 0.688 | Finding 38, results/perquery/finetuned_random_*_image_full.csv |
+| pretrained FashionSigLIP, same setting | R@1 0.476 | Finding 38 |
+| classical image search (colour + texture + shape) | R@1 0.123 | Finding 42, results/classical_baseline.csv |
+| keyword search, short / idealised detailed (gallery) | R@1 0.312 / 0.486 | Finding 41, results/keyword_baseline.csv |
+| whole photo instead of crop (official corpus) | R@1 0.391 | Finding 37/38, results/perquery/*_raw_image_full.csv |
+| fine-tuning gain on blurred photos (all 981) | +6 to +21 points R@1 | Finding 40, results/robustness*.csv |
+| learned re-ranker | R@1 0.520 (+2.1, n.s.) | Finding 43, results/rerank_test.csv |
+| right group in top 5 with the group bonus (gallery) | 0.905 (sanity floor) | Finding 32, results/fusion_test.csv |
+
+Raw numbers of the first phase are in `results/summary.csv` (with 95% CIs) and `results/comparisons.csv`.
+
+---
 
 ## Setup (as of Nov 10)
 
