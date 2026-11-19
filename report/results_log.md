@@ -769,3 +769,16 @@ the app's group badge and group bonus inherit that noise on H&M items. (3) 395 o
 items (6.4%) are kids' items by name; harmless for the evaluation (nothing is hidden there), noted as label noise.
 Limitation: kids' items are hidden, not detected in the photo; a photo of a kids' garment gets the most
 similar ADULT items, with no warning.
+
+## Pre-registration: whole photo vs crop on LookBench (task 2a, evaluation/whole_photo.py)
+Question: every real-photo number so far uses LookBench's hand-drawn crop, but the app sends the WHOLE
+photo by default (crop box optional). How much worse is the app's default setting?
+Runs (no tuning, nothing chosen): evaluation/run_lookbench.py --query_image raw_image for finetuned_random
+and fashion_siglip, same 3,278 gallery and dedup protocol; plain similarity, no group bonus.
+Reported on all 981 queries and on the TEST half: R@1, R@5, group P@5 for crop and whole photo; paired
+cluster bootstrap over the split clusters for (1) finetuned_random whole - crop, (2) fashion_siglip
+whole - crop, (3) on whole photos finetuned_random - fashion_siglip; Holm over these 3 per metric and side.
+Also: the R@1 ceiling on whole photos (one photo is the query for several items but gets one ranking),
+and R@1 for photos with one query vs photos shared by several queries.
+Sanity check: the crop numbers reproduce the saved R@1 (lookbench_summary.csv) and group P@5 (group_p5.csv).
+Expectation written now: whole photo is worse; the size of the drop is the result.
