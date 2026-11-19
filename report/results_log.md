@@ -1033,3 +1033,28 @@ first) and a linear adapter ablation. Group P@5 is not defined on the full corpu
 Sanity checks: recomputed fine-tuned similarity equals the saved stage-1 score of every pair; the stage-1 order
 reproduces the saved dev and test R@1.
 Expectation written now: a small gain or none (fixed-weight colour and DINOv2 fusion did not help, Finding 32).
+
+## Finding 43: learned re-ranker on real photos (task 5, evaluation/rerank_*.py -> results/rerank_*.csv)
+Checks OK: recomputed fine-tuned similarity equals the saved stage-1 score (max difference 2.4e-07); the stage-1
+order reproduces the saved dev (0.502) and test (0.499) R@1 query by query. (The features script printed
+"saved 0.5010": that was the rounded 0.501; the exact saved value is 491/981 = 0.5005, as computed.)
+True item in the top 20 (ceiling of any re-ranker): 0.771 overall, 0.764 on dev.
+Dev, 5-fold CV by cluster: stage 1 0.502, logistic regression 0.506, boosted trees 0.508 -> boosted trees chosen.
+TEST, run once (481 photos, official corpus):
+  stage 1 (finetuned_random)   R@1 0.499   R@5 0.688
+  re-ranker (boosted trees)    R@1 0.520   R@5 0.709
+  difference R@1 +0.021 [-0.004, +0.050] p = 0.12; R@5 +0.021 [-0.004, +0.048] p = 0.12 (paired cluster bootstrap)
+Learning curve (descriptive; test R@1, mean of 20 random training subsets): 50 dev photos 0.486 (below stage 1),
+100: 0.504, 250: 0.513, 500: 0.520; still rising at 500.
+Permutation importance on test (R@1 lost when the feature is shuffled): fine-tuned similarity 0.151, gap to rank 1
+0.072, pretrained similarity 0.025, rank 0.015, group agreement 0.012, colour difference 0.011, patch matching
+0.009, colour histogram 0.005, DINOv2 similarity 0.003.
+CPU latency of stage 2: 76 ms per photo (4 threads), IF the candidates' DINOv2 patch tokens are stored with the
+catalogue (for the 54k app catalogue that is about 54k x 256 x 768 numbers, ~21 GB in half precision: not
+practical as is).
+Meaning: NEGATIVE / INCONCLUSIVE at the pre-registered test. The re-ranker gains +2.1 points R@1 on held-out real
+photos, in the expected direction but not significant (CI includes 0). The learning curve is the more informative
+result: with 50 labelled photos the re-ranker is worse than doing nothing, and it improves steadily up to the 500
+available, so the method is data-limited rather than useless. The features meant to catch "right garment, wrong
+design" (patch matching, DINOv2, colour) contribute little; the model mostly re-weighs the fine-tuned and
+pretrained similarities and their gaps. The expectation (small gain or none) was right.

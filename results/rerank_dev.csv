@@ -1,0 +1,4 @@
+model,dev_cv_R1
+logistic regression,0.506
+gradient-boosted trees,0.508
+stage 1 only,0.502
