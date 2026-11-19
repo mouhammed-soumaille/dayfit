@@ -63,6 +63,10 @@ st.title("DAYFIT: find a garment from a photo")
 st.caption("Your photo is only used for this search. It is kept in memory and never stored.")
 
 photo = st.file_uploader("Photo of the garment", type=["jpg", "jpeg", "png", "webp", "heic"])
+# Finding 37: on real street photos, searching only the garment instead of the whole outfit photo finds the
+# exact item first 51% instead of 41% of the time, and the right kind of garment far more often
+st.caption("Tip: photograph the garment alone, or mark it with the box after uploading. On real street "
+           "photos this finds the exact item first about 51% of the time, against 41% for a whole-outfit photo.")
 col_a, col_b = st.columns(2)
 same_type_only = col_a.toggle("Same type only")
 hide_other_colours = col_b.toggle("Hide clearly different colours")
@@ -70,7 +74,7 @@ hide_other_colours = col_b.toggle("Hide clearly different colours")
 if photo is not None:
     left, right = st.columns([1, 3])
     # optional crop box: two sliders in percent of the width and height (default: the whole photo)
-    with left.expander("Mark the garment (optional)"):
+    with left.expander("Mark the garment (recommended)", expanded=True):
         x_range = st.slider("Left - right (%)", 0, 100, (0, 100))
         y_range = st.slider("Top - bottom (%)", 0, 100, (0, 100))
     whole_photo = x_range == (0, 100) and y_range == (0, 100)

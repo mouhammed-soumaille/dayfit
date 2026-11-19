@@ -43,8 +43,10 @@ For each photo:
   not sell at all (on the evaluation catalogue this catches 92% of such real photos, with 4% false alarms).
 - Two optional filters, *same type only* and *hide clearly different colours*. They hide results; they
   never change the order.
-- An optional **crop box** ("Mark the garment") to search only part of the photo, as in the picture
-  above. The crop happens in memory; by default the whole photo is sent.
+- A **crop box** ("Mark the garment", recommended) to search only the garment, as in the picture above.
+  The crop happens in memory; if the box is left as it is, the whole photo is sent. Marking the garment
+  matters more than any model change we tried: on real street photos the exact item comes first about
+  51% of the time with the garment marked, against 41% for the whole outfit photo (Finding 37).
 
 The badges describe differences we measured; they are not the model's reasons. The order comes from
 overall visual similarity.
@@ -205,7 +207,9 @@ suggest what the shop sells, and the closest match is not always the same cut.*
   synthetic vs +2.7 real, Finding 5). The real-photo results come from LookBench, which we also used to
   choose the model; only the group bonus has a clean held-out test. A final test on my own wardrobe is
   planned with its rules fixed in advance (`report/results_log.md`).
-- LookBench queries are hand-drawn crops; the app's default (whole photo) is not measured yet.
+- LookBench queries are hand-drawn crops. With the whole photo (the app's default when the box is not
+  used) results are clearly worse: exact item first 41% instead of 51%, right kind of garment in the top 5
+  68% instead of 87% (held-out half, Finding 37). The 0.905 headline is a crop number.
 - The 90% figure is for 7 broad garment groups, a much easier target than the exact item.
 - We did not compare with existing photo-search tools (for example Google Lens), which are what most
   shoppers would actually use today.
