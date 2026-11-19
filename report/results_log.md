@@ -679,3 +679,21 @@ All 15 results are sweaters (group badge "tops"), mostly H&M flat photos. The cr
 and shrank the shortlist; rank 1 was the same item in all three photos. Flat photo: the estimated colour moved
 from #4b3e36 to #7d6f67 (lighter, greyer) with the lighting, so the colour badges changed while the ranking barely
 did (as the README's lighting caveat says). Demo recipe chosen: worn photo + crop box around the garment.
+
+## Pre-registration: "colour can't be judged" check for the app (serving/colour_check.py)
+Problem: on black-and-white or very dark photos the colour estimate (median CIELAB of the image centre) is
+meaningless but the app still shows confident colour badges. The check uses the QUERY photo only; catalogue
+colours and the colour bands of Finding 24 are unchanged.
+Two numbers per photo, over the whole photo (longer side 224 px): colourfulness = 95th percentile of CIELAB
+chroma, brightness = 95th percentile of L*. Flag "black-and-white" if colourfulness < T_c; flag "too dark"
+if brightness < T_L. Rule fixed now: T_c and T_L = the 1st percentile of each number over the DISTINCT
+LookBench query crops of the DEV half (identical crops counted once), so at most ~1% of normal real photos
+are flagged by construction. No other value is tried.
+Check, once, on the distinct TEST-half crops and on 300 random catalogue images (seed 1): flag rate on the
+original photos (false alarms; catalogue split into items listed Black/White/Grey vs the rest), and on
+grayscale, brightness x0.5 (inside the training range 0.45-1.55), x0.3 and x0.15 (outside) versions; and how
+often the colour estimate moves by more than the "different" band (Delta-E > 37.0) from the original.
+Ship rule: ship if false alarms on test originals <= 2% and grayscale detection >= 95% on test crops;
+the darkness flag is reported (no ground truth for "too dark" beyond the estimate moving).
+Sanity check: the script first recomputes the colour bands of Finding 24 and stops if they differ from
+serving/badges.json.
