@@ -1,0 +1,12 @@
+# Packages needed to RUN THE EXPERIMENTS (evaluation/, data_prep/, training/), on top of requirements.txt
+# (the app's runtime). Install with:  pip install -r requirements.txt -r requirements-dev.txt
+datasets==5.2.0              # LookBench from Hugging Face
+pyarrow==26.0.1
+scikit-learn==1.9.1          # re-ranker, learned "not sure" score
+scipy==1.18.1                # motion blur in the robustness test
+matplotlib==3.11.2           # figures
+transformers==5.23.0         # tokenizer for text prompts (zero-shot types, close-up rule)
+pytest==9.2.0
+rembg==2.0.87                # garment cropping experiment (Finding 2-3)
+onnxruntime==1.31.1          # needed by rembg
+kaggle==2.2.5                # H&M download (data_prep/hm_catalog.py)
