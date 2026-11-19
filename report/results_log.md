@@ -1013,3 +1013,23 @@ converts every input to float internally, so the numbers are the same as with in
 Baseline ladder on the real test half (exact item first): colour histogram 0.08, classical 0.12 (full corpus);
 classical + menu 0.24, short keywords 0.31, detailed idealised keywords 0.49 (gallery); photo 0.50 (full corpus),
 0.51 (gallery); photo + menu 0.54 (gallery).
+
+## Pre-registration: learned re-ranker trained on real photos (task 5, evaluation/rerank_features.py + rerank_model.py)
+Problem (Finding 31): most misses are the right kind of garment with the wrong design; one embedding decides on
+its own what matters. Stage 1: finetuned_random's top 20 distinct pictures on the official 61,553-image corpus
+(main protocol; true item in the top 20 bounds what any re-ranker can do). Stage 2: a model scores each
+(photo, candidate) pair from 9 features, fixed now: fine-tuned similarity, gap to rank 1, rank, pretrained
+FashionSigLIP similarity, DINOv2 similarity (CLS, 224 px), DINOv2 patch matching (mean over the photo's 256
+patches of the best cosine with the candidate's patches), masked HSV colour-histogram cosine, CIEDE2000 colour
+difference, and P(candidate's zero-shot group | photo). Label: candidate is the true item.
+Models, fixed settings: logistic regression (standardised, C = 1) and HistGradientBoostingClassifier (200 trees,
+lr 0.05, 15 leaves, seed 0), trained pointwise. Choice on DEV only: 5-fold cross-validation by split cluster
+inside dev; the higher cross-validated dev R@1 wins (tie: logistic regression). The chosen model is trained on
+all dev and run ONCE on TEST, whatever its dev result; paired cluster bootstrap vs stage 1 (R@1, R@5).
+Descriptive, after the test run (nothing chosen with them): learning curve with 50 / 100 / 250 / 500 dev photos
+(20 random subsets) -> test R@1; permutation importance on test; CPU latency of stage 2.
+Not in this step (decided now, may follow): extra training data from real_studio_flat (needs a leakage check
+first) and a linear adapter ablation. Group P@5 is not defined on the full corpus and is not reported here.
+Sanity checks: recomputed fine-tuned similarity equals the saved stage-1 score of every pair; the stage-1 order
+reproduces the saved dev and test R@1.
+Expectation written now: a small gain or none (fixed-weight colour and DINOv2 fusion did not help, Finding 32).
