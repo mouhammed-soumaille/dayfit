@@ -1058,3 +1058,18 @@ result: with 50 labelled photos the re-ranker is worse than doing nothing, and i
 available, so the method is data-limited rather than useless. The features meant to catch "right garment, wrong
 design" (patch matching, DINOv2, colour) contribute little; the model mostly re-weighs the fine-tuned and
 pretrained similarities and their gaps. The expectation (small gain or none) was right.
+
+## Pre-registration: re-ranker with extra real training photos from real_studio_flat (evaluation/rerank_studio.py)
+Reason: Finding 43's learning curve was still rising at 500 labelled photos. Extra data: LookBench real_studio_flat
+(1,011 studio / flat-lay photos, 3,951-item gallery), used for TRAINING only.
+Leakage rule, fixed now: a studio photo is dropped if its own image, or any gallery picture of its true item, is
+byte-identical or a near-duplicate (pretrained FashionSigLIP cosine >= 0.97, rule of Finding 18) of a
+real_streetlook TEST query crop or of a gallery picture of a TEST item. Counts are reported.
+Studio pairs: stage 1 = finetuned_random top 20 on real_studio_flat's official corpus (its gallery + the 58,275
+noise images); the same 9 features as Finding 43. Model: Finding 43's choice (boosted trees, same settings;
+sklearn's automatic early stopping, which would switch on above 10,000 rows, is switched off so nothing changes),
+trained on dev + studio pairs. Reported: dev 5-fold CV by cluster (studio always in training) next to Finding 43's
+0.508; then ONCE on test: paired cluster bootstrap vs stage 1, Holm over the two re-rankers taken to test
+(Finding 43's and this one); this one minus Finding 43's, descriptive.
+Sanity check: the dev-only model reproduces Finding 43's test R@1 (0.520).
+Expectation written now: small extra gain at most; studio photos are a different kind of photo from street crops.
