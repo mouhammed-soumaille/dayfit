@@ -697,3 +697,52 @@ Ship rule: ship if false alarms on test originals <= 2% and grayscale detection 
 the darkness flag is reported (no ground truth for "too dark" beyond the estimate moving).
 Sanity check: the script first recomputes the colour bands of Finding 24 and stops if they differ from
 serving/badges.json.
+
+
+## Finding 35: "colour can't be judged" check (serving/colour_check.py -> results/colour_check.csv)
+Check OK: the colour bands recomputed as 16.45 / 37.00, equal to serving/badges.json. Thresholds by the
+pre-registered rule (1st percentile over 362 distinct dev crops): colourfulness < 3.64, brightness < 54.41.
+Test (338 distinct test crops), flag rate black-and-white / dark / either:
+  original 0.012 / 0.015 / 0.027; grayscale 1.000 / 0.015 / 1.000; brightness x0.5 0.021 / 1.000 / 1.000;
+  x0.3 0.092 / 1.000 / 1.000; x0.15 0.467 / 1.000 / 1.000.
+Catalogue (300 random items, seed 1), black-and-white flag on the originals: 0.006 for items listed in a
+colour (172), 0.227 for items listed Black / White / Grey (128); grayscale versions flagged 1.000 in both.
+Pre-registered ship rule FAILED: 2.7% false alarms on test originals (limit 2%). Cause: two flags, each set to
+fire on ~1% of normal photos, together fire on ~2.7%; the rule left no room for dev-to-test variation
+(a design error in the rule, not bad luck).
+Dark flag: fires on 100% of x0.5 photos (inside the training range 0.45-1.55), although there the colour
+estimate never moved past the "different" band (0%); it moved only at x0.3 (39%) and x0.15 (48%).
+Brightness alone does not tell whether colour can be judged.
+Black-and-white flag alone: catches 100% of grayscale photos, 1.2% false alarms on real test crops, 0.6% on
+colourful catalogue items, but 22.7% on plain-background photos of black / white / grey items (no colour
+anywhere: the photo cannot tell this apart from a black-and-white photo).
+Also: grayscale never moved the estimate past Delta-E 37 (0%), so "moved past the different band" is a poor
+yardstick for black-and-white photos; the harm there is a meaningless grey swatch and confident badges.
+Decision (made AFTER seeing the test numbers, so the test half is used up for this check; a display feature,
+not an accuracy claim): ship the black-and-white flag only (it meets both ship conditions on its own) and
+drop the dark flag. App: below colourfulness 3.64, no swatch and no colour badges, and the message "This
+photo has almost no colour (a black-and-white photo, or a black, white or grey garment), so the colour
+can't be judged". Darkness moves to task 3 (colour-badge errors on darkened real photos).
+Not fixed by this check: on whole photos the estimate can pick up the background (a wallet on a beige
+backdrop gave #9c7f68, the backdrop, not the dark-brown wallet); the page now suggests marking the garment.
+
+## Pre-registration: app catalogue clean-up (data_prep/app_cleanup.py)
+Problems found in the app: H&M fabric close-ups reach the top 5; some Kaggle rows show another product
+than their label (item 13378, "Timberland Unisex Infant Pink Casual Shoes", is a black Fossil wallet);
+kids' items listed as Men/Women/Unisex are not hidden (~444 by product name). App catalogue only; the same
+rules are COUNTED on the evaluation catalogue (first 6,197 rows) but never applied there.
+Rules, fixed now, no value tried twice (pretrained FashionSigLIP, zero-shot):
+  closeup     : 2-way choice "a photo of a close-up of fabric" vs the item's own type prompt; hide if P >= 0.5.
+  wrong_image : zero-shot group (app prompts, 7 groups, as the group badge) differs from the listed group
+                with group probability >= 0.9 (the badge's own threshold); hide.
+  kids_name   : Kaggle product name matches kid(s), kid's, kidswear, infant(s), baby, babies, toddler, boy(s),
+                boy's, girl(s), girl's (whole words, any case); hide. H&M items come from adult sections.
+Check, by eye: for each rule a contact sheet of 24 random items it drops and 24 random items it keeps
+(seed 0; kids: only drops not already hidden by gender). A rule ships only if the author judges >= 20/24
+of its dropped items to be correct drops (judged by the author, not independent). Report how many items
+each rule drops, per source.
+Caveat: wrong_image uses the same zero-shot model as the group badge and the group bonus, so hiding its
+disagreements makes the app look more self-consistent; later app measurements of the group badge are
+slightly flattered by it.
+Sanity checks: the pretrained embeddings of the first 6,197 app rows equal the saved fashion_siglip.npy;
+the batch zero-shot group equals TypePredictor("app").analyse on 5 random items.
