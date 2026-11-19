@@ -21,6 +21,7 @@ COPY data/images_hires/ data/images_hires/
 # the bigger demo catalogue (DAYFIT_CATALOG=app): 33,141 items, own index
 COPY data/app_catalog.csv data/app_catalog.csv
 COPY data/app_images/ data/app_images/
+COPY data/hm/images/ data/hm/images/
 COPY models/ models/
 # the index cache checks the checkpoint's modification time, which copying into the image changes;
 # restore the time recorded in the index file so the index built on the Mac is reused (not rebuilt)

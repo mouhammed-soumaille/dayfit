@@ -11,6 +11,7 @@
 !models/index/finetuned_random_paths.txt
 !data/app_catalog.csv
 !data/app_images/
+!data/hm/images/
 !models/index/finetuned_random_app.npy
 !models/index/finetuned_random_app_paths.txt
 **/__pycache__
