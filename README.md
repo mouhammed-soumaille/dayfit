@@ -110,7 +110,7 @@ returns JSON with `results` (rank, item, score, type and colour badges, colour h
 | Real street photos (LookBench, 981 queries, duplicate-aware) | Recall@1 | 0.520 |
 | Same | right kind of garment in the top 5 (exact names / groups) | 0.725 / 0.869 |
 | Real photos, held-out test half (481 queries), with the group bonus | right kind of garment in the top 5 (groups) | **0.905** (+3.4 points, 95% CI +2.4 to +4.5) |
-| Docker on CPU (4 vCPU), median / p95 | response time | 266 / 282 ms |
+| Docker on CPU (4 vCPU), median / p95, evaluation / app catalogue | response time | 266 / 282 ms; 265 / 282 ms |
 | Mac GPU (MPS), median | response time | 36 ms |
 
 Main findings, each with its statistics in `report/results_log.md`:

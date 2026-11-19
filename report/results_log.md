@@ -607,3 +607,14 @@ photos. Same w as before; serving/rerank.json records level "group" and the evid
 synthetic photos (the type-level numbers of F29 no longer describe the app exactly; to check with D9).
 Decision (Nov 19): DeepFashion2 real-pair training skipped for now (only lever left for exact-item R@1, but
 costly: access form, large download, hours of training); revisit only if > 1 week remains after G.
+
+## Finding 33: Docker with the app catalogue (Dockerfile, docker-compose.yml, serving/latency.py)
+The image now ships both catalogues and serves the app catalogue by default; a build step checks that the
+saved app index matches (weights line + 33,141 image paths) so it is reused, not re-embedded on the CPU.
+Check: a reference top 5 was saved from the Mac's own app API (MPS) for 105 synthetic medium photos
+(results/latency_reference_app.csv); the container gives the same top 5 for 105/105.
+CPU in Docker (Colima, 4 vCPU), 100 photos after 5 warm-up: server median 263 ms, p95 279 ms; round trip
+median 265 ms, p95 282 ms (evaluation catalogue, F26: 266 / 282 ms). Five times more items cost nothing
+measurable: scoring 33k x 768 dot products is tiny next to the two image-model forward passes.
+Also new (not evaluated): optional crop box in the UI (two sliders, in-memory crop; default sends the
+original bytes). LookBench queries are hand-drawn crops, so the evaluated setting is the marked-garment one.
