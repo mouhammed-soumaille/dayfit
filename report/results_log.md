@@ -879,3 +879,20 @@ old value still covers about 89-90%, consistent with Finding 38 (distractors rar
 photo, out of 61,553; the page shows the number only when it is at most 50, so in practice it says "many".
 (3) With a whole photo, "not sure" fires on about half the photos, which fits Finding 37 (whole photos
 are much harder): the warning reacts to the harder setting even though it was calibrated on crops.
+
+## Pre-registration: robustness to bad photos on REAL LookBench crops (task 3, evaluation/robustness.py)
+Question: how much do imperfect photos hurt, inside vs outside the training augmentation? Our only
+robustness numbers so far are synthetic (same augmentation as training).
+Filters, fixed now, applied to the 981 real crops (sizes in px at the 224 input, as in phone_aug.py):
+  inside the training augmentation: Gaussian blur radius 1.5 and 3; brightness x0.5
+  outside: Gaussian blur radius 6; horizontal motion blur 5, 9, 15 px; brightness x0.3 and x0.15;
+           half saturation and grayscale; warm colour cast (R, G, B multiplied by 1/0.85/0.65 and 1/0.7/0.45).
+Methods: finetuned_random, fashion_siglip, colour histogram (reference baseline; task 4 adds the credible ones).
+Metrics: R@1, R@5 on the official corpus (main protocol), group P@5 on the 3,278 gallery; "not sure" rate of
+the app rule (finetuned_random); share of photos whose TRUE item gets the "different" colour badge, before
+and after the black-and-white fix (Finding 35). All 981 queries (nothing is tuned).
+Tests: drop from clean with a 95% cluster-bootstrap CI for each method; finetuned_random - fashion_siglip per
+filter (R@1 and group P@5), paired cluster bootstrap over the split clusters, Holm over the 14 conditions
+per metric. Expectation written now: small drops inside the augmentation, larger outside; fine-tuning should
+help more inside than outside.
+Sanity check: with no filter both models reproduce the saved per-query full-corpus R@1.
