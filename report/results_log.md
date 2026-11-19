@@ -618,3 +618,18 @@ median 265 ms, p95 282 ms (evaluation catalogue, F26: 266 / 282 ms). Five times 
 measurable: scoring 33k x 768 dot products is tiny next to the two image-model forward passes.
 Also new (not evaluated): optional crop box in the UI (two sliders, in-memory crop; default sends the
 original bytes). LookBench queries are hand-drawn crops, so the evaluated setting is the marked-garment one.
+
+## Finding 34: H&M items added to the app catalogue (data_prep/hm_catalog.py, data_prep/app_add_hm.py)
+App catalogue 33,141 -> 54,178 items: 21,037 H&M products (2018-20; adult sections; 27 product types, at most
+1,000 per type; mostly flat or plain-background photos). Each H&M type was mapped, before running, to an
+existing app type (e.g. Hoodie -> Sweatshirts, Boots -> Casual Shoes), so badge prompts, the
+out-of-catalogue threshold and the group bonus are unchanged; the page shows H&M's own type name.
+Only the new images were embedded and appended (checks: old 33,141 vectors unchanged; 20 re-embedded
+images reproduce the saved vectors, cosine > 0.999; the engine loads the merged index without re-embedding).
+Old files kept as *_fpi. Evaluation numbers unaffected (evaluation catalogue).
+Own photo (long tiered floral skirt on a person, crop box around the skirt): top 5 all skirts, maxi
+and tiered or floral in the right tones; rank 1 a black-ground floral tiered maxi (H&M) close in design.
+Shortlist size 1,784: with 54k items many more are about as similar as the best match; the shortlist was
+calibrated on LookBench's 3,278-item gallery, so in the app it is only indicative (as already stated).
+Colour names are the shops' own labels (H&M: one main colour per item), the swatch is measured; the page
+now says "listed as".
