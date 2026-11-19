@@ -396,6 +396,14 @@ wardrobe, and the group bonus of Finding 32 became the headline method):
       one of the 14 (the original protocol).
 - Also reported, descriptive: color_hist, fashion_siglip, ensemble_mv on (2); the app's "not sure" rate,
   group-badge accuracy, out-of-catalogue warnings and shortlist sizes.
+Clarification (Nov 19, 13:35, BEFORE any photo was taken; script evaluation/d9_own_photos.py written, not run):
+- Crop box: not used. The crop box is optional in the app and its default sends the photo unchanged, so
+  "the app as shipped" = the whole photo. (Harder than LookBench, whose queries are hand-drawn crops.)
+  Photos are taken with the garment filling most of the frame (hanger or plain surface, or worn).
+- Group "other": a garment that fits none of the 7 groups (e.g. a watch) is labelled "other"; it is listed
+  and counted for out-of-catalogue warnings but is in neither primary result.
+- Photos in data/real_photos/ (git-ignored); labels in data/real_photos/labels.csv (file, group, eval_type),
+  written by hand and checked with --check (no model) BEFORE --run. --run refuses to run twice.
 
 ## Finding 22: hubness on LookBench (T5, evaluation/hubness.py)
 k-occurrence N_k(x) = number of distinct query crops (700; identical crops counted once, F20) whose top-k
