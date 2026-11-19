@@ -845,3 +845,20 @@ is larger (+5 points). These p-values are not Holm-corrected. (3) Not comparable
 55.2% "fine R@1" (different correctness rule, Finding 5).
 Only exact-item metrics exist on this corpus (noise images have no category); group P@5 stays a
 3,278-gallery metric.
+
+## Decision (Nov 19, after Finding 38): protocol for all later experiments
+Main protocol for exact-item metrics (R@1, R@5): the OFFICIAL corpus (3,278 gallery + 58,275 noise =
+61,553 entries), dedup protocol. Group P@5 stays on the 3,278 gallery (noise has no category). The old
+3,278-gallery exact-item numbers are kept as a clearly labelled secondary protocol. Later re-rankers work
+on the top 20 of the full corpus. Same dev/test split, same paired cluster bootstrap, Holm across methods.
+
+## Pre-registration: shortlist re-calibration at the official-corpus scale (serving/calibrate_full.py)
+The shortlist q (relative split conformal, alpha 0.1) is re-calibrated with the best similarity taken over
+the 61,553-image corpus instead of the 3,278 gallery, for crops and for whole photos separately (all 981
+photos, finetuned_random). Rule fixed now: the app uses the LARGER of the two q values, so the 90% holds on
+LookBench for both kinds of photo the app can receive. Reported: q for each view, coverage over 200
+random 50/50 splits, median shortlist size on the corpus, coverage of the OLD q at the new scale, and the
+coverage of each view's q on the other view. "Not sure" is NOT re-calibrated (its loss needs garment
+groups, which noise images lack); reported only: its answer rate at the current lambda on the gallery vs
+the full corpus. Sanity checks: gallery-only crops give back the saved q; the best full-corpus similarity
+equals the saved rank-1 scores of lookbench_full.py.
