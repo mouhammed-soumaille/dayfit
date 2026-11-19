@@ -823,3 +823,25 @@ Sanity check: ranking only the 3,278 gallery entries reproduces the saved R@1 of
 Not in this step: re-calibrating "not sure" and the shortlist at this scale (next step), ensemble_mv
 (three times the embedding cost), and near-duplicates between noise and gallery (only exact copies merged).
 Decision to take after the results, with the author: which corpus later experiments use.
+
+## Finding 38: LookBench against the official 61,553-image corpus (task 2b, evaluation/lookbench_full.py)
+Checks OK: 0 noise images are byte-identical to a gallery picture; for both models and both views,
+ranking only the 3,278 gallery entries reproduces the saved rank-1 result for 981/981 queries.
+R@1 / R@5 on the full corpus (all 981; 95% CI), with the 3,278-gallery R@1 and the share of noise in the top 5:
+  finetuned_random crop   R@1 0.501 [0.471, 0.531]  R@5 0.677   (gallery 0.520)  noise in top 5: 16%
+  finetuned_random whole  R@1 0.382 [0.353, 0.412]  R@5 0.521   (gallery 0.406)  noise in top 5: 23%
+  fashion_siglip   crop   R@1 0.472 [0.441, 0.504]  R@5 0.643   (gallery 0.486)  noise in top 5: 14%
+  fashion_siglip   whole  R@1 0.353 [0.323, 0.383]  R@5 0.474   (gallery 0.376)  noise in top 5: 21%
+finetuned_random - fashion_siglip, paired cluster bootstrap (split clusters):
+  crop  all 981: R@1 +0.029 [+0.011, +0.046] p=0.001; R@5 +0.034 p<0.001
+        test 481: R@1 +0.023 [+0.000, +0.047] p=0.070; R@5 +0.025 [-0.004, +0.056] p=0.113
+  whole all 981: R@1 +0.030 [+0.010, +0.050] p=0.004; R@5 +0.047 p<0.001
+        test 481: R@1 +0.025 [+0.002, +0.050] p=0.044; R@5 +0.052 [+0.029, +0.079] p<0.001
+Meaning: (1) a corpus 19 times bigger costs only about 2 points of R@1 (crop 0.520 -> 0.501, whole photo
+0.406 -> 0.382): the 58k distractors rarely beat the true item, although they fill 14-23% of the top-5 slots.
+(2) The fine-tuning gain is about +2.5 to +3 points R@1 at this scale too; on the test half alone it is
+borderline for crops (p = 0.07) and significant for whole photos (p = 0.044); with whole photos the R@5 gain
+is larger (+5 points). These p-values are not Holm-corrected. (3) Not comparable to the paper's FashionSigLIP
+55.2% "fine R@1" (different correctness rule, Finding 5).
+Only exact-item metrics exist on this corpus (noise images have no category); group P@5 stays a
+3,278-gallery metric.
