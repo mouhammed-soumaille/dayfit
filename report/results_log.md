@@ -976,3 +976,17 @@ so ties would grow. This could not be measured: the noise images have no text.
 Implication: the honest pitch is not "photos beat text" but "photos match a perfect description without the
 shopper having to produce one"; and photo + a typed or menu-chosen category is the natural combination
 (Finding 14: type menu + our ranking, R@1 0.554 on the gallery, not tested on the frozen split).
+
+## Pre-registration: classical (non-deep-learning) image baseline (task 4b, evaluation/classical_baseline.py)
+Replaces the plain colour histogram as the non-ML image baseline. Each image (resized to 128 x 256) is
+described by: masked HSV colour histogram (8x4x4; near-white pixels S < 26 and V > 230 left out), masked LBP
+texture histogram (8 neighbours, radius 1, uniform, 10 bins) and HOG shape (64 x 128 grayscale, 9 orientations,
+16 px cells, 2x2 blocks); each normalised; score = weighted sum of the three cosines.
+Weights: grid of all settings in steps of 0.1 that sum to 1 (66), chosen by the highest DEV R@1 on the official
+corpus (main protocol); then run ONCE on the TEST half. Variant "classical + menu": the shopper picks the right
+garment group from a menu (idealised), and only gallery items of that group are ranked (gallery only: noise has
+no labels). References, not tested: colour only (masked) with the same features, and the same menu in front of
+our photo model. Tests on the test half: photo - classical (full corpus) and photo (gallery, no menu) - classical
++ menu, R@1, paired cluster bootstrap, Holm over these 2.
+Sanity check: saved finetuned_random query embeddings reproduce the saved gallery R@1 (0.520).
+Expectation written now: far below the photo model on exact items; the menu helps it a lot.
