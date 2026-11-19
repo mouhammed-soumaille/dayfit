@@ -12,21 +12,39 @@ What the shopper sees:
   - two optional filters that HIDE results without changing the ranking:
     "same type only" and "hide clearly different colours"
   - one honest line: badges describe differences, the ranking is overall visual similarity
+  - an optional crop box (two sliders): the shopper marks the garment, so the background and other
+    clothes in the photo do not count. The crop is done in memory; with the default box (the whole
+    photo) the original bytes are sent unchanged.
 
 Run (API first, in another terminal):
     uvicorn serving.api:app --port 8000
     streamlit run serving/ui.py
 """
+import io
 import os
 
 import requests
 import streamlit as st
+from PIL import Image, ImageDraw, ImageOps
+
+try:                                       # iPhone photos (HEIC), as in the API
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    pass
 
 API = os.environ.get("DAYFIT_API", "http://localhost:8000")
 PLURAL = {"skirt": "skirts", "jumpsuit": "jumpsuits", "handbag": "handbags", "hat": "hats",
           "scarf": "scarves", "belt": "belts", "socks": "socks", "sunglasses": "sunglasses",
           "swimsuit": "swimsuits", "watch": "watches", "necklace": "necklaces",
           "earrings": "earrings", "wallet": "wallets", "umbrella": "umbrellas"}
+
+
+def crop_box(image, x_range, y_range):
+    """Slider percentages (0-100) -> pixel box (left, top, right, bottom)."""
+    w, h = image.size
+    return (round(w * x_range[0] / 100), round(h * y_range[0] / 100),
+            round(w * x_range[1] / 100), round(h * y_range[1] / 100))
 
 
 def swatch(hex_code):
@@ -45,9 +63,32 @@ hide_other_colours = col_b.toggle("Hide clearly different colours")
 
 if photo is not None:
     left, right = st.columns([1, 3])
-    left.image(photo.getvalue(), caption="Your photo")
+    # optional crop box: two sliders in percent of the width and height (default: the whole photo)
+    with left.expander("Mark the garment (optional)"):
+        x_range = st.slider("Left - right (%)", 0, 100, (0, 100))
+        y_range = st.slider("Top - bottom (%)", 0, 100, (0, 100))
+    whole_photo = x_range == (0, 100) and y_range == (0, 100)
+    if whole_photo:
+        left.image(photo.getvalue(), caption="Your photo")
+        body = photo.getvalue()                      # exactly the uploaded bytes, as before
+    else:
+        try:
+            image = ImageOps.exif_transpose(Image.open(io.BytesIO(photo.getvalue()))).convert("RGB")
+        except OSError:
+            right.error("This photo could not be opened for cropping; switch the box back to the whole photo.")
+            st.stop()
+        box = crop_box(image, x_range, y_range)
+        if box[2] - box[0] < 20 or box[3] - box[1] < 20:
+            right.error("The box is too small. Make it bigger.")
+            st.stop()
+        preview = image.copy()
+        ImageDraw.Draw(preview).rectangle(box, outline="red", width=max(3, image.width // 150))
+        left.image(preview, caption="Your photo (only the red box is searched)")
+        buffer = io.BytesIO()                        # in memory only, never written to disk
+        image.crop(box).save(buffer, format="JPEG", quality=95)
+        body = buffer.getvalue()
     with st.spinner("Searching the catalogue..."):
-        response = requests.post(f"{API}/search", data=photo.getvalue(), timeout=60)
+        response = requests.post(f"{API}/search", data=body, timeout=60)
     if response.status_code != 200:
         right.error(response.json().get("detail", "The search failed."))
         st.stop()
