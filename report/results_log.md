@@ -664,7 +664,12 @@ Scope (added 13:27, after the sweater rehearsal below): a worn sweater matched f
 so photo style is not a general rule; likely jeans-specific (the old catalogue has hundreds of men's jeans on a model).
 Not measured: the rank of the 37 wide-leg denim items for the worn photo (would need a small script).
 
-### Demo rehearsal (Nov 19, 13:20): a friend's brown crew-neck sweater (not in the catalogue, not a D9 photo)
+### Demo rehearsal (Nov 19, 13:20): the author's own brown crew-neck sweater (not in the catalogue)
+CORRECTION (13:40): this sweater is the AUTHOR'S (first written down as a friend's), so it is a D9 wardrobe
+garment that was searched in the app before D9. Decision, made now, before any D9 photo: it stays in D9 like
+every other garment (the protocol drops nothing), and is flagged in the D9 result. The app was not changed
+after seeing it (frozen since the H&M merge), so seeing it cannot have tuned the method; dropping it now,
+after seeing its results, would be the biased choice.
 Descriptive only; app frozen, nothing changed. Same sweater, three photos:
                                   rank 1                          sim    shortlist  colour badges (top 5)
   worn, no crop (room, face)      H&M brown knit "Greenish Khaki" 0.71   1,386      4 very close, 1 different (beige)
