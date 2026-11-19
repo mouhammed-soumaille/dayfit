@@ -16,6 +16,10 @@ Uncertainty (constants from serving/calibration.json, calibrated on LookBench re
   - shortlist_size: number of catalogue items within q of the best similarity (conformal, alpha 0.1)
   Neither guarantee formally holds here (different gallery); the response says so.
 
+Colour (Finding 35): if the photo has almost no colour anywhere (black-and-white photo, or a black,
+white or grey garment on a plain background), the colour estimate means nothing, so query.colour_judged
+is false and no colour badges are given (colour_badge = None). Threshold from serving/colour_check.py.
+
 Catalogue: DAYFIT_CATALOG=evaluation (default, 6,197 items) or app (~33k items, demo only); the badge
 vocabulary and the out-of-catalogue threshold follow the catalogue.
 
@@ -34,6 +38,7 @@ from fastapi.responses import FileResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 from serving.badges import TypePredictor, colour_band, garment_colour, lab_to_hex
+from serving.colour_check import photo_numbers
 from serving.engine import SearchEngine
 
 try:  # lets PIL open iPhone .heic photos
@@ -56,6 +61,9 @@ with open("serving/calibration.json") as f:
     calibration = json.load(f)
 with open("serving/badges.json") as f:
     badges = json.load(f)
+with open("serving/colour_check.json") as f:
+    # only the black-and-white threshold is used; the darkness flag was dropped (Finding 35)
+    colourfulness_min = json.load(f)["colourfulness_min"]
 with open(OUTSIDE_FILE[engine.catalogue]) as f:
     outside = json.load(f)                     # out-of-catalogue warning threshold (outside_check.py / app_badges_check.py)
 rerank_w = 0.0                                 # evaluation catalogue: plain similarity, exactly as evaluated
@@ -123,6 +131,8 @@ def search_photo(image):
     not_sold = seen["outside_prob"] >= outside["tau"]
     show_group = group_prob >= badges["type_badge"]["min_confidence"]
     query_colour = garment_colour(image)
+    colourfulness, _ = photo_numbers(image)
+    colour_judged = colourfulness >= colourfulness_min  # False: almost no colour anywhere in the photo
 
     results = []
     for rank, i in enumerate(order, start=1):
@@ -130,6 +140,8 @@ def search_photo(image):
         row = engine.item.loc[item_id]
         item_colour = garment_colour(Image.open(row["image_path"]))
         band, delta_e = colour_band(query_colour, item_colour, badges["colour_bands"])
+        if not colour_judged:                           # no colour in the photo: no colour badge
+            band, delta_e = None, None
         item_group = types.group_of[row["article_type"]]
         # name shown to the shopper: H&M's own product type if the item comes from H&M (data_prep/app_add_hm.py),
         # otherwise the catalogue type; badges and ranking always use article_type
@@ -140,14 +152,16 @@ def search_photo(image):
             article_type=row["article_type"], display_type=display_type, color=row["color"],
             image_url=f"/catalog/{item_id}",
             type_badge=("same type" if item_group == group else "different type") if show_group else None,
-            colour_badge=band, colour_delta_e=round(delta_e, 1), colour_hex=lab_to_hex(item_colour)))
+            colour_badge=band, colour_delta_e=None if delta_e is None else round(delta_e, 1),
+            colour_hex=lab_to_hex(item_colour)))
 
     q = calibration["shortlist"]["q"]
     lam = calibration["not_sure"]["lambda"]
     return dict(
         results=results,
         query=dict(predicted_group=group if show_group else None, group_confidence=round(group_prob, 3),
-                   colour_hex=lab_to_hex(query_colour),
+                   colour_hex=lab_to_hex(query_colour) if colour_judged else None,
+                   colour_judged=bool(colour_judged),
                    not_in_catalogue=seen["outside_type"] if not_sold else None,
                    not_in_catalogue_prob=round(seen["outside_prob"], 3)),
         not_sure=best < lam,

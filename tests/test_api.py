@@ -4,12 +4,14 @@ Run from the repo root:
     python -m pytest tests/test_api.py -v
 """
 import builtins
+import io
 import os
 import tempfile
 
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
+from PIL import Image, ImageOps
 
 from serving.api import app
 
@@ -56,6 +58,22 @@ def test_search_writes_no_file(monkeypatch):
     assert r.status_code == 200
     assert writes == []
     assert set(os.listdir(tempfile.gettempdir())) - temp_before == set()
+
+
+def test_black_and_white_photo_gets_no_colour_badges():
+    """Finding 35: a grayscale version of a normal photo -> colour not judged, no colour badges;
+    the colour original still gets them."""
+    original = photo_bytes(SAVED["query_id"].iloc[0])
+    gray = ImageOps.grayscale(Image.open(io.BytesIO(original))).convert("RGB")
+    buffer = io.BytesIO()                               # in memory only
+    gray.save(buffer, format="JPEG", quality=95)
+    colour_answer = client.post("/search", content=original).json()
+    gray_answer = client.post("/search", content=buffer.getvalue()).json()
+    assert colour_answer["query"]["colour_judged"] is True
+    assert all(r["colour_badge"] is not None for r in colour_answer["results"])
+    assert gray_answer["query"]["colour_judged"] is False
+    assert gray_answer["query"]["colour_hex"] is None
+    assert all(r["colour_badge"] is None for r in gray_answer["results"])
 
 
 def test_too_large_is_refused():

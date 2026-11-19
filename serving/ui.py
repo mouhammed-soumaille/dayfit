@@ -7,7 +7,8 @@ memory (Streamlit keeps uploads in memory) and is sent to the API as raw bytes; 
 What the shopper sees:
   - a "not sure" banner when the best match is weak (risk control, calibrated on real photos)
   - the top 5 results, each with a type badge (only when the type prediction is confident)
-    and a colour badge (very close / slightly different / different)
+    and a colour badge (very close / slightly different / different); no colour badges when the photo
+    has almost no colour (black-and-white photo, or a black/white/grey garment), see Finding 35
   - the shortlist size: how many catalogue items are about as similar as the best one, shown only
     when it is at most SHORTLIST_SHOW_MAX; above that the page only says that many items are about
     as similar (the API still returns the exact number)
@@ -108,8 +109,13 @@ if photo is not None:
                       "suggestions, or try a clearer photo of the garment alone.")
     group = answer["query"]["predicted_group"]
     right.write(f"Looks like: **{group}**" if group else "Garment type: not sure")
-    right.markdown(f"Estimated colour of your garment: {swatch(answer['query']['colour_hex'])} "
-                   "(from the photo; lighting can shift it)", unsafe_allow_html=True)
+    if answer["query"]["colour_judged"]:
+        right.markdown(f"Estimated colour of your garment: {swatch(answer['query']['colour_hex'])} "
+                       "(from the photo; lighting can shift it; marking the garment makes it more reliable)",
+                       unsafe_allow_html=True)
+    else:
+        right.info("This photo has almost no colour (a black-and-white photo, or a black, white or grey "
+                   "garment), so the colour can't be judged and colour badges are hidden.")
     size = answer["shortlist_size"]
     if size <= SHORTLIST_SHOW_MAX:
         items = "item is" if size == 1 else "items are"
@@ -133,8 +139,9 @@ if photo is not None:
         col.caption(f"listed as: {r['color']}")      # the shop's own colour label; the swatch below is measured
         if r["type_badge"]:
             col.caption(("✅ " if r["type_badge"] == "same type" else "⚠️ ") + r["type_badge"])
-        col.caption({"very close": "🎨 colour very close", "slightly different": "🎨 colour slightly different",
-                     "different": "🎨 colour different"}[r["colour_badge"]])
+        if r["colour_badge"]:
+            col.caption({"very close": "🎨 colour very close", "slightly different": "🎨 colour slightly different",
+                         "different": "🎨 colour different"}[r["colour_badge"]])
         col.markdown(swatch(r["colour_hex"]), unsafe_allow_html=True)
         col.caption(f"similarity {r['score']:.2f}")
     if hidden:
