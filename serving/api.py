@@ -86,7 +86,7 @@ if engine.catalogue == "app":
     hidden = engine.item.loc[engine.retriever.item_ids, "gender"].isin(KIDS).to_numpy()
     flagged = pd.read_csv(HIDDEN_FILE, dtype=str)
     kids_by_name = set(flagged.loc[flagged["reasons"].str.contains("kids_name"), "item_id"])
-    hidden |= np.array([i in kids_by_name for i in engine.retriever.item_ids])
+    hidden = hidden | np.array([i in kids_by_name for i in engine.retriever.item_ids])   # new array (pandas gives a read-only one)
 
 
 def pick_results(ranking):
