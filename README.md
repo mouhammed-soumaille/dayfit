@@ -195,8 +195,11 @@ returns JSON with the `results` (rank, item, score, type and colour badges, colo
 (predicted group, estimated colour or `colour_judged: false`, out-of-catalogue warning), `not_sure`,
 `shortlist_size`, `latency_ms` and a `note` on the limitations.
 
-Response time: 266 ms median on a 4-core CPU in Docker (282 ms 95th percentile), 36 ms on a Mac GPU (MPS),
-measured on the evaluation catalogue and at 33k items (Findings 26, 33).
+**Response time.** Budget: at most 500 ms of server time per search on a 4-core CPU (about 1 s is the limit
+for an answer to feel immediate, and the phone upload and page take roughly the other half). Measured: 266 ms
+median in Docker on 4 vCPUs (Findings 26, 33); on the Mac's CPU with 4 threads 129 ms for the 54k-item app
+catalogue, of which 56 ms is the second (type) model, and 36 ms on the Mac GPU (Finding 45). For slower machines
+`DAYFIT_TYPE_MODEL=off` skips the type model (no type badge, no group bonus, no out-of-catalogue warning).
 
 ## Synthetic phone photos (secondary result)
 

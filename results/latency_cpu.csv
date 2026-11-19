@@ -1,0 +1,4 @@
+catalogue,items,type_model,device,threads,n,median_ms,p95_ms,budget_ms,within_budget
+evaluation,6197,on,cpu,4,100,123.65,125.405,500,True
+app,54178,on,cpu,4,100,128.75,131.005,500,True
+app,54178,off,cpu,4,100,72.6,74.11,500,True

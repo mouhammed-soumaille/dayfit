@@ -1146,3 +1146,16 @@ than the container's, so the absolute numbers are optimistic; Docker gave 266 ms
 What switching it off costs is already measured: group P@5 0.905 -> 0.871 on the test half (Finding 32), and
 no type badge or out-of-catalogue warning.
 Sanity check: (evaluation, on) reproduces the saved top 5 for at least 98% of photos.
+
+## Finding 45: latency budget and the optional type model (serving/latency_cpu.py -> results/latency_cpu.csv)
+Check OK: on the CPU the evaluation catalogue gives the saved top 5 for 105/105 photos.
+Server time per search, Mac CPU, 4 threads, 100 photos after 5 warm-up (median / 95th percentile):
+  evaluation catalogue (6,197 items), type model on    124 / 125 ms
+  app catalogue (54,178 items), type model on          129 / 131 ms
+  app catalogue (54,178 items), type model off          73 /  74 ms
+Meaning: (1) all settings are well inside the 500 ms budget; the Docker container (4 vCPUs, slower) measured
+266 ms with the type model on (Finding 26), also inside it. (2) The second model takes 56 ms of 129 (44%):
+Finding 26's "about half" is roughly right (off / on = 0.56). (3) Nine times more catalogue items cost 5 ms.
+Decision: the type model stays ON by default. The app is inside the budget with it, and switching it off
+loses the type badge, the out-of-catalogue warning and 3.4 points of group P@5 (Finding 32) to save ~56 ms.
+DAYFIT_TYPE_MODEL=off remains for slower machines.
