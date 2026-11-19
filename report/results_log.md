@@ -1159,3 +1159,11 @@ Finding 26's "about half" is roughly right (off / on = 0.56). (3) Nine times mor
 Decision: the type model stays ON by default. The app is inside the budget with it, and switching it off
 loses the type badge, the out-of-catalogue warning and 3.4 points of group P@5 (Finding 32) to save ~56 ms.
 DAYFIT_TYPE_MODEL=off remains for slower machines.
+
+## README check (task 6, evaluation/readme_check.py)
+Every README number that comes from a results file is recomputed from that file and must appear verbatim in the
+README (39 checks). Mismatches found and fixed: (1) the synthetic fine-tuning gain was given as +17.7 points, which
+is the FIRST (hard-batch) model of Finding 4; for the recommended random-batch model it is +15.6 (0.949 vs 0.793,
+medium photos). (2) "confidence intervals are 4-5 points wide" was wrong: they are about +-4 to 5 points (twice
+that wide). After the fixes: 0 mismatches. Numbers that exist only in this log (Docker 266 ms, MPS 36 ms, the
+wide-leg jeans check, H&M label noise, the 500 / 481 split) are listed by the script for a check by eye.

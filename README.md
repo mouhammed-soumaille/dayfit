@@ -206,7 +206,8 @@ catalogue, of which 56 ms is the second (type) model, and 36 ms on the Mac GPU (
 Before real photos were available I built synthetic "phone photos" of the evaluation catalogue (random
 background, rotation, crop, lighting, blur, JPEG). The fine-tuned model was **trained on the same kind of
 synthetic photo**, so these numbers mostly measure how well it learned that augmentation: its gain over the
-pretrained model is +17.7 points here and about +3 on real photos (Finding 5).
+pretrained model is +15.6 points here (0.949 vs 0.793 on medium photos) and about +2 to +3 on clean real
+photos (Findings 7, 38).
 
 | Test (294 items, medium / strong photos) | Value |
 |---|---|
@@ -224,7 +225,7 @@ promise on real photos if it is calibrated on real photos (Finding 10).
 - The app can only return what the catalogue sells, so for many photos the best answer is "similar", not
   "the same". The exact item comes first about half the time on real crops, 39% on whole photos.
 - The real-photo test is one benchmark (LookBench street photos, 981 photos, 621 independent groups); the
-  confidence intervals are 4-5 points wide. My own wardrobe test (D9) was planned with fixed rules but not run.
+  95% confidence intervals are about +-4 to 5 points. My own wardrobe test (D9) was planned with fixed rules but not run.
 - Very blurry photos break every model (strong blur: R@1 0.12), and "not sure" catches few of them (it fires
   on 19% of such photos). Very dark photos often get a wrong "colour different" badge (27-33% for the true
   item even after the black-and-white fix).
