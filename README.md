@@ -5,8 +5,7 @@ enough to search for it. DAYFIT lets you search with the photo instead: upload i
 most similar items from a shop's catalogue. The app also tells you when it isn't sure, and labels each
 result with what it measured (kind of garment, colour) so you can judge the matches yourself.
 
-Course project for EECE 490 (Machine Learning), American University of Beirut, Fall 2026. I did the work
-alone; `report/results_log.md` is my lab notebook.
+Course project for EECE 490 (Machine Learning), American University of Beirut, Fall 2026. `report/results_log.md` is my lab notebook.
 
 **Who it is for.** The user is an online shopper; the system would run as a "search by photo" feature on
 one shop's site, so it can only suggest what that shop sells. **How it is done today:** on a shop's own
