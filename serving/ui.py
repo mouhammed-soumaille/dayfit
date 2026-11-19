@@ -103,6 +103,10 @@ if photo is not None:
         right.error(response.json().get("detail", "The search failed."))
         st.stop()
     answer = response.json()
+    if "colour_judged" not in answer["query"]:          # an API started before the colour check (Finding 35)
+        right.error("The API is an older version than this page. Stop it and start it again "
+                    "(uvicorn serving.api:app --port 8000), then search again.")
+        st.stop()
 
     not_sold = answer["query"]["not_in_catalogue"]
     if not_sold:
