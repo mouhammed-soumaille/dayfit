@@ -650,6 +650,19 @@ None is a D9 wardrobe photo (web/product photos). App catalogue 54,178 items, gr
   vintage tone is missed (3/5 "colour slightly different", all brighter blue).
 Reading: with a flat-lay photo, the H&M flat-lay items with the right cut (incl. wide-leg) come first; with a
 worn photo, the old worn-on-model jeans come first even though wide-leg items now exist. The model matches HOW
-the garment was photographed before WHAT the cut is. Correction to F30: catalogue coverage is necessary but
-not sufficient; photo style decides (same mechanism as F29, in the other direction).
+the garment was photographed before WHAT the cut is, FOR JEANS. Correction to F30: catalogue coverage is
+necessary but not sufficient; photo style decides (same mechanism as F29, in the other direction).
+Scope (added 13:27, after the sweater rehearsal below): a worn sweater matched flat H&M sweaters without trouble,
+so photo style is not a general rule; likely jeans-specific (the old catalogue has hundreds of men's jeans on a model).
 Not measured: the rank of the 37 wide-leg denim items for the worn photo (would need a small script).
+
+### Demo rehearsal (Nov 19, 13:20): a friend's brown crew-neck sweater (not in the catalogue, not a D9 photo)
+Descriptive only; app frozen, nothing changed. Same sweater, three photos:
+                                  rank 1                          sim    shortlist  colour badges (top 5)
+  worn, no crop (room, face)      H&M brown knit "Greenish Khaki" 0.71   1,386      4 very close, 1 different (beige)
+  worn, crop box on the sweater   same item                       0.74   1,081      5 very close
+  flat on a bed (other lighting)  same item                       0.74   1,299      5 slightly different
+All 15 results are sweaters (group badge "tops"), mostly H&M flat photos. The crop box raised the top similarity
+and shrank the shortlist; rank 1 was the same item in all three photos. Flat photo: the estimated colour moved
+from #4b3e36 to #7d6f67 (lighter, greyer) with the lighting, so the colour badges changed while the ranking barely
+did (as the README's lighting caveat says). Demo recipe chosen: worn photo + crop box around the garment.
