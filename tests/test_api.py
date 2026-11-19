@@ -1,5 +1,9 @@
 """Tests for the API (serving/api.py). Loads the models once, so they take a few seconds.
 
+They need generated files that are not in git (the evaluation catalogue, the fine-tuned checkpoint and the
+saved synthetic results; see "Reproduce" in the README). Without them the whole file is skipped, so
+`python -m pytest` still runs the other tests on a fresh clone.
+
 Run from the repo root:
     python -m pytest tests/test_api.py -v
 """
@@ -13,7 +17,13 @@ import pytest
 from fastapi.testclient import TestClient
 from PIL import Image, ImageOps
 
-from serving.api import app
+NEEDED = ["data/catalog.csv", "data/queries.csv", "models/finetuned_random.pt",
+          "results/finetuned_random_phone_medium.csv"]
+MISSING = [path for path in NEEDED if not os.path.exists(path)]
+if MISSING:
+    pytest.skip(f"generated files missing (see README, Reproduce): {MISSING}", allow_module_level=True)
+
+from serving.api import app  # noqa: E402  (imported after the check: it loads the models)
 
 client = TestClient(app)
 QUERIES = pd.read_csv("data/queries.csv", dtype={"source_item_id": str}).set_index("query_id")

@@ -38,6 +38,7 @@ import time
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 
@@ -195,7 +196,8 @@ def search_photo(image):
 @app.post("/search")
 async def search(request: Request):
     image = await read_photo(request)
-    return search_photo(image)
+    # the model runs in a worker thread, so a slow search does not freeze the server (other requests, /health)
+    return await run_in_threadpool(search_photo, image)
 
 
 @app.get("/catalog/{item_id}")
