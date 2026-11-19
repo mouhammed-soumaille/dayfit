@@ -862,3 +862,20 @@ coverage of each view's q on the other view. "Not sure" is NOT re-calibrated (it
 groups, which noise images lack); reported only: its answer rate at the current lambda on the gallery vs
 the full corpus. Sanity checks: gallery-only crops give back the saved q; the best full-corpus similarity
 equals the saved rank-1 scores of lookbench_full.py.
+
+## Finding 39: shortlist re-calibrated at the official-corpus scale (serving/calibrate_full.py -> results/calibration_full.csv)
+Checks OK: gallery-only crops give back the saved q (0.228381); the best full-corpus similarity equals the
+saved rank-1 score of lookbench_full.py for every photo.
+                     q (61,553 corpus)  coverage (200 50/50 splits)  median shortlist  coverage of the OLD q
+  crop               0.2297             0.902                        116 entries       0.897
+  whole photo        0.2363             0.902                        878 entries       0.888
+Crop q on whole photos covers 0.889; whole-photo q on crops covers 0.905. By the pre-registered rule the
+app now uses q = 0.2363 (was 0.2284; old value kept in serving/calibration.json as q_gallery_3278).
+"Not sure" (lambda 0.671, unchanged) answers 92% of crops on the gallery and 93% on the full corpus, but
+only 49% of whole photos (both corpora).
+Meaning: (1) a 19 times bigger corpus barely moves the shortlist constant (0.228 -> 0.230 for crops): the
+old value still covers about 89-90%, consistent with Finding 38 (distractors rarely beat the true item).
+(2) The honest 90% shortlist is long: about 116 items for a marked garment and about 880 for a whole
+photo, out of 61,553; the page shows the number only when it is at most 50, so in practice it says "many".
+(3) With a whole photo, "not sure" fires on about half the photos, which fits Finding 37 (whole photos
+are much harder): the warning reacts to the harder setting even though it was calibrated on crops.

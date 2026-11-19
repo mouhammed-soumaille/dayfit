@@ -4,9 +4,13 @@
   "n_calibration": 981,
   "shortlist": {
     "alpha": 0.1,
-    "q": 0.2283805012702942,
+    "q": 0.23633882403373718,
     "lookbench_coverage": 0.9014460285132384,
-    "lookbench_median_size": 59.0
+    "lookbench_median_size": 59.0,
+    "q_gallery_3278": 0.2283805012702942,
+    "q_full_crop": 0.2296697497367859,
+    "q_full_whole": 0.23633882403373718,
+    "source": "LookBench official corpus (3,278 gallery + 58,275 noise); larger q of crops and whole photos"
   },
   "not_sure": {
     "alpha": 0.1,
