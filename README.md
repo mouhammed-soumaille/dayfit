@@ -83,6 +83,8 @@ distractors do not have):
 | Fine-tuned + an ideal type menu | 0.536 | 1.0 (by construction) |
 | Fine-tuned + group bonus (the app's ranking) | 0.509 | 0.905 |
 
+![Exact item first on the test half: photo model against every baseline, with 95% CIs](report/figures/fig15_headline_real.png)
+
 What these show:
 
 - **A photo beats every realistic alternative that does not need the shopper to describe the garment.** The
@@ -133,6 +135,8 @@ garment**, and that is much harder (official corpus, test half):
 | Garment marked (crop) | 0.499 | 0.688 |
 | Whole photo (person, background, other clothes) | 0.391 | 0.530 |
 
+![Crop vs whole photo, pretrained and fine-tuned, R@1 and R@5 with 95% CIs](report/figures/fig16_crop_vs_whole.png)
+
 Marking the garment matters more than any model change I tried, so the page now recommends it. The same holds
 for the proposal's metric: on whole photos the right kind of garment is in the top 5 for only 0.68 of photos
 (test half, without the group bonus; the bonus was not measured on whole photos), so the 0.905 above is a
@@ -169,6 +173,12 @@ hand and checked before the single run (Finding 46).
 | Fine-tuned model, evaluation catalogue: same article type in the top 5 | 0.745 [0.668, 0.822] | 65 |
 | Pretrained FashionSigLIP, same | 0.711 | 65 |
 | Colour histogram, same | 0.092 | 65 |
+
+![D9: the app's right-kind-of-garment score per group, and the fine-tuned model's article-type score per type](report/figures/fig17_d9.png)
+
+![D9 examples: my photo and the app's top 5, for the first photo of each group and the lowest-scoring photo](report/figures/fig18_d9_gallery.png)
+*Rows chosen by a fixed rule, not by looking: the first photo of each group (in file order) and the photo with
+the lowest score. Green: right kind of garment, red: wrong.*
 
 - **Higher than I expected**, because a garment laid flat or on a hanger filling the frame looks much like a
   shop's product photo. This does not contradict the low whole-street-photo numbers above: it is the easy case.
