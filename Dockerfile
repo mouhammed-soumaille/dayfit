@@ -11,9 +11,9 @@ RUN pip install --no-cache-dir torch==2.15.0 torchvision==0.29.2 --index-url htt
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# only what the app needs (.dockerignore is an allow-list: no results, report, LookBench or photos)
+# only what the app needs (.dockerignore is an allow-list: no evaluation code, results, report, LookBench
+# or photos)
 COPY common/ common/
-COPY evaluation/ evaluation/
 COPY retrieval/ retrieval/
 COPY serving/ serving/
 COPY data/catalog.csv data/catalog.csv

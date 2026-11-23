@@ -13,6 +13,12 @@ services:
     read_only: true             # privacy by construction: the API cannot write any file
     tmpfs:
       - /tmp
+    healthcheck:                # the page waits until the API has loaded the model and answers /health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
   ui:
     image: dayfit
     command: ["streamlit", "run", "serving/ui.py", "--server.address", "0.0.0.0", "--server.port", "8501"]
@@ -22,4 +28,5 @@ services:
     ports:
       - "8501:8501"
     depends_on:
-      - api
+      api:
+        condition: service_healthy

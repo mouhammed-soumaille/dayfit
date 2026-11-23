@@ -1,7 +1,6 @@
 *
 !requirements.txt
 !common/
-!evaluation/
 !retrieval/
 !serving/
 !data/catalog.csv

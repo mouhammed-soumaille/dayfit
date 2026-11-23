@@ -5,8 +5,9 @@ ONCE, then answers searches: photo in, top-k catalogue items out (with type, col
 image path and similarity score). No photo is ever written anywhere: the image only
 lives in memory while it is embedded.
 
-This is a thin layer over the retriever used in all experiments (RETRIEVERS in
-evaluation/run_eval.py), so the app searches exactly like the evaluated model.
+This is a thin layer over the retriever used in all experiments: the model is built by
+retrieval/app_model.py, the same function evaluation/run_eval.py uses for "finetuned_random", so the app
+searches exactly like the evaluated model without importing any evaluation code.
 
 Two catalogues (chosen with the environment variable DAYFIT_CATALOG):
   evaluation (default): data/catalog.csv, the 6,197 items used for the synthetic-photo results and the tests (LookBench results use LookBench's own gallery)
@@ -32,7 +33,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-from evaluation.run_eval import RETRIEVERS
+from retrieval.app_model import make_finetuned_random
 
 METHOD = "finetuned_random"
 CATALOGS = {"evaluation": "data/catalog.csv", "app": "data/app_catalog.csv"}
@@ -40,9 +41,11 @@ CATALOGS = {"evaluation": "data/catalog.csv", "app": "data/app_catalog.csv"}
 
 class SearchEngine:
     def __init__(self, method=METHOD, catalogue=None):
+        if method != METHOD:
+            raise ValueError(f"the app only serves {METHOD}")
         self.catalogue = catalogue or os.environ.get("DAYFIT_CATALOG", "evaluation")
         self.catalog = pd.read_csv(CATALOGS[self.catalogue], dtype={"item_id": str})
-        self.retriever = RETRIEVERS[method]()
+        self.retriever = make_finetuned_random()
         if self.catalogue != "evaluation":                # own embeddings file, e.g. finetuned_random_app.npy
             self.retriever.index_name = f"{method}_{self.catalogue}"
         self.retriever.build_index(self.catalog)          # loads the saved embeddings (or makes them once)
