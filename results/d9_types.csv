@@ -1,0 +1,261 @@
+file,eval_type,method,result_types,type_p5
+IMG_4230.heic,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4230.heic,Tshirts,color_hist,Shirts|Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts,0.0
+IMG_4230.heic,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4230.heic,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4231.heic,Tshirts,finetuned_random,Tshirts|Tshirts|Sweatshirts|Tshirts|Tshirts,0.8
+IMG_4231.heic,Tshirts,color_hist,Jeans|Shirts|Jackets|Shirts|Track Pants,0.0
+IMG_4231.heic,Tshirts,fashion_siglip,Casual Shoes|Tshirts|Tops|Tshirts|Casual Shoes,0.4
+IMG_4231.heic,Tshirts,ensemble_mv,Tops|Casual Shoes|Tshirts|Casual Shoes|Tshirts,0.4
+IMG_4232.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4232.HEIC,Tshirts,color_hist,Sports Shoes|Tshirts|Jeans|Jeans|Sweatshirts,0.2
+IMG_4232.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4232.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4233.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Kurtas,0.8
+IMG_4233.HEIC,Tshirts,color_hist,Jeans|Sweatshirts|Trousers|Trousers|Trousers,0.0
+IMG_4233.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tops|Tshirts|Sweatshirts,0.6
+IMG_4233.HEIC,Tshirts,ensemble_mv,Tops|Tshirts|Tshirts|Tshirts|Tops,0.6
+IMG_4234.HEIC,Tshirts,finetuned_random,Sweatshirts|Tshirts|Sweatshirts|Tshirts|Tshirts,0.6
+IMG_4234.HEIC,Tshirts,color_hist,Jackets|Shorts|Shorts|Jackets|Sweatshirts,0.0
+IMG_4234.HEIC,Tshirts,fashion_siglip,Tops|Tops|Tops|Sweatshirts|Sweatshirts,0.0
+IMG_4234.HEIC,Tshirts,ensemble_mv,Tops|Tops|Tops|Tshirts|Sweatshirts,0.2
+IMG_4235.HEIC,Tshirts,finetuned_random,Shirts|Tshirts|Tshirts|Tshirts|Tshirts,0.8
+IMG_4235.HEIC,Tshirts,color_hist,Shirts|Jackets|Shirts|Track Pants|Tshirts,0.2
+IMG_4235.HEIC,Tshirts,fashion_siglip,Tops|Tops|Tshirts|Tshirts|Tshirts,0.6
+IMG_4235.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tops|Tops|Tops,0.4
+IMG_4236.HEIC,Tshirts,finetuned_random,Heels|Tops|Shirts|Casual Shoes|Dresses,0.0
+IMG_4236.HEIC,Tshirts,color_hist,Sweatshirts|Sweatshirts|Sweatshirts|Kurtas|Tshirts,0.2
+IMG_4236.HEIC,Tshirts,fashion_siglip,Tops|Trousers|Trousers|Jeans|Jeans,0.0
+IMG_4236.HEIC,Tshirts,ensemble_mv,Trousers|Tshirts|Jeans|Track Pants|Trousers,0.2
+IMG_4237.HEIC,Tshirts,finetuned_random,Heels|Heels|Casual Shoes|Casual Shoes|Casual Shoes,0.0
+IMG_4237.HEIC,Tshirts,color_hist,Kurtas|Sweatshirts|Sweatshirts|Sweatshirts|Kurtas,0.0
+IMG_4237.HEIC,Tshirts,fashion_siglip,Trousers|Tops|Track Pants|Trousers|Tops,0.0
+IMG_4237.HEIC,Tshirts,ensemble_mv,Jeans|Jeans|Track Pants|Trousers|Trousers,0.0
+IMG_4238.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4238.HEIC,Tshirts,color_hist,Tshirts|Trousers|Sweatshirts|Shorts|Sweatshirts,0.2
+IMG_4238.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4238.HEIC,Tshirts,ensemble_mv,Tops|Tshirts|Tshirts|Tops|Tshirts,0.6
+IMG_4239.HEIC,Tshirts,finetuned_random,Tops|Tshirts|Tops|Tshirts|Sweatshirts,0.4
+IMG_4239.HEIC,Tshirts,color_hist,Shirts|Trousers|Sweatshirts|Jackets|Track Pants,0.0
+IMG_4239.HEIC,Tshirts,fashion_siglip,Tops|Tshirts|Tops|Tshirts|Tshirts,0.6
+IMG_4239.HEIC,Tshirts,ensemble_mv,Tops|Tops|Tshirts|Tshirts|Tshirts,0.6
+IMG_4240.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4240.HEIC,Tshirts,color_hist,Jeans|Sweatshirts|Trousers|Trousers|Trousers,0.0
+IMG_4240.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tops|Tshirts|Tshirts,0.8
+IMG_4240.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tops,0.8
+IMG_4241.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Kurtas,0.8
+IMG_4241.HEIC,Tshirts,color_hist,Casual Shoes|Jeans|Track Pants|Shorts|Shirts,0.0
+IMG_4241.HEIC,Tshirts,fashion_siglip,Tshirts|Tops|Sweatshirts|Trousers|Tshirts,0.4
+IMG_4241.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tops|Tops|Tops,0.4
+IMG_4242.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Shirts,0.8
+IMG_4242.HEIC,Tshirts,color_hist,Dresses|Trousers|Kurtas|Trousers|Shirts,0.0
+IMG_4242.HEIC,Tshirts,fashion_siglip,Tshirts|Sweatshirts|Tshirts|Tops|Tshirts,0.6
+IMG_4242.HEIC,Tshirts,ensemble_mv,Tshirts|Jackets|Tshirts|Tops|Tops,0.4
+IMG_4243.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tops|Tshirts,0.8
+IMG_4243.HEIC,Tshirts,color_hist,Jackets|Jeans|Shirts|Sweatshirts|Shirts,0.0
+IMG_4243.HEIC,Tshirts,fashion_siglip,Tops|Tshirts|Tshirts|Tshirts|Tshirts,0.8
+IMG_4243.HEIC,Tshirts,ensemble_mv,Tshirts|Tops|Tops|Tshirts|Tshirts,0.6
+IMG_4244.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4244.HEIC,Tshirts,color_hist,Track Pants|Jeans|Jeans|Jeans|Jeans,0.0
+IMG_4244.HEIC,Tshirts,fashion_siglip,Tops|Tshirts|Tshirts|Tshirts|Tshirts,0.8
+IMG_4244.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tops|Tshirts|Tshirts,0.8
+IMG_4245.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4245.HEIC,Tshirts,color_hist,Tshirts|Sweatshirts|Trousers|Trousers|Shorts,0.2
+IMG_4245.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tops,0.8
+IMG_4245.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4246.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4246.HEIC,Tshirts,color_hist,Trousers|Shirts|Sweatshirts|Track Pants|Trousers,0.0
+IMG_4246.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Sweatshirts|Tshirts,0.8
+IMG_4246.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4247.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4247.HEIC,Tshirts,color_hist,Jeans|Sweatshirts|Trousers|Trousers|Shorts,0.0
+IMG_4247.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4247.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4248.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4248.HEIC,Tshirts,color_hist,Jeans|Shirts|Jackets|Shirts|Track Pants,0.0
+IMG_4248.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4248.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4250.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Kurtas|Tshirts|Tshirts,0.8
+IMG_4250.HEIC,Tshirts,color_hist,Jeans|Sweatshirts|Trousers|Trousers|Trousers,0.0
+IMG_4250.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Sweatshirts|Tshirts|Tops,0.6
+IMG_4250.HEIC,Tshirts,ensemble_mv,Tops|Tshirts|Track Pants|Tshirts|Tops,0.4
+IMG_4251.HEIC,Tshirts,finetuned_random,Shirts|Shirts|Shirts|Tshirts|Trousers,0.2
+IMG_4251.HEIC,Tshirts,color_hist,Jeans|Shirts|Sweatshirts|Jackets|Trousers,0.0
+IMG_4251.HEIC,Tshirts,fashion_siglip,Trousers|Tshirts|Sweatshirts|Trousers|Trousers,0.2
+IMG_4251.HEIC,Tshirts,ensemble_mv,Trousers|Track Pants|Trousers|Trousers|Trousers,0.0
+IMG_4252.HEIC,Tshirts,finetuned_random,Tshirts|Sweatshirts|Tshirts|Tshirts|Sweatshirts,0.6
+IMG_4252.HEIC,Tshirts,color_hist,Shirts|Shorts|Sweatshirts|Tshirts|Shirts,0.2
+IMG_4252.HEIC,Tshirts,fashion_siglip,Sweatshirts|Tshirts|Tshirts|Tshirts|Sweatshirts,0.6
+IMG_4252.HEIC,Tshirts,ensemble_mv,Sweatshirts|Tshirts|Tshirts|Tshirts|Sweatshirts,0.6
+IMG_4255.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Sweatshirts,0.8
+IMG_4255.HEIC,Tshirts,color_hist,Shorts|Shirts|Sweatshirts|Sweatshirts|Sweatshirts,0.0
+IMG_4255.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Sweatshirts|Tshirts,0.8
+IMG_4255.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Sweatshirts|Tshirts|Tshirts,0.8
+IMG_4256.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Shorts|Tops,0.6
+IMG_4256.HEIC,Tshirts,color_hist,Shorts|Shirts|Sweatshirts|Sweatshirts|Sweatshirts,0.0
+IMG_4256.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Jeans|Tshirts|Tops,0.6
+IMG_4256.HEIC,Tshirts,ensemble_mv,Tops|Tshirts|Tshirts|Tshirts|Tshirts,0.8
+IMG_4257.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4257.HEIC,Tshirts,color_hist,Shirts|Sweatshirts|Casual Shoes|Tshirts|Shirts,0.2
+IMG_4257.HEIC,Tshirts,fashion_siglip,Tshirts|Sweatshirts|Tshirts|Tshirts|Tshirts,0.8
+IMG_4257.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4258.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4258.HEIC,Tshirts,color_hist,Shirts|Jackets|Jeans|Shirts|Track Pants,0.0
+IMG_4258.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4258.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tops,0.8
+IMG_4260.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Shirts|Tops|Shorts,0.4
+IMG_4260.HEIC,Tshirts,color_hist,Shorts|Shirts|Sweatshirts|Sweatshirts|Sweatshirts,0.0
+IMG_4260.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4260.HEIC,Tshirts,ensemble_mv,Tshirts|Tops|Tshirts|Tshirts|Tshirts,0.8
+IMG_4261.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Shirts|Tshirts|Tshirts,0.8
+IMG_4261.HEIC,Tshirts,color_hist,Trousers|Sports Shoes|Shirts|Sports Shoes|Tshirts,0.2
+IMG_4261.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4261.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4262.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4262.HEIC,Tshirts,color_hist,Sweatshirts|Jeans|Trousers|Trousers|Trousers,0.0
+IMG_4262.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4262.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4263.HEIC,Tshirts,finetuned_random,Tshirts|Shirts|Shorts|Tshirts|Sweatshirts,0.4
+IMG_4263.HEIC,Tshirts,color_hist,Sweatshirts|Jeans|Trousers|Trousers|Trousers,0.0
+IMG_4263.HEIC,Tshirts,fashion_siglip,Tshirts|Tops|Tshirts|Shorts|Tshirts,0.6
+IMG_4263.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tops|Shorts|Tshirts,0.6
+IMG_4264.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4264.HEIC,Tshirts,color_hist,Jeans|Shirts|Jackets|Shirts|Track Pants,0.0
+IMG_4264.HEIC,Tshirts,fashion_siglip,Tshirts|Tops|Tshirts|Tshirts|Tshirts,0.8
+IMG_4264.HEIC,Tshirts,ensemble_mv,Tshirts|Tops|Tshirts|Tshirts|Tshirts,0.8
+IMG_4265.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4265.HEIC,Tshirts,color_hist,Shirts|Jackets|Shirts|Jeans|Track Pants,0.0
+IMG_4265.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tops,0.8
+IMG_4265.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tops|Tshirts,0.8
+IMG_4266.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Sweatshirts|Tshirts|Tshirts,0.8
+IMG_4266.HEIC,Tshirts,color_hist,Jeans|Casual Shoes|Sweatshirts|Track Pants|Trousers,0.0
+IMG_4266.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Sweatshirts|Tops|Track Pants,0.4
+IMG_4266.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tops|Tops|Tops,0.4
+IMG_4267.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4267.HEIC,Tshirts,color_hist,Shorts|Sports Shoes|Sports Shoes|Casual Shoes|Sweatshirts,0.0
+IMG_4267.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4267.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4268.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Sweatshirts|Tops|Sweatshirts,0.4
+IMG_4268.HEIC,Tshirts,color_hist,Jeans|Shirts|Jackets|Shirts|Sweatshirts,0.0
+IMG_4268.HEIC,Tshirts,fashion_siglip,Tops|Tops|Tshirts|Tops|Shorts,0.2
+IMG_4268.HEIC,Tshirts,ensemble_mv,Tshirts|Tops|Tshirts|Tshirts|Tops,0.6
+IMG_4269.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Tshirts,1.0
+IMG_4269.HEIC,Tshirts,color_hist,Jeans|Shirts|Jackets|Shirts|Track Pants,0.0
+IMG_4269.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Jeans|Tshirts|Track Pants,0.6
+IMG_4269.HEIC,Tshirts,ensemble_mv,Tshirts|Track Pants|Tops|Tshirts|Tshirts,0.6
+IMG_4270.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tshirts|Sweatshirts,0.8
+IMG_4270.HEIC,Tshirts,color_hist,Shirts|Jackets|Shirts|Track Pants|Jackets,0.0
+IMG_4270.HEIC,Tshirts,fashion_siglip,Tops|Track Pants|Tshirts|Tshirts|Tshirts,0.6
+IMG_4270.HEIC,Tshirts,ensemble_mv,Tshirts|Tops|Tshirts|Tshirts|Tops,0.6
+IMG_4271.HEIC,Tshirts,finetuned_random,Tshirts|Tshirts|Tshirts|Tops|Tops,0.6
+IMG_4271.HEIC,Tshirts,color_hist,Jackets|Tops|Tshirts|Tshirts|Tshirts,0.6
+IMG_4271.HEIC,Tshirts,fashion_siglip,Tshirts|Sweatshirts|Tops|Tshirts|Tshirts,0.6
+IMG_4271.HEIC,Tshirts,ensemble_mv,Tshirts|Tops|Sweatshirts|Tops|Tshirts,0.4
+IMG_4272.HEIC,Tshirts,finetuned_random,Tshirts|Jackets|Sweatshirts|Sweatshirts|Casual Shoes,0.2
+IMG_4272.HEIC,Tshirts,color_hist,Shorts|Shirts|Sweatshirts|Sweatshirts|Sweatshirts,0.0
+IMG_4272.HEIC,Tshirts,fashion_siglip,Tshirts|Tshirts|Tops|Sweatshirts|Sweatshirts,0.4
+IMG_4272.HEIC,Tshirts,ensemble_mv,Tshirts|Tshirts|Tshirts|Tshirts|Sweatshirts,0.8
+IMG_4273.HEIC,Shorts,finetuned_random,Shorts|Shorts|Shorts|Shorts|Shorts,1.0
+IMG_4273.HEIC,Shorts,color_hist,Tshirts|Sports Shoes|Jeans|Sports Shoes|Jeans,0.0
+IMG_4273.HEIC,Shorts,fashion_siglip,Shorts|Shorts|Shorts|Track Pants|Shorts,0.8
+IMG_4273.HEIC,Shorts,ensemble_mv,Shorts|Shorts|Track Pants|Shorts|Shorts,0.8
+IMG_4274.HEIC,Shorts,finetuned_random,Shorts|Shorts|Shorts|Shorts|Shorts,1.0
+IMG_4274.HEIC,Shorts,color_hist,Shorts|Tshirts|Shirts|Kurtas|Jackets,0.2
+IMG_4274.HEIC,Shorts,fashion_siglip,Shorts|Shorts|Shorts|Shorts|Shorts,1.0
+IMG_4274.HEIC,Shorts,ensemble_mv,Shorts|Shorts|Shorts|Shorts|Track Pants,0.8
+IMG_4275.HEIC,Shorts,finetuned_random,Shorts|Shorts|Shorts|Shorts|Shorts,1.0
+IMG_4275.HEIC,Shorts,color_hist,Jeans|Sweatshirts|Tshirts|Trousers|Trousers,0.0
+IMG_4275.HEIC,Shorts,fashion_siglip,Shorts|Shorts|Shorts|Trousers|Trousers,0.6
+IMG_4275.HEIC,Shorts,ensemble_mv,Jeans|Shorts|Shorts|Shorts|Trousers,0.6
+IMG_4276.HEIC,Shorts,finetuned_random,Shorts|Shorts|Shorts|Shorts|Shorts,1.0
+IMG_4276.HEIC,Shorts,color_hist,Shorts|Tshirts|Kurtas|Shorts|Jackets,0.4
+IMG_4276.HEIC,Shorts,fashion_siglip,Shorts|Shorts|Shorts|Jeans|Shorts,0.8
+IMG_4276.HEIC,Shorts,ensemble_mv,Track Pants|Jeans|Jeans|Shorts|Jeans,0.2
+IMG_4277.HEIC,Trousers,finetuned_random,Track Pants|Trousers|Jeans|Trousers|Track Pants,0.4
+IMG_4277.HEIC,Trousers,color_hist,Sweatshirts|Jeans|Trousers|Trousers|Trousers,0.6
+IMG_4277.HEIC,Trousers,fashion_siglip,Trousers|Jeans|Trousers|Trousers|Trousers,0.8
+IMG_4277.HEIC,Trousers,ensemble_mv,Jeans|Trousers|Trousers|Trousers|Track Pants,0.6
+IMG_4278.HEIC,Jeans,finetuned_random,Jeans|Jeans|Jeans|Jeans|Jeans,1.0
+IMG_4278.HEIC,Jeans,color_hist,Shirts|Sweatshirts|Tshirts|Trousers|Shirts,0.0
+IMG_4278.HEIC,Jeans,fashion_siglip,Jeans|Jeans|Shorts|Jeans|Jeans,0.8
+IMG_4278.HEIC,Jeans,ensemble_mv,Jeans|Jeans|Jeans|Jeans|Jeans,1.0
+IMG_4279.HEIC,Jeans,finetuned_random,Jeans|Jeans|Jeans|Jeans|Jeans,1.0
+IMG_4279.HEIC,Jeans,color_hist,Jackets|Tshirts|Tops|Tshirts|Tshirts,0.0
+IMG_4279.HEIC,Jeans,fashion_siglip,Jeans|Jeans|Jeans|Jeans|Jeans,1.0
+IMG_4279.HEIC,Jeans,ensemble_mv,Jeans|Jeans|Jeans|Jeans|Jeans,1.0
+IMG_4280.HEIC,Jeans,finetuned_random,Jeans|Jeans|Jeans|Jeans|Jeans,1.0
+IMG_4280.HEIC,Jeans,color_hist,Jeans|Jeans|Trousers|Jeans|Shirts,0.6
+IMG_4280.HEIC,Jeans,fashion_siglip,Jeans|Jeans|Jeans|Jeans|Jeans,1.0
+IMG_4280.HEIC,Jeans,ensemble_mv,Jeans|Jeans|Jeans|Jeans|Jeans,1.0
+IMG_4281.HEIC,Shorts,finetuned_random,Shorts|Shorts|Shorts|Shorts|Shorts,1.0
+IMG_4281.HEIC,Shorts,color_hist,Sweatshirts|Trousers|Trousers|Trousers|Dresses,0.0
+IMG_4281.HEIC,Shorts,fashion_siglip,Shorts|Shorts|Shorts|Shorts|Shorts,1.0
+IMG_4281.HEIC,Shorts,ensemble_mv,Shorts|Shorts|Shorts|Shorts|Track Pants,0.8
+IMG_4282.HEIC,Trousers,finetuned_random,Track Pants|Track Pants|Track Pants|Track Pants|Jeans,0.0
+IMG_4282.HEIC,Trousers,color_hist,Jackets|Jackets|Sweatshirts|Shorts|Trousers,0.2
+IMG_4282.HEIC,Trousers,fashion_siglip,Jeans|Jeans|Trousers|Jeans|Trousers,0.4
+IMG_4282.HEIC,Trousers,ensemble_mv,Jeans|Jeans|Jeans|Track Pants|Jeans,0.0
+IMG_4283.HEIC,Trousers,finetuned_random,Trousers|Track Pants|Track Pants|Track Pants|Trousers,0.4
+IMG_4283.HEIC,Trousers,color_hist,Jeans|Sweatshirts|Trousers|Trousers|Trousers,0.6
+IMG_4283.HEIC,Trousers,fashion_siglip,Trousers|Trousers|Trousers|Trousers|Trousers,1.0
+IMG_4283.HEIC,Trousers,ensemble_mv,Trousers|Trousers|Jeans|Trousers|Trousers,0.8
+IMG_4284.HEIC,Trousers,finetuned_random,Track Pants|Track Pants|Track Pants|Track Pants|Track Pants,0.0
+IMG_4284.HEIC,Trousers,color_hist,Trousers|Jeans|Jeans|Jeans|Shirts,0.2
+IMG_4284.HEIC,Trousers,fashion_siglip,Track Pants|Trousers|Track Pants|Track Pants|Track Pants,0.2
+IMG_4284.HEIC,Trousers,ensemble_mv,Track Pants|Track Pants|Track Pants|Track Pants|Trousers,0.2
+IMG_4285.HEIC,Trousers,finetuned_random,Trousers|Trousers|Trousers|Track Pants|Trousers,0.8
+IMG_4285.HEIC,Trousers,color_hist,Jackets|Shorts|Shorts|Shorts|Jackets,0.0
+IMG_4285.HEIC,Trousers,fashion_siglip,Trousers|Jeans|Trousers|Trousers|Trousers,0.8
+IMG_4285.HEIC,Trousers,ensemble_mv,Jeans|Trousers|Trousers|Trousers|Trousers,0.8
+IMG_4295.HEIC,Jackets,finetuned_random,Jackets|Jackets|Sweatshirts|Jackets|Jackets,0.8
+IMG_4295.HEIC,Jackets,color_hist,Shirts|Jackets|Jeans|Shirts|Track Pants,0.2
+IMG_4295.HEIC,Jackets,fashion_siglip,Jackets|Jackets|Jackets|Trousers|Trousers,0.6
+IMG_4295.HEIC,Jackets,ensemble_mv,Jackets|Jackets|Trousers|Jackets|Trousers,0.6
+IMG_4296.HEIC,Jackets,finetuned_random,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4296.HEIC,Jackets,color_hist,Jeans|Sweatshirts|Shirts|Trousers|Shorts,0.0
+IMG_4296.HEIC,Jackets,fashion_siglip,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4296.HEIC,Jackets,ensemble_mv,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4297.HEIC,Jackets,finetuned_random,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4297.HEIC,Jackets,color_hist,Jeans|Sweatshirts|Trousers|Shorts|Shirts,0.0
+IMG_4297.HEIC,Jackets,fashion_siglip,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4297.HEIC,Jackets,ensemble_mv,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4298.HEIC,Jackets,finetuned_random,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4298.HEIC,Jackets,color_hist,Shirts|Jeans|Jackets|Shirts|Tshirts,0.2
+IMG_4298.HEIC,Jackets,fashion_siglip,Jackets|Jackets|Trousers|Jackets|Jackets,0.8
+IMG_4298.HEIC,Jackets,ensemble_mv,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4303.HEIC,Casual Shoes,finetuned_random,Casual Shoes|Sports Shoes|Casual Shoes|Sports Shoes|Casual Shoes,0.6
+IMG_4303.HEIC,Casual Shoes,color_hist,Shorts|Tshirts|Kurtas|Shorts|Shirts,0.0
+IMG_4303.HEIC,Casual Shoes,fashion_siglip,Casual Shoes|Sports Shoes|Casual Shoes|Casual Shoes|Casual Shoes,0.8
+IMG_4303.HEIC,Casual Shoes,ensemble_mv,Casual Shoes|Casual Shoes|Sports Shoes|Casual Shoes|Casual Shoes,0.8
+IMG_4304.HEIC,Casual Shoes,finetuned_random,Sports Shoes|Sports Shoes|Casual Shoes|Sports Shoes|Sports Shoes,0.2
+IMG_4304.HEIC,Casual Shoes,color_hist,Shorts|Tops|Tshirts|Sweatshirts|Trousers,0.0
+IMG_4304.HEIC,Casual Shoes,fashion_siglip,Sports Shoes|Casual Shoes|Sports Shoes|Sports Shoes|Sports Shoes,0.2
+IMG_4304.HEIC,Casual Shoes,ensemble_mv,Sports Shoes|Sports Shoes|Casual Shoes|Sports Shoes|Sports Shoes,0.2
+IMG_4306.HEIC,Track Pants,finetuned_random,Track Pants|Track Pants|Track Pants|Track Pants|Track Pants,1.0
+IMG_4306.HEIC,Track Pants,color_hist,Sweatshirts|Jackets|Sweatshirts|Shorts|Kurtas,0.0
+IMG_4306.HEIC,Track Pants,fashion_siglip,Track Pants|Track Pants|Track Pants|Track Pants|Track Pants,1.0
+IMG_4306.HEIC,Track Pants,ensemble_mv,Track Pants|Track Pants|Track Pants|Track Pants|Track Pants,1.0
+IMG_4307.HEIC,Sweatshirts,finetuned_random,Sweatshirts|Jackets|Jackets|Sweatshirts|Jackets,0.4
+IMG_4307.HEIC,Sweatshirts,color_hist,Tshirts|Kurtas|Kurtas|Kurtas|Kurtas,0.0
+IMG_4307.HEIC,Sweatshirts,fashion_siglip,Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts,1.0
+IMG_4307.HEIC,Sweatshirts,ensemble_mv,Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts,1.0
+IMG_4308.HEIC,Sweatshirts,finetuned_random,Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts,1.0
+IMG_4308.HEIC,Sweatshirts,color_hist,Jeans|Sweatshirts|Trousers|Trousers|Shorts,0.2
+IMG_4308.HEIC,Sweatshirts,fashion_siglip,Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts,1.0
+IMG_4308.HEIC,Sweatshirts,ensemble_mv,Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts|Sweatshirts,1.0
+IMG_4310.HEIC,Shirts,finetuned_random,Shirts|Jackets|Shirts|Casual Shoes|Tops,0.4
+IMG_4310.HEIC,Shirts,color_hist,Jackets|Shirts|Jackets|Track Pants|Jackets,0.2
+IMG_4310.HEIC,Shirts,fashion_siglip,Tops|Shirts|Shirts|Shirts|Sweatshirts,0.6
+IMG_4310.HEIC,Shirts,ensemble_mv,Shirts|Tops|Shirts|Shirts|Jackets,0.6
+IMG_4311.HEIC,Jackets,finetuned_random,Casual Shoes|Jackets|Jackets|Jackets|Jackets,0.8
+IMG_4311.HEIC,Jackets,color_hist,Sweatshirts|Sweatshirts|Sweatshirts|Trousers|Sweatshirts,0.0
+IMG_4311.HEIC,Jackets,fashion_siglip,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4311.HEIC,Jackets,ensemble_mv,Jackets|Jackets|Jackets|Jackets|Jackets,1.0
+IMG_4316.HEIC,Casual Shoes,finetuned_random,Casual Shoes|Casual Shoes|Casual Shoes|Casual Shoes|Casual Shoes,1.0
+IMG_4316.HEIC,Casual Shoes,color_hist,Shirts|Trousers|Dresses|Kurtas|Casual Shoes,0.2
+IMG_4316.HEIC,Casual Shoes,fashion_siglip,Casual Shoes|Casual Shoes|Casual Shoes|Casual Shoes|Casual Shoes,1.0
+IMG_4316.HEIC,Casual Shoes,ensemble_mv,Casual Shoes|Casual Shoes|Casual Shoes|Casual Shoes|Casual Shoes,1.0
+IMG_4317.HEIC,Casual Shoes,finetuned_random,Casual Shoes|Sports Shoes|Casual Shoes|Sports Shoes|Sports Shoes,0.4
+IMG_4317.HEIC,Casual Shoes,color_hist,Sweatshirts|Trousers|Trousers|Trousers|Shorts,0.0
+IMG_4317.HEIC,Casual Shoes,fashion_siglip,Sports Shoes|Sports Shoes|Sports Shoes|Sports Shoes|Casual Shoes,0.2
+IMG_4317.HEIC,Casual Shoes,ensemble_mv,Sports Shoes|Sports Shoes|Sports Shoes|Casual Shoes|Sports Shoes,0.2

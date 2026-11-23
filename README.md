@@ -31,7 +31,7 @@ split (Findings 5-7). So the test half is clean for everything decided after the
 DINOv2 and colour fusion, the re-ranker, the classical and keyword baselines): each was tuned on the dev half
 only and run once on the test half. It is **not** clean for the choice of the model itself, so the fine-tuned
 vs pretrained comparison below is slightly optimistic. The final untouched check is my own photos (D9), with
-rules fixed before any photo was taken; it has not been run yet.
+rules fixed before any photo was taken, run once on Nov 23 (results below the bad-photo table).
 
 Two questions, two metrics:
 
@@ -120,9 +120,9 @@ for the proposal's metric: on whole photos the right kind of garment is in the t
 (test half, without the group bonus; the bonus was not measured on whole photos), so the 0.905 above is a
 **crop** number.
 
-None of the real-photo numbers in this README are measured on the app's own 54,178-item catalogue: LookBench's target
-items are not in it, so exact-item R@1 cannot be measured there. My own-photo test (D9) is the planned check of
-the app as shipped.
+None of the LookBench numbers are measured on the app's own 54,178-item catalogue: LookBench's target items
+are not in it, so exact-item R@1 cannot be measured there. My own-photo test (D9, below) is the check of the app
+as shipped.
 
 Bad photos (all 981 real crops, so including the dev photos and the photos the model was chosen on; fixed
 filters; * = outside the training augmentation; differences Holm-corrected over the 14 filters):
@@ -137,6 +137,27 @@ filters; * = outside the training augmentation; differences Holm-corrected over 
 | warm colour cast, mild* / strong* | 0.485 / 0.452 | 0.456 / 0.432 | +3.0 / +1.9 (n.s.) |
 
 ![Real crops with filters: R@1 per filter for the fine-tuned model, the pretrained model and a colour histogram](report/figures/robustness.png)
+
+### My own wardrobe: the final untouched check (D9)
+
+83 photos, one per garment I own (39 t-shirts, 9 sweaters, 2 hoodies, a shirt, 14 bottoms, 6 jackets/blazer,
+4 pairs of shoes, 7 accessories, a wallet), taken in one session with my phone, whole photo, no editing. The
+rules, the frozen model and my expected result (0.70-0.90) were written before any photo was taken; labelled by
+hand and checked before the single run (Finding 46).
+
+| Result | Value [95% CI] | Photos |
+|---|---|---|
+| **The app as shipped** (54,178-item catalogue + group bonus): right kind of garment in the top 5 | **0.985** [0.968, 0.998] | 82 |
+| Fine-tuned model, evaluation catalogue: same article type in the top 5 | 0.745 [0.668, 0.822] | 65 |
+| Pretrained FashionSigLIP, same | 0.711 | 65 |
+| Colour histogram, same | 0.092 | 65 |
+
+- **Higher than I expected**, because a garment laid flat or on a hanger filling the frame looks much like a
+  shop's product photo. This does not contradict the low whole-street-photo numbers above: it is the easy case.
+- **The type is harder than the group.** Jeans, shorts and jackets are almost always right; trousers are mostly
+  matched with track pants (0.32) and casual shoes with sports shoes (0.55): right group, wrong type.
+- The group badge appeared for 92% of photos and was right every time; the out-of-catalogue warning fired once,
+  on the wallet, and on none of the 82 garments the shop sells. "Not sure" did not work here (see below).
 
 ## What the app shows
 
@@ -159,7 +180,9 @@ For each photo:
   The page shows the size only when it is 50 or fewer; for a marked garment the honest 90% list is about 116
   items long, for a whole photo about 880. Both were calibrated on LookBench, not on the app's catalogue, so
   in the app the 90% is not guaranteed (the API's `note` says so). "Not sure" was calibrated on crops; on
-  whole photos it fires for about half of them.
+  whole photos it fires for about half of them. On my own wardrobe (D9) it fired for 47% of photos while the
+  results were just as good with or without it (0.984 vs 0.986), so on the app catalogue it is far too cautious,
+  and the shortlist (median 1,552 items) is too long to show.
 - **"This looks like a skirt; our catalogue has no skirts"** when the photo shows something the shop does
   not sell at all.
 - Two optional filters, *same type only* and *hide clearly different colours*. They hide results; they
@@ -271,10 +294,10 @@ promise on real photos if it is calibrated on real photos (Finding 10).
 - The real-photo test is one benchmark (LookBench street photos, 981 photos, 621 independent groups); the
   95% confidence intervals are about +-4 to 5 points. The model itself was chosen on all 981 photos before the
   dev / test split existed, so the test half is only clean for what was decided afterwards (see "How these
-  photos were used"). My own wardrobe test (D9), the final untouched check, was planned with fixed rules but
-  not run.
-- **The app as shipped is not measured.** Every accuracy number is on LookBench's catalogue, mostly with
-  crops; none is on the 54,178-item app catalogue with whole photos, which is what a shopper actually uses.
+  photos were used").
+- **The app as shipped is measured only on my own wardrobe** (D9: 83 photos, one person, one session, 61%
+  tops, no dresses or bags, garments on a plain surface). Those photos are easy; a shopper's photo of a
+  garment someone is wearing in the street is closer to LookBench's whole photos (0.68 right kind of garment).
 - **"Similar" is only measured as "same kind of garment".** For a photo of something the shop does not sell
   (the common case), the useful answer is a similar item, but the only measure of that here is group P@5,
   which a menu gets for free. Whether the top 5 actually look alike was not judged by people.

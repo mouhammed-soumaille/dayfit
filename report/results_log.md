@@ -1308,3 +1308,40 @@ shows that this is the harder setting).
 My expectation, written now, based on Finding 37 (whole street photos, gallery, no bonus: group P@5 0.67-0.68): my own
 photos, with the garment filling the frame, should be easier than street photos, so I expect the primary group P@5 to
 land between 0.70 and 0.90. Whatever the value turns out to be, it gets reported.
+## Finding 46: D9, my own wardrobe (evaluation/d9_own_photos.py -> results/d9_*.csv), run ONCE on Nov 23
+Run at commit 051c560 (plus the labels), protocol of Nov 18 with amendments of Nov 19 00:55 and 21:25, labels
+checked with --check before the run. 83 photos (one per garment, whole photo, no crop box, no editing): tops 51
+(39 t-shirts, 9 sweaters, 2 hoodies, 1 shirt), bottoms 14, outerwear 6, footwear 4, accessories 7, other 1
+(a wallet). No dresses or bags (I own none). All 83 photos loaded. The sanity check passed first (every
+evaluation method reproduced its saved top 5; app catalogue 54,178 items, group bonus w = 0.05).
+
+Primary results (95% bootstrap CI over photos):
+- (1) app as shipped, group P@5: **0.985 [0.968, 0.998]**, n = 82 (all but the wallet). Per group: tops 0.980
+  (51), bottoms 0.986 (14), outerwear 1.0 (6), footwear 1.0 (4), accessories 1.0 (7). Only 4 photos have any
+  wrong-group result (two t-shirts, a pair of trousers, a sweater).
+- (2) type P@5, finetuned_random, evaluation catalogue: **0.745 [0.668, 0.822]**, n = 65.
+Descriptive, same 65 photos: fashion_siglip 0.711, ensemble_mv 0.689, color_hist 0.092 (fine-tuned minus
+pretrained: +3.4 points on average, n~65, not tested). By type (finetuned_random): Jeans 1.0 (3), Shorts 1.0 (5),
+Jackets 0.92 (5), Tshirts 0.75 (39), Sweatshirts 0.70 (2), Casual Shoes 0.55 (4), Shirts 0.40 (1), Trousers 0.32
+(5). Trousers are mostly matched with Track Pants and casual shoes with Sports Shoes: the right group, the wrong
+type. Two t-shirts (IMG_4236, IMG_4237) get heels and shoes as their top types on the evaluation catalogue.
+
+App behaviour (descriptive):
+- Group badge shown for 76 of 83 photos (92%) and right for all 76.
+- Out-of-catalogue warning: fired once, on the wallet (the only item outside the catalogue), and on none of the
+  82 garments the shop sells. (The summary file lists this as a count, 1, not a rate.)
+- **"Not sure" fired on 39 of 83 photos (47%) and carries no information here**: group P@5 is 0.984 when it fires
+  (38 garments) and 0.986 when it does not (44). It was calibrated on LookBench's gallery (Finding 23), whose
+  similarity levels differ from the app catalogue's, so on the app it is far too cautious.
+- Shortlist: median size 1,552 (range 67-8,806), so the page never shows it (it shows sizes <= 50). Its 90%
+  guarantee can't be checked here (my clothes aren't in the catalogue), and at this size it isn't useful.
+
+Against my written expectation (amendment 2: group P@5 between 0.70 and 0.90): the result is ABOVE the range.
+Likely reason: my photos have one garment filling the frame on a plain surface or hanger, which is much closer to
+a shop's product photo than a LookBench street photo with a person, background and other clothes. So D9 says the
+app works well on clean photos of one garment; it does not contradict the low whole-street-photo numbers of
+Finding 37.
+
+Limits: one person's wardrobe, one session, one phone; 61% of the photos are tops (39 t-shirts); no dresses,
+bags or skirts; the type labels and the photos are mine. Per-type numbers rest on 1-5 photos except t-shirts.
+Nothing was changed after seeing these results.

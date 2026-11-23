@@ -1,0 +1,12 @@
+result,n,value,ci_low,ci_high
+(1) app group P@5,82,0.9853658536585367,0.9682926829268294,0.9975609756097561
+(2) type P@5 finetuned_random,65,0.7446153846153846,0.6676923076923078,0.8215384615384616
+descriptive type P@5 color_hist,65,0.09230769230769231,0.05846153846153846,0.1353846153846154
+descriptive type P@5 fashion_siglip,65,0.7107692307692308,0.64,0.7784615384615384
+descriptive type P@5 ensemble_mv,65,0.6892307692307693,0.6184615384615384,0.7569999999999996
+app: not sure rate,83,0.46987951807228917,,
+app: group badge shown,83,0.9156626506024096,,
+app: group badge correct when shown (excl. other),76,1.0,,
+app: out-of-catalogue warnings,83,1.0,,
+app: shortlist size median,83,1552.0,,
+photos that failed to load,83,0.0,,
