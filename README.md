@@ -174,6 +174,10 @@ hand and checked before the single run (Finding 46).
 | Pretrained FashionSigLIP, same | 0.711 | 65 |
 | Colour histogram, same | 0.092 | 65 |
 
+One photo (a t-shirt label on something that is not a garment, taken by mistake) was noticed only after the run.
+The rules say nothing is dropped after seeing results, so the table keeps it; without it the two primary numbers
+are 0.990 and 0.756 (Finding 46, correction).
+
 ![D9: the app's right-kind-of-garment score per group, and the fine-tuned model's article-type score per type](report/figures/fig17_d9.png)
 
 ![D9 examples: my photo and the app's top 5, for the first photo of each group and the lowest-scoring photo](report/figures/fig18_d9_gallery.png)
@@ -317,6 +321,9 @@ promise on real photos if it is calibrated on real photos (Finding 10).
 
 ## Limitations
 
+- **It doesn't notice when a photo shows no garment at all.** An accidental photo of my finger in D9 got
+  blazers and shirts back, with no "not sure" and no out-of-catalogue warning; the warning only knows clothing
+  the shop doesn't sell.
 - The app can only return what the catalogue sells, so for many photos the best answer is "similar", not
   "the same". The exact item comes first about half the time on real crops, 39% on whole photos.
 - The real-photo test is one benchmark (LookBench street photos, 981 photos, 621 independent groups); the

@@ -5,7 +5,8 @@
   fig16_crop_vs_whole.png  garment marked (crop) vs whole photo, test half, official corpus
   fig17_d9.png             D9 own wardrobe: the app's group P@5 per group, and type P@5 per type
   fig18_d9_gallery.png     D9 examples: the app's top 5 for 6 of my photos, chosen by a fixed rule
-                           (the first photo of each group in file order + the photo with the lowest group P@5)
+                           (the first photo of each group in file order + the photo with the lowest group P@5;
+                           IMG_4237 is skipped: it is not a garment, see the correction to Finding 46)
 
 Every number is read from results/ (or recomputed from the per-query files) and checked against the value
 in the README before plotting. Error bars: 95% bootstrap CI over photos (evaluation/stats.py), the same
@@ -219,7 +220,8 @@ def fig_gallery():
     from serving.badges import APP_GROUP_OF_TYPE
 
     app = pd.read_csv("results/d9_app.csv")
-    scored = app[app["group"] != "other"]
+    # IMG_4237 is not a garment (taken by mistake, see the correction to Finding 46): never shown as an example
+    scored = app[(app["group"] != "other") & (app["file"] != "IMG_4237.HEIC")]
     # fixed rule, not chosen by looking: first photo of each group in file order, then the lowest group P@5
     picks = [scored[scored["group"] == g].sort_values("file").iloc[0]
              for g in ["tops", "bottoms", "outerwear", "footwear", "accessories"]]

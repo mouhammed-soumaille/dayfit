@@ -1345,3 +1345,17 @@ Finding 37.
 Limits: one person's wardrobe, one session, one phone; 61% of the photos are tops (39 t-shirts); no dresses,
 bags or skirts; the type labels and the photos are mine. Per-type numbers rest on 1-5 photos except t-shirts.
 Nothing was changed after seeing these results.
+
+Correction to Finding 46 (Nov 23, AFTER the run): IMG_4237.HEIC is not a garment. It was taken by mistake and
+labelled as a t-shirt by mistake; I noticed while choosing examples for the figures, i.e. after seeing that it was
+one of the lowest-scoring photos. The protocol says no photo is dropped after seeing results, so the primary
+numbers above stay as run (82 / 65 photos). Without that photo (81 / 64 photos): app group P@5 0.990
+[0.978, 1.0]; type P@5 finetuned_random 0.756 [0.675, 0.825], fashion_siglip 0.722, ensemble_mv 0.700,
+color_hist 0.094; t-shirts 0.768 (38). "Not sure" then fires on 39 of 82 photos, with group P@5 0.984 when it
+fires vs 0.995 when it does not, so the conclusion (it barely separates good from bad results) is unchanged.
+Both versions are reported; the conclusions don't depend on which one is used. The example gallery
+(report/make_final_figures.py) skips this photo, since it does not show a garment.
+The photo is of my finger, which makes it an accidental test of a non-garment photo: the app returned blazers,
+shirts, tops and a scarf, did NOT say "not sure", and did not give the out-of-catalogue warning (only the type
+badge was held back, confidence < 0.9). The warning only knows clothing the shop doesn't sell, so it can't
+recognise "not clothing at all"; that's a limitation of the app.
