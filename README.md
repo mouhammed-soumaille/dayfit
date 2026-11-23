@@ -2,10 +2,28 @@
 
 You see a jacket on someone in the street, or a pair of jeans in a photo, and you can't describe it well
 enough to search for it. DAYFIT lets you search with the photo instead: upload it, and you get the five
-most similar items from a shop's catalogue. The app also tells you when it isn't sure, and labels each
-result with what it measured (kind of garment, colour) so you can judge the matches yourself.
+most similar items from a shop's catalogue. Each result is labelled with what was measured (kind of
+garment, colour) so you can judge the matches yourself, and the app warns you when the photo shows something
+the shop doesn't sell.
 
-Course project for EECE 490 (Machine Learning), American University of Beirut, Fall 2026. `report/results_log.md` is my lab notebook.
+Course project for EECE 490 (Machine Learning), American University of Beirut, Fall 2026.
+`report/results_log.md` is my lab notebook.
+
+**Results at a glance**
+- **On real street photos** (LookBench test half, 481 photos, 61,553 images to search), the fine-tuned photo
+  model puts the exact item first for 50% of photos, 4 times as often as a classical image search (12%).
+  Against the shop's 3,278 items alone it gets 51%, against 31% for a short typed search; only an idealised
+  shopper who types every attribute in the shop's own words ties it (49%).
+- **Photo quality matters more than the model.** Sending the whole photo instead of marking the garment drops
+  this to 39%. Fine-tuning helps little on clean photos (+2 points, not significant on the test half) and a lot
+  on blurred ones (+6 to +21 points).
+- **On my own wardrobe** (83 garments, the final untouched test), the app as shipped puts the right kind of
+  garment in the top 5 for 98.5% of photos. The exact article type is harder: on the evaluation catalogue the
+  fine-tuned model gets it for 75% (trousers often come back as track pants).
+- **What doesn't work:** a learned re-ranker (+2 points, not significant) and the "not sure" message, which
+  fired on 47% of my wardrobe photos without telling good results from bad ones.
+- The model was chosen before the test split was frozen, so one comparison is slightly optimistic; details
+  under "How these photos were used".
 
 **Who it is for.** The user is an online shopper; the system would run as a "search by photo" feature on
 one shop's site, so it can only suggest what that shop sells. **How it is done today:** on a shop's own
