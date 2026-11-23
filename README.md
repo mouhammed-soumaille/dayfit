@@ -7,7 +7,7 @@ garment, colour) so you can judge the matches yourself, and the app warns you wh
 the shop doesn't sell.
 
 Course project for EECE 490 (Machine Learning), American University of Beirut, Fall 2026.
-`report/results_log.md` is my lab notebook.
+The full write-up is in the final report, `report/final_report.pdf`.
 
 **Results at a glance**
 - **On real street photos** (LookBench test half, 481 photos, 61,553 images to search), the fine-tuned photo
@@ -45,7 +45,7 @@ half of a 500 / 481 split (photos of the same street picture or item kept on one
 
 **How these photos were used, honestly.** I chose the app's model (fine-tuned with random batches, rather than
 same-type batches, the pretrained model or an ensemble) on **all 981** LookBench photos, *before* I froze the
-split (Findings 5-7). So the test half is clean for everything decided after the split (the group bonus,
+split. So the test half is clean for everything decided after the split (the group bonus,
 DINOv2 and colour fusion, the re-ranker, the classical and keyword baselines): each was tuned on the dev half
 only and run once on the test half. It is **not** clean for the choice of the model itself, so the fine-tuned
 vs pretrained comparison below is slightly optimistic. The final untouched check is my own photos (D9), with
@@ -116,7 +116,7 @@ What these show:
 ### Where it fails
 
 On the dev half, 87% of the misses (206 of 236) already have the right kind of garment first, just not the
-right design: the model finds "a black leather jacket with a shearling collar", not *that* jacket (Finding 31).
+right design: the model finds "a black leather jacket with a shearling collar", not *that* jacket.
 And 97 of the 236 misses do not have the true item in the top 20 at all, so no re-ranking can fix them;
 that needs a better embedding, for example training on real street-to-shop pairs, which I did not do.
 
@@ -165,7 +165,7 @@ filters; * = outside the training augmentation; differences Holm-corrected over 
 83 photos, one per garment I own (39 t-shirts, 9 sweaters, 2 hoodies, a shirt, 14 bottoms, 6 jackets/blazer,
 4 pairs of shoes, 7 accessories, a wallet), taken in one session with my phone, whole photo, no editing. The
 rules, the frozen model and my expected result (0.70-0.90) were written before any photo was taken; labelled by
-hand and checked before the single run (Finding 46).
+hand and checked before the single run.
 
 | Result | Value [95% CI] | Photos |
 |---|---|---|
@@ -176,7 +176,7 @@ hand and checked before the single run (Finding 46).
 
 One photo (a t-shirt label on something that is not a garment, taken by mistake) was noticed only after the run.
 The rules say nothing is dropped after seeing results, so the table keeps it; without it the two primary numbers
-are 0.990 and 0.756 (Finding 46, correction).
+are 0.990 and 0.756.
 
 ![D9: the app's right-kind-of-garment score per group, and the fine-tuned model's article-type score per type](report/figures/fig17_d9.png)
 
@@ -235,7 +235,7 @@ The evaluation catalogue is Kaggle's Fashion Product Images. For the demo I want
 shop, so the app catalogue adds 26,944 more adult items from the same dataset and 21,037 newer H&M products
 (2018-20). Each H&M product type was mapped to one of the existing types before anything was run, so the
 badges and the ranking bonus did not have to be recalibrated; the page still shows H&M's own name for the
-product. The app hides 809 kids' items (by the shop's gender field and by product name, Finding 36).
+product. The app hides 809 kids' items (by the shop's gender field and by product name).
 `curl -s localhost:8000/health` tells you which catalogue is running.
 
 ## Privacy
@@ -296,8 +296,8 @@ returns JSON with the `results` (rank, item, score, type and colour badges, colo
 
 **Response time.** Budget: at most 500 ms of server time per search on a 4-core CPU (about 1 s is the limit
 for an answer to feel immediate, and the phone upload and page take roughly the other half). Measured: 266 ms
-median in Docker on 4 vCPUs (Findings 26, 33); on the Mac's CPU with 4 threads 129 ms for the 54k-item app
-catalogue, of which 56 ms is the second (type) model, and 36 ms on the Mac GPU (Finding 45). For slower machines
+median in Docker on 4 vCPUs; on the Mac's CPU with 4 threads 129 ms for the 54k-item app
+catalogue, of which 56 ms is the second (type) model, and 36 ms on the Mac GPU. For slower machines
 `DAYFIT_TYPE_MODEL=off` skips the type model (no type badge, no group bonus, no out-of-catalogue warning).
 
 ## Synthetic phone photos (secondary result)
@@ -306,7 +306,7 @@ Before real photos were available I built synthetic "phone photos" of the evalua
 background, rotation, crop, lighting, blur, JPEG). The fine-tuned model was **trained on the same kind of
 synthetic photo**, so these numbers mostly measure how well it learned that augmentation: its gain over the
 pretrained model is +15.6 points here (0.949 vs 0.793 on medium photos) and about +2 to +3 on clean real
-photos (Findings 7, 38).
+photos.
 
 | Test (294 items, medium / strong photos) | Value |
 |---|---|
@@ -316,8 +316,8 @@ photos (Findings 7, 38).
 ![Exact-item Recall@1 for each step of the pipeline on synthetic phone photos](report/figures/fig1_ladder.png)
 
 Other first-phase findings that still hold: same-type batches during fine-tuning made the model worse at
-telling types apart and random batches fixed it (Findings 7-8); the conformal shortlist only keeps its 90%
-promise on real photos if it is calibrated on real photos (Finding 10).
+telling types apart and random batches fixed it; the conformal shortlist only keeps its 90%
+promise on real photos if it is calibrated on real photos.
 
 ## Limitations
 
@@ -344,9 +344,9 @@ promise on real photos if it is calibrated on real photos (Finding 10).
 - The learned re-ranker would need the candidates' small-patch features stored with the catalogue (about
   21 GB for 54k items), so it is not in the app.
 - **Catalogue coverage and bias.** The base catalogue is Fashion Product Images (Indian e-commerce, 2011-12)
-  and leans towards men's and older styles (none of its jeans are wide-leg, Finding 30). Women's and current
+  and leans towards men's and older styles (none of its jeans are wide-leg). Women's and current
   styles depend mostly on the H&M items. H&M's own type labels are noisy (parkas filed as hoodies, jumpsuits
-  as trousers, Finding 36), and some catalogue images are fabric close-ups or show the wrong product; I could
+  as trousers), and some catalogue images are fabric close-ups or show the wrong product; I could
   not remove those reliably.
 - Kids' items are hidden, not detected: a photo of a kids' garment gets the most similar adult items.
 - The colour estimate looks at the middle of the photo, so with a whole photo it can pick up the background.
@@ -406,7 +406,7 @@ python -m data_prep.app_cleanup
 ```
 
 3. **Real-photo experiments** (each script checks itself against a saved number and stops if it does not
-   match; the test half is used once per method, see the pre-registrations in `report/results_log.md`):
+   match; the test half is used once per method):
 
 ```
 python -m evaluation.lookbench_split
@@ -447,6 +447,5 @@ mine.
 
 ## Documents
 
-- `report/results_log.md`: the full lab notebook, with a one-page index at the top, every pre-registration
-  and every result, including corrections and negative results. Later findings can overrule earlier ones;
-  this README is the current summary.
+- `report/final_report.pdf`: the final report (source: `report/final_report.tex`), with the problem, method,
+  results on real photos and on my own wardrobe, limitations and possible extensions.
