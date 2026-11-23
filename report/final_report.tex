@@ -405,6 +405,11 @@ logged. A test checks that a search writes no file, and in Docker the API runs o
 \item \textbf{Scaling to a store's full catalogue.} At hundreds of thousands of items, the exact search used
   now (comparing the photo with every item) would be replaced by an approximate nearest-neighbour index,
   with the catalogue embeddings updated as products are added.
+\item \textbf{Learning from shopper feedback.} Once deployed, clicks and purchases give a reward signal.
+  A contextual bandit, a simple form of reinforcement learning, could use it to tune the ranking (for example
+  the weight of the group bonus) for each store, while occasionally exploring lower-ranked items. This needs
+  care: shoppers click what is shown first, and a system that learns from its own clicks can reinforce its
+  mistakes and over-promote popular items.
 \item \textbf{A wider final test}, with other people's wardrobes (dresses, bags, skirts) and photos taken in
   the street rather than on a plain surface.
 \end{itemize}
